@@ -19,6 +19,13 @@ class OrderController extends Controller
 {
     public function index(Request $request): View
     {
+        $perPageOptions = [20, 50, 100];
+        $perPage = $request->integer('per_page', 20);
+
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = 20;
+        }
+
         $query = Order::query()->with('user');
 
         if ($request->filled('payment_status')) {
@@ -42,11 +49,14 @@ class OrderController extends Controller
                 'status' => 'status',
                 'created_at' => 'created_at',
             ],
+            'created_at',
+            'desc',
+            $perPage,
         );
 
         $paymentFilter = $request->string('payment_status')->toString();
 
-        return view('admin.orders.index', compact('orders', 'paymentFilter'));
+        return view('admin.orders.index', compact('orders', 'paymentFilter', 'perPage', 'perPageOptions'));
     }
 
     public function show(Order $order): View

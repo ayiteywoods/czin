@@ -15,7 +15,7 @@
         ];
     @endphp
 
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <form method="GET" action="{{ route('admin.orders.index') }}" class="flex flex-wrap gap-2">
             @foreach (request()->except(['payment_status', 'page']) as $key => $value)
                 @if (is_array($value))
@@ -39,17 +39,43 @@
             @endforeach
         </form>
 
-        <p class="text-sm text-brand-muted">
-            @if (($paymentFilter ?? '') === PaymentStatus::Paid->value)
-                Showing paid orders only
-            @elseif (($paymentFilter ?? '') === PaymentStatus::Pending->value)
-                Showing pending payment orders only
-            @elseif (($paymentFilter ?? '') === OrderStatus::Cancelled->value)
-                Showing cancelled orders only
-            @else
-                Showing all orders
-            @endif
-        </p>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <p class="text-sm text-brand-muted">
+                @if (($paymentFilter ?? '') === PaymentStatus::Paid->value)
+                    Showing paid orders only
+                @elseif (($paymentFilter ?? '') === PaymentStatus::Pending->value)
+                    Showing pending payment orders only
+                @elseif (($paymentFilter ?? '') === OrderStatus::Cancelled->value)
+                    Showing cancelled orders only
+                @else
+                    Showing all orders
+                @endif
+            </p>
+
+            <form method="GET" action="{{ route('admin.orders.index') }}" class="flex items-center gap-2 text-sm">
+                @foreach (request()->except(['per_page', 'page']) as $key => $value)
+                    @if (is_array($value))
+                        @foreach ($value as $item)
+                            <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                        @endforeach
+                    @else
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+
+                <label for="orders-per-page" class="whitespace-nowrap text-brand-muted">Show</label>
+                <select
+                    id="orders-per-page"
+                    name="per_page"
+                    class="input-field mt-0 w-24 py-1.5 text-sm"
+                    onchange="this.form.submit()"
+                >
+                    @foreach ($perPageOptions as $option)
+                        <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
     </div>
 
     <x-admin-table-panel :page-ids="$orders->pluck('id')">
