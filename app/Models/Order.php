@@ -266,6 +266,7 @@ class Order extends Model
             OrderStatus::PendingPayment,
             OrderStatus::Paid,
             OrderStatus::Cancelled,
+            OrderStatus::Refunded,
         ];
     }
 

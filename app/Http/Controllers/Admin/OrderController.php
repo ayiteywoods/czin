@@ -12,6 +12,7 @@ use App\Services\OrderPaymentService;
 use App\Support\AdminTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -82,7 +83,7 @@ class OrderController extends Controller
         $previousStatus = $order->status;
         $newStatus = OrderStatus::from($validated['status']);
 
-        if ($newStatus === $previousStatus) {
+        if ($newStatus === $previousStatus && ! ($newStatus === OrderStatus::Refunded && $order->payment_status !== PaymentStatus::Refunded)) {
             return back()->with('success', 'No changes were made.');
         }
 
@@ -120,6 +121,49 @@ class OrderController extends Controller
             ]);
 
             return back()->with('success', 'Order marked as paid and payment status updated.');
+        }
+
+        if ($newStatus === OrderStatus::Refunded) {
+            DB::transaction(function () use ($order) {
+                $payment = Payment::query()
+                    ->where('order_id', $order->id)
+                    ->latest('id')
+                    ->first();
+
+                if (! $payment) {
+                    $payment = Payment::query()->create([
+                        'order_id' => $order->id,
+                        'user_id' => $order->user_id,
+                        'reference' => $order->order_number.'_refund_'.time(),
+                        'provider' => 'manual',
+                        'amount' => $order->total,
+                        'currency' => config('shop.currency'),
+                        'status' => PaymentStatus::Refunded,
+                        'metadata' => [
+                            'marked_refunded_by' => auth()->id(),
+                            'source' => 'admin_status_update',
+                        ],
+                    ]);
+                } else {
+                    $payment->update([
+                        'status' => PaymentStatus::Refunded,
+                        'metadata' => array_merge($payment->metadata ?? [], [
+                            'marked_refunded_by' => auth()->id(),
+                            'refunded_at' => now()->toIso8601String(),
+                            'source' => 'admin_status_update',
+                        ]),
+                    ]);
+                }
+
+                $order->update([
+                    'status' => OrderStatus::Refunded,
+                    'payment_status' => PaymentStatus::Refunded,
+                ]);
+            });
+
+            app(AdminNotificationService::class)->sync();
+
+            return back()->with('success', 'Order marked as refunded and payment status updated.');
         }
 
         $order->update(['status' => $newStatus]);
