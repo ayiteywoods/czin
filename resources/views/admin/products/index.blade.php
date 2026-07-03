@@ -3,7 +3,31 @@
 @section('heading', 'Products')
 
 @section('content')
-    <div class="mb-6 flex justify-end">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <form method="GET" action="{{ route('admin.products.index') }}" class="flex items-center gap-2 text-sm">
+            @foreach (request()->except(['per_page', 'page']) as $key => $value)
+                @if (is_array($value))
+                    @foreach ($value as $item)
+                        <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                    @endforeach
+                @else
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endif
+            @endforeach
+
+            <label for="products-per-page" class="whitespace-nowrap text-brand-muted">Show</label>
+            <select
+                id="products-per-page"
+                name="per_page"
+                class="input-field mt-0 w-24 py-1.5 text-sm"
+                onchange="this.form.submit()"
+            >
+                @foreach ($perPageOptions as $option)
+                    <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }}</option>
+                @endforeach
+            </select>
+        </form>
+
         <a href="{{ route('admin.products.create') }}" class="btn-primary w-full text-center sm:w-auto">Add product</a>
     </div>
 

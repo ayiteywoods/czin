@@ -21,6 +21,13 @@ class ProductController extends Controller
 {
     public function index(Request $request): View
     {
+        $perPageOptions = [20, 50, 100];
+        $perPage = $request->integer('per_page', 20);
+
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = 20;
+        }
+
         $products = AdminTable::paginate(
             Product::query()->with(['category', 'images']),
             $request,
@@ -32,9 +39,12 @@ class ProductController extends Controller
                 'status' => 'status',
                 'created_at' => 'created_at',
             ],
+            'created_at',
+            'desc',
+            $perPage,
         );
 
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products', 'perPage', 'perPageOptions'));
     }
 
     public function create(): View
