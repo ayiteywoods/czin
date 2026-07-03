@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Services\AdminNotificationService;
+use App\Services\OrderPaymentService;
 use App\Support\AdminTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,6 +74,42 @@ class OrderController extends Controller
 
         if ($newStatus === $previousStatus) {
             return back()->with('success', 'No changes were made.');
+        }
+
+        if ($newStatus === OrderStatus::Paid && $order->payment_status !== PaymentStatus::Paid) {
+            $payment = Payment::query()
+                ->where('order_id', $order->id)
+                ->latest('id')
+                ->first();
+
+            if (! $payment) {
+                $payment = Payment::query()->create([
+                    'order_id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'reference' => $order->order_number.'_admin_'.time(),
+                    'provider' => 'manual',
+                    'amount' => $order->total,
+                    'currency' => config('shop.currency'),
+                    'status' => PaymentStatus::Pending,
+                    'metadata' => [
+                        'marked_paid_by' => auth()->id(),
+                        'source' => 'admin_status_update',
+                    ],
+                ]);
+            }
+
+            app(OrderPaymentService::class)->markAsPaid($order, $payment, [
+                'id' => $payment->provider_transaction_id ?: 'admin-'.$order->id.'-'.time(),
+                'channel' => $payment->channel ?: 'admin',
+                'paid_at' => now()->toIso8601String(),
+                'receipt_number' => 'ADMIN-'.$order->order_number,
+                'metadata' => [
+                    'marked_paid_by' => auth()->id(),
+                    'source' => 'admin_status_update',
+                ],
+            ]);
+
+            return back()->with('success', 'Order marked as paid and payment status updated.');
         }
 
         $order->update(['status' => $newStatus]);

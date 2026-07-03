@@ -264,6 +264,7 @@ class Order extends Model
 
         return [
             OrderStatus::PendingPayment,
+            OrderStatus::Paid,
             OrderStatus::Cancelled,
         ];
     }
