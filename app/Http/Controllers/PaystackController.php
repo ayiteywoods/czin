@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\OrderPaymentService;
+use App\Services\PaystackPaymentReconciliationService;
 use App\Services\PaystackService;
 use App\Support\GuestOrderAccess;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,7 @@ class PaystackController extends Controller
     public function __construct(
         protected PaystackService $paystack,
         protected OrderPaymentService $payments,
+        protected PaystackPaymentReconciliationService $reconciliation,
     ) {}
 
     public function initialize(Order $order): RedirectResponse
@@ -68,6 +70,7 @@ class PaystackController extends Controller
         ]);
 
         $payment->update([
+            'reference' => $data['reference'],
             'metadata' => array_merge($payment->metadata ?? [], [
                 'access_code' => $data['access_code'],
             ]),
@@ -86,12 +89,20 @@ class PaystackController extends Controller
             ]);
         }
 
-        $payment = Payment::query()->where('reference', $reference)->firstOrFail();
+        $data = $this->paystack->verify($reference);
+
+        $payment = $this->reconciliation->findPaymentByReference($reference)
+            ?? $this->reconciliation->recoverPaymentFromPaystackData($reference, $data);
+
+        if (! $payment) {
+            throw ValidationException::withMessages([
+                'paystack' => 'Payment could not be matched to an order.',
+            ]);
+        }
+
         $order = $payment->order()->firstOrFail();
 
         GuestOrderAccess::remember($order);
-
-        $data = $this->paystack->verify($reference);
 
         if (($data['status'] ?? null) === 'success') {
             $this->payments->markAsPaid($order, $payment, $data);

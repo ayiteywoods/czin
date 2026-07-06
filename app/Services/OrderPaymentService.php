@@ -22,20 +22,23 @@ class OrderPaymentService
     {
         $wasAlreadyPaid = false;
         $stockUnavailable = false;
+        $wasCancelled = false;
 
-        DB::transaction(function () use ($order, $payment, $data, &$wasAlreadyPaid, &$stockUnavailable) {
+        DB::transaction(function () use ($order, $payment, $data, &$wasAlreadyPaid, &$stockUnavailable, &$wasCancelled) {
             $order = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
             $payment = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
-
-            if ($order->status === OrderStatus::Cancelled) {
-                return;
-            }
 
             if ($order->payment_status === PaymentStatus::Paid) {
                 $wasAlreadyPaid = true;
 
                 return;
             }
+
+            if ($order->payment_status === PaymentStatus::Refunded || $order->status === OrderStatus::Refunded) {
+                return;
+            }
+
+            $wasCancelled = $order->status === OrderStatus::Cancelled;
 
             $order->loadMissing('items');
 
@@ -44,27 +47,11 @@ class OrderPaymentService
             } catch (InsufficientStockException $exception) {
                 $stockUnavailable = true;
 
-                $payment->update([
-                    'status' => PaymentStatus::Failed,
-                    'metadata' => array_merge($payment->metadata ?? [], [
-                        'failure_reason' => 'stock_unavailable',
-                        'failure_message' => $exception->getMessage(),
-                        'verification' => $data,
-                    ]),
-                ]);
-
-                $order->update([
-                    'status' => OrderStatus::Cancelled,
-                    'payment_status' => PaymentStatus::Failed,
-                ]);
-
-                Log::warning('Payment received but stock unavailable.', [
+                Log::warning('Payment received but stock unavailable; order marked paid for manual fulfillment.', [
                     'order_id' => $order->id,
                     'payment_id' => $payment->id,
                     'message' => $exception->getMessage(),
                 ]);
-
-                return;
             }
 
             $paidAt = isset($data['paid_at'])
@@ -79,15 +66,22 @@ class OrderPaymentService
                 ? $order->order_number.'-'.$receiptNumber
                 : null;
 
+            $paymentMetadata = array_merge($payment->metadata ?? [], [
+                'verification' => $data,
+                'display_reference' => $displayReference,
+            ]);
+
+            if ($stockUnavailable) {
+                $paymentMetadata['stock_warning'] = true;
+                $paymentMetadata['stock_warning_message'] = 'Stock was unavailable when payment was confirmed. Fulfill manually.';
+            }
+
             $payment->update([
                 'status' => PaymentStatus::Paid,
                 'channel' => $data['channel'] ?? data_get($data, 'authorization.channel') ?? $payment->channel,
                 'provider_transaction_id' => $transactionId ?: $payment->provider_transaction_id,
                 'paid_at' => $paidAt,
-                'metadata' => array_merge($payment->metadata ?? [], [
-                    'verification' => $data,
-                    'display_reference' => $displayReference,
-                ]),
+                'metadata' => $paymentMetadata,
             ]);
 
             $order->update([
@@ -95,13 +89,17 @@ class OrderPaymentService
                 'status' => OrderStatus::Paid,
                 'paid_at' => $paidAt,
             ]);
+
+            if ($wasCancelled) {
+                Log::info('Reinstated cancelled order after confirmed payment.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'payment_id' => $payment->id,
+                ]);
+            }
         });
 
-        if ($wasAlreadyPaid || $stockUnavailable) {
-            if ($stockUnavailable) {
-                app(AdminNotificationService::class)->sync();
-            }
-
+        if ($wasAlreadyPaid) {
             return;
         }
 

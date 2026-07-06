@@ -76,6 +76,22 @@ class PaystackService
         return (array) $response->json('data');
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function listTransactions(array $params = []): array
+    {
+        $response = $this->client()->get('/transaction', $params);
+
+        if (! $response->successful() || ! $response->json('status')) {
+            throw ValidationException::withMessages([
+                'paystack' => $response->json('message') ?? 'Unable to list Paystack transactions.',
+            ]);
+        }
+
+        return (array) $response->json('data', []);
+    }
+
     public function computeWebhookSignature(string $payload): string
     {
         $secret = (string) $this->secretKey();

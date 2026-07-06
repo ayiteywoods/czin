@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Services\AdminNotificationService;
 use App\Services\OrderPaymentService;
+use App\Services\PaystackPaymentReconciliationService;
 use App\Support\AdminTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -173,6 +174,21 @@ class OrderController extends Controller
         return back()->with('success', $order->isTrackable()
             ? 'Delivery tracking updated. The customer has been emailed about this stage.'
             : 'Order status updated.');
+    }
+
+    public function syncPaystack(
+        Order $order,
+        PaystackPaymentReconciliationService $reconciliation,
+    ): RedirectResponse {
+        if ($order->payment_status === PaymentStatus::Paid) {
+            return back()->with('success', 'This order is already marked as paid.');
+        }
+
+        if ($reconciliation->reconcileOrder($order)) {
+            return back()->with('success', 'Payment verified with Paystack and order marked as paid.');
+        }
+
+        return back()->with('error', 'No successful Paystack payment was found for this order.');
     }
 
     public function destroy(Order $order): RedirectResponse

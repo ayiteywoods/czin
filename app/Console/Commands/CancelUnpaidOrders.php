@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Services\OrderCancellationService;
+use App\Services\PaystackPaymentReconciliationService;
 use Illuminate\Console\Command;
 
 class CancelUnpaidOrders extends Command
@@ -14,8 +15,10 @@ class CancelUnpaidOrders extends Command
 
     protected $description = 'Cancel unpaid orders past their payment deadline and release reserved stock';
 
-    public function handle(OrderCancellationService $cancellations): int
-    {
+    public function handle(
+        OrderCancellationService $cancellations,
+        PaystackPaymentReconciliationService $reconciliation,
+    ): int {
         $orders = Order::query()
             ->where('status', OrderStatus::PendingPayment)
             ->where('payment_status', PaymentStatus::Pending)
@@ -32,6 +35,12 @@ class CancelUnpaidOrders extends Command
         $cancelled = 0;
 
         foreach ($orders as $order) {
+            if ($reconciliation->reconcileOrder($order)) {
+                $this->line("Order {$order->order_number} was paid on Paystack and marked as paid.");
+
+                continue;
+            }
+
             if ($cancellations->cancelUnpaid($order)) {
                 $cancelled++;
             }

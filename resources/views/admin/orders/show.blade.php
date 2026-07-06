@@ -120,6 +120,14 @@
                         </div>
                     @endif
                 </dl>
+                @if ($order->payment_status !== \App\Enums\PaymentStatus::Paid)
+                    <form method="POST" action="{{ route('admin.orders.sync-paystack', $order) }}" class="mt-4">
+                        @csrf
+                        <button type="submit" class="btn-secondary w-full py-2 text-sm">
+                            Sync payment from Paystack
+                        </button>
+                    </form>
+                @endif
             </div>
 
             <div class="card p-6">
