@@ -16,10 +16,6 @@
                 <div class="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
                     Some items in your cart are out of stock or exceed available quantity. Update your cart or remove unavailable items before checkout.
                 </div>
-            @else
-                <div class="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    Items stay in your cart until payment is completed. Stock is confirmed at checkout and when you pay.
-                </div>
             @endif
 
             <div class="mt-10 grid gap-10 lg:grid-cols-3">
