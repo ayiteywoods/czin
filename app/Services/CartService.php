@@ -155,12 +155,16 @@ class CartService
      */
     public function itemsWithAvailability(): array
     {
-        $cart = $this->resolve()->load(['items.product', 'items.variant']);
+        $cart = $this->resolve()->load([
+            'items.product.images',
+            'items.product.category',
+            'items.variant',
+        ]);
 
         return $cart->items->map(function (CartItem $item) {
             $available = $item->variant
                 ? $this->stock->sellableQuantity($item->variant)
-                : max(0, (int) ($item->product->quantity ?? 0));
+                : max(0, (int) ($item->product?->quantity ?? 0));
 
             return [
                 'item' => $item,

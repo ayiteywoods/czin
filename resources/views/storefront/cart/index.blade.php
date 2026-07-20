@@ -25,10 +25,12 @@
             <div class="mt-10 grid gap-10 lg:grid-cols-3">
                 <div class="space-y-4 lg:col-span-2">
                     @foreach ($itemRows ?? [] as $row)
-                        @php($item = $row['item'])
+                        @php
+                            $item = $row['item'];
+                        @endphp
                         <div class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center {{ ($row['is_out_of_stock'] || $row['exceeds_stock']) ? 'border-red-200 bg-red-50/30' : '' }}">
                             <a href="{{ route('shop.show', $item->product) }}" class="shrink-0">
-                                @if ($item->product->primaryImage())
+                                @if ($item->product?->primaryImage())
                                     <img
                                         src="{{ asset('storage/'.$item->product->primaryImage()->path) }}"
                                         alt="{{ $item->product->name }}"
@@ -40,7 +42,7 @@
                             </a>
 
                             <div class="min-w-0 flex-1">
-                                <p class="text-xs uppercase tracking-wide text-brand-red">{{ $item->product->category->name }}</p>
+                                <p class="text-xs uppercase tracking-wide text-brand-red">{{ $item->product?->category?->name }}</p>
                                 <a href="{{ route('shop.show', $item->product) }}" class="mt-1 block font-medium uppercase tracking-wide transition hover:text-brand-red">
                                     {{ $item->product->name }}
                                 </a>
