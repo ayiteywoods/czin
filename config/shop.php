@@ -23,7 +23,7 @@ return [
 
     'default_country' => env('SHOP_DEFAULT_COUNTRY', 'Ghana'),
 
-    'cart_reservation_minutes' => (int) env('SHOP_CART_RESERVATION_MINUTES', 60),
+    'cart_reservation_minutes' => (int) env('SHOP_CART_RESERVATION_MINUTES', 60), // legacy, no longer used
 
     'order_payment_timeout_hours' => (int) env('SHOP_ORDER_PAYMENT_TIMEOUT_HOURS', 24),
 

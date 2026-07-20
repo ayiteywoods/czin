@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Http\Requests\CheckoutRequest;
 use App\Models\Order;
 use App\Models\ShippingOption;
 use App\Models\ShippingRegion;
 use App\Services\AdminNotificationService;
+use App\Services\CartService;
 use App\Services\CheckoutService;
 use App\Services\CouponService;
+use App\Services\PaystackPaymentReconciliationService;
 use App\Support\GuestOrderAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +28,7 @@ class CheckoutController extends Controller
     public function create(): View
     {
         $cart = $this->checkout->getCartWithItems();
+        $hasUnavailableItems = app(CartService::class)->hasUnavailableItems();
         $regions = ShippingRegion::query()
             ->with(['options' => fn ($query) => $query->where('is_active', true)])
             ->where('is_active', true)
@@ -62,6 +67,7 @@ class CheckoutController extends Controller
             'regions' => $regions,
             'defaultRegionId' => $defaultRegionId,
             'appliedCoupon' => $appliedCoupon,
+            'hasUnavailableItems' => $hasUnavailableItems,
         ]);
     }
 
@@ -93,6 +99,12 @@ class CheckoutController extends Controller
 
     public function store(CheckoutRequest $request): RedirectResponse
     {
+        if (app(CartService::class)->hasUnavailableItems()) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', 'Some items in your cart are out of stock or exceed available quantity. Please update your cart.');
+        }
+
         $order = $this->checkout->placeOrder(
             auth()->user(),
             $request->only([
@@ -122,9 +134,16 @@ class CheckoutController extends Controller
         return redirect()->to(GuestOrderAccess::paystackInitializeUrl($order));
     }
 
-    public function success(Order $order): View|RedirectResponse
-    {
+    public function success(
+        Order $order,
+        PaystackPaymentReconciliationService $reconciliation,
+    ): View|RedirectResponse {
         GuestOrderAccess::assertCanAccess($order);
+
+        if ($order->payment_status !== PaymentStatus::Paid) {
+            $reconciliation->reconcileOrder($order);
+            $order->refresh();
+        }
 
         $order->load('items');
 

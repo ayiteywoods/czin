@@ -12,14 +12,21 @@
                 <a href="{{ route('shop.index') }}" class="btn-primary mt-6 inline-flex px-8 py-3">Browse Products</a>
             </div>
         @else
-            <div class="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Stock is confirmed when payment is completed. If an item sells out while you are checking out, payment may not go through.
-            </div>
+            @if ($hasUnavailableItems ?? false)
+                <div class="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+                    Some items in your cart are out of stock or exceed available quantity. Update your cart or remove unavailable items before checkout.
+                </div>
+            @else
+                <div class="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Items stay in your cart until payment is completed. Stock is confirmed at checkout and when you pay.
+                </div>
+            @endif
 
             <div class="mt-10 grid gap-10 lg:grid-cols-3">
                 <div class="space-y-4 lg:col-span-2">
-                    @foreach ($items as $item)
-                        <div class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+                    @foreach ($itemRows ?? [] as $row)
+                        @php($item = $row['item'])
+                        <div class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center {{ ($row['is_out_of_stock'] || $row['exceeds_stock']) ? 'border-red-200 bg-red-50/30' : '' }}">
                             <a href="{{ route('shop.show', $item->product) }}" class="shrink-0">
                                 @if ($item->product->primaryImage())
                                     <img
@@ -41,6 +48,11 @@
                                 @if ($item->optionLabel())
                                     <p class="mt-1 text-sm text-brand-muted">{{ $item->optionLabel() }}</p>
                                 @endif
+                                @if ($row['is_out_of_stock'])
+                                    <p class="mt-2 text-sm font-medium text-red-700">This item is currently out of stock.</p>
+                                @elseif ($row['exceeds_stock'])
+                                    <p class="mt-2 text-sm font-medium text-red-700">Only {{ $row['available'] }} available — reduce quantity to continue.</p>
+                                @endif
                                 <p class="mt-2 font-semibold text-brand-red">
                                     {{ config('shop.currency_symbol') }} {{ number_format($item->unit_price, 2) }}
                                 </p>
@@ -48,7 +60,7 @@
 
                             <div class="flex flex-col items-start gap-3 sm:items-end">
                                 @php
-                                    $maxQty = $item->variant?->quantity ?? $item->product->quantity;
+                                    $maxQty = max(1, $row['available']);
                                 @endphp
                                 <div class="flex items-center border border-neutral-200 bg-brand-white">
                                     <form action="{{ route('cart.update', $item) }}" method="POST">
@@ -140,7 +152,14 @@
                         <p class="text-xs text-brand-muted">Excludes delivery. Choose your region and delivery type at checkout.</p>
                     </div>
 
-                    <a href="{{ route('checkout.create') }}" class="btn-primary mt-6 flex w-full items-center justify-center gap-2 py-3">
+                    <a
+                        href="{{ ($hasUnavailableItems ?? false) ? '#' : route('checkout.create') }}"
+                        @class([
+                            'btn-primary mt-6 flex w-full items-center justify-center gap-2 py-3',
+                            'pointer-events-none opacity-50' => ($hasUnavailableItems ?? false),
+                        ])
+                        @if ($hasUnavailableItems ?? false) aria-disabled="true" @endif
+                    >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.374 3.374 0 01-1.043 3.296 3.374 3.374 0 00-1.048 2.859 3.374 3.374 0 01-1.85 3.135 3.374 3.374 0 00-1.566-.878M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>

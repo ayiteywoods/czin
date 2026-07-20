@@ -106,6 +106,8 @@ class OrderPaymentService
         $order->refresh();
         $payment->refresh();
 
+        app(CartService::class)->clearOrderItems($order);
+
         $this->notifications->paymentReceived($order);
         app(AdminNotificationService::class)->sync();
     }

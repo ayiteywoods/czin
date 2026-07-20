@@ -23,11 +23,15 @@ class CartController extends Controller
     public function index(): View
     {
         $cart = $this->cart->resolve()->load(['items.product.images', 'items.product.category', 'items.variant']);
+        $itemRows = $this->cart->itemsWithAvailability();
         $totals = $this->checkout->calculateTotals($cart->items);
+        $hasUnavailableItems = $this->cart->hasUnavailableItems();
 
         return view('storefront.cart.index', [
             'cart' => $cart,
             'items' => $cart->items,
+            'itemRows' => $itemRows,
+            'hasUnavailableItems' => $hasUnavailableItems,
             'subtotal' => $totals['subtotal'],
             'totals' => $totals,
         ]);

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
@@ -131,6 +132,54 @@ class CartService
     public function clear(bool $releaseStock = true): void
     {
         $this->resolve()->items()->delete();
+    }
+
+    public function clearOrderItems(Order $order): void
+    {
+        $variantIds = $order->items()
+            ->whereNotNull('product_variant_id')
+            ->pluck('product_variant_id');
+
+        if ($variantIds->isEmpty()) {
+            return;
+        }
+
+        $this->resolve()
+            ->items()
+            ->whereIn('product_variant_id', $variantIds)
+            ->delete();
+    }
+
+    /**
+     * @return array<int, array{item: CartItem, available: int, is_out_of_stock: bool, exceeds_stock: bool}>
+     */
+    public function itemsWithAvailability(): array
+    {
+        $cart = $this->resolve()->load(['items.product', 'items.variant']);
+
+        return $cart->items->map(function (CartItem $item) {
+            $available = $item->variant
+                ? $this->stock->sellableQuantity($item->variant)
+                : max(0, (int) ($item->product->quantity ?? 0));
+
+            return [
+                'item' => $item,
+                'available' => $available,
+                'is_out_of_stock' => $available <= 0,
+                'exceeds_stock' => $item->quantity > $available,
+            ];
+        })->all();
+    }
+
+    public function hasUnavailableItems(): bool
+    {
+        foreach ($this->itemsWithAvailability() as $row) {
+            if ($row['is_out_of_stock'] || $row['exceeds_stock']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function count(): int

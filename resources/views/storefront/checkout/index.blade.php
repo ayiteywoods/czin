@@ -357,8 +357,15 @@
                         <p class="mt-4 text-sm text-brand-red">{{ $message }}</p>
                     @enderror
 
+                    @if ($hasUnavailableItems ?? false)
+                        <div class="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+                            Some items in your cart are out of stock or exceed available quantity.
+                            <a href="{{ route('cart.index') }}" class="font-medium underline">Update your cart</a> before placing the order.
+                        </div>
+                    @endif
+
                     <div class="mt-8 flex flex-col gap-3">
-                        <button type="submit" class="btn-primary w-full px-8 py-3.5">
+                        <button type="submit" class="btn-primary w-full px-8 py-3.5" @disabled($hasUnavailableItems ?? false)>
                             Place Order
                         </button>
                         <a href="{{ route('cart.index') }}" class="text-sm text-brand-muted transition hover:text-brand-red">

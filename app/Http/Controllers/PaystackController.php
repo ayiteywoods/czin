@@ -26,16 +26,24 @@ class PaystackController extends Controller
     {
         GuestOrderAccess::assertCanAccess($order);
 
-        if ($order->status === OrderStatus::Cancelled) {
-            return redirect()
-                ->route('checkout.success', $order)
-                ->with('error', 'This order was cancelled because payment was not received in time.');
-        }
-
-        if ($order->payment_status->value === 'paid') {
+        if ($order->payment_status === PaymentStatus::Paid) {
             return redirect()
                 ->route('checkout.success', $order)
                 ->with('success', 'This order has already been paid.');
+        }
+
+        if ($order->status === OrderStatus::Cancelled) {
+            if ($this->reconciliation->reconcileOrder($order)) {
+                return redirect()
+                    ->route('checkout.success', $order)
+                    ->with('success', 'Payment confirmed. Thank you!');
+            }
+
+            $order->update([
+                'status' => OrderStatus::PendingPayment,
+                'payment_status' => PaymentStatus::Pending,
+                'payment_due_at' => now()->addHours((int) config('shop.order_payment_timeout_hours', 24)),
+            ]);
         }
 
         $reference = $this->resolvePaymentReference($order);
@@ -69,8 +77,13 @@ class PaystackController extends Controller
             ],
         ]);
 
+        if (($data['reference'] ?? $payment->reference) !== $payment->reference) {
+            $payment->update([
+                'reference' => $data['reference'],
+            ]);
+        }
+
         $payment->update([
-            'reference' => $data['reference'],
             'metadata' => array_merge($payment->metadata ?? [], [
                 'access_code' => $data['access_code'],
             ]),
@@ -106,6 +119,12 @@ class PaystackController extends Controller
 
         if (($data['status'] ?? null) === 'success') {
             $this->payments->markAsPaid($order, $payment, $data);
+            $order->refresh();
+
+            if ($order->payment_status !== PaymentStatus::Paid) {
+                $this->reconciliation->reconcilePayment($payment);
+                $order->refresh();
+            }
 
             return redirect()
                 ->route('checkout.success', $order)

@@ -199,8 +199,6 @@ class CheckoutService
                 $this->coupons->clearSession();
             }
 
-            $this->cart->clear(releaseStock: false);
-
             return $order->load('items');
         });
     }
