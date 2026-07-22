@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaystackPaymentReconciliationService;
+use App\Support\OrderLookup;
 use Illuminate\Console\Command;
 
 class ReconcilePaystackPayments extends Command
@@ -34,7 +35,7 @@ class ReconcilePaystackPayments extends Command
         }
 
         if ($orderNumber = $this->option('order')) {
-            $order = Order::query()->where('order_number', $orderNumber)->first();
+            $order = OrderLookup::findByNumberOrId((string) $orderNumber);
 
             if (! $order) {
                 $this->error("Order {$orderNumber} not found.");

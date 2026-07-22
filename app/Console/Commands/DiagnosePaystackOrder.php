@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaystackPaymentReconciliationService;
 use App\Services\PaystackService;
+use App\Support\OrderLookup;
 use Illuminate\Console\Command;
 
 class DiagnosePaystackOrder extends Command
@@ -21,14 +22,22 @@ class DiagnosePaystackOrder extends Command
     ): int {
         $input = (string) $this->argument('order');
 
-        $order = Order::query()
-            ->when(is_numeric($input), fn ($query) => $query->whereKey((int) $input))
-            ->when(! is_numeric($input), fn ($query) => $query->where('order_number', $input))
-            ->with('payment')
-            ->first();
+        $order = OrderLookup::findByNumberOrId($input);
 
         if (! $order) {
-            $this->error('Order not found.');
+            $this->error("Order not found for \"{$input}\".");
+            $this->line('Tip: use the order number shown in admin (e.g. 1534), or id:123 for database ID.');
+            $this->newLine();
+            $this->line('Recent unpaid orders:');
+
+            Order::query()
+                ->where('payment_status', '!=', PaymentStatus::Paid)
+                ->latest('id')
+                ->limit(10)
+                ->get(['id', 'order_number', 'payment_status', 'status', 'created_at'])
+                ->each(function (Order $candidate) {
+                    $this->line("  #{$candidate->order_number} (id {$candidate->id}) — {$candidate->payment_status->label()} — {$candidate->created_at->format('M j, Y g:i A')}");
+                });
 
             return self::FAILURE;
         }
