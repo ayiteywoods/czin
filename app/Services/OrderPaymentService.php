@@ -38,6 +38,13 @@ class OrderPaymentService
                 return;
             }
 
+            if ($order->payment_status === PaymentStatus::Failed) {
+                Log::info('Reconciling order previously marked failed after Paystack success.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                ]);
+            }
+
             $wasCancelled = $order->status === OrderStatus::Cancelled;
 
             $order->loadMissing('items');

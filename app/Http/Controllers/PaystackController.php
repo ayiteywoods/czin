@@ -12,7 +12,9 @@ use App\Services\PaystackService;
 use App\Support\GuestOrderAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class PaystackController extends Controller
 {
@@ -47,9 +49,22 @@ class PaystackController extends Controller
         }
 
         $reference = $this->resolvePaymentReference($order);
+        $callbackUrl = $this->paystack->callbackUrl();
 
-        $payment = Payment::query()->updateOrCreate(
-            ['reference' => $reference],
+        $data = $this->paystack->initialize([
+            'email' => $order->customerEmail() ?? $order->billing_email,
+            'amount' => (int) round(((float) $order->total) * 100),
+            'reference' => $reference,
+            'callback_url' => $callbackUrl,
+            'currency' => config('shop.currency'),
+            'metadata' => [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+            ],
+        ]);
+
+        Payment::query()->updateOrCreate(
+            ['reference' => $data['reference']],
             [
                 'order_id' => $order->id,
                 'user_id' => $order->user_id,
@@ -59,35 +74,11 @@ class PaystackController extends Controller
                 'status' => PaymentStatus::Pending,
                 'metadata' => [
                     'order_number' => $order->order_number,
+                    'access_code' => $data['access_code'],
+                    'initialization_reference' => $reference,
                 ],
             ]
         );
-
-        $callbackUrl = $this->paystack->callbackUrl();
-
-        $data = $this->paystack->initialize([
-            'email' => $order->customerEmail() ?? $order->billing_email,
-            'amount' => (int) round(((float) $order->total) * 100),
-            'reference' => $payment->reference,
-            'callback_url' => $callbackUrl,
-            'currency' => config('shop.currency'),
-            'metadata' => [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-            ],
-        ]);
-
-        if (($data['reference'] ?? $payment->reference) !== $payment->reference) {
-            $payment->update([
-                'reference' => $data['reference'],
-            ]);
-        }
-
-        $payment->update([
-            'metadata' => array_merge($payment->metadata ?? [], [
-                'access_code' => $data['access_code'],
-            ]),
-        ]);
 
         return redirect()->away($data['authorization_url']);
     }
@@ -102,12 +93,40 @@ class PaystackController extends Controller
             ]);
         }
 
-        $data = $this->paystack->verify($reference);
+        try {
+            $data = $this->paystack->verify($reference);
+        } catch (Throwable $exception) {
+            Log::error('Paystack callback verify failed.', [
+                'reference' => $reference,
+                'paystack_mode' => $this->paystack->mode(),
+                'error' => $exception->getMessage(),
+            ]);
 
-        $payment = $this->reconciliation->findPaymentByReference($reference)
-            ?? $this->reconciliation->recoverPaymentFromPaystackData($reference, $data);
+            $payment = $this->reconciliation->findPaymentByReference($reference);
+
+            if ($payment?->order) {
+                GuestOrderAccess::remember($payment->order);
+                $this->reconciliation->reconcileOrder($payment->order);
+
+                return redirect()
+                    ->route('checkout.success', $payment->order)
+                    ->with('error', 'We are confirming your payment. Please check back in a moment.');
+            }
+
+            throw ValidationException::withMessages([
+                'paystack' => 'Unable to verify Paystack transaction.',
+            ]);
+        }
+
+        $payment = $this->reconciliation->resolvePayment($reference, $data);
 
         if (! $payment) {
+            Log::error('Paystack callback could not match payment to order.', [
+                'reference' => $reference,
+                'order_id' => $this->reconciliation->orderIdFromPaystackData($data),
+                'order_number' => $this->reconciliation->orderNumberFromPaystackData($data),
+            ]);
+
             throw ValidationException::withMessages([
                 'paystack' => 'Payment could not be matched to an order.',
             ]);
@@ -118,17 +137,25 @@ class PaystackController extends Controller
         GuestOrderAccess::remember($order);
 
         if (($data['status'] ?? null) === 'success') {
-            $this->payments->markAsPaid($order, $payment, $data);
+            $result = $this->reconciliation->applySuccessfulPaystackPayment($order, $payment, $data);
             $order->refresh();
 
-            if ($order->payment_status !== PaymentStatus::Paid) {
-                $this->reconciliation->reconcilePayment($payment);
-                $order->refresh();
+            if (! $result['reconciled']) {
+                Log::error('Paystack callback payment verified but order not marked paid.', [
+                    'order_id' => $order->id,
+                    'reference' => $reference,
+                    'reason' => $result['reason'],
+                ]);
             }
 
             return redirect()
                 ->route('checkout.success', $order)
-                ->with('success', 'Payment confirmed. Thank you!');
+                ->with(
+                    $order->payment_status === PaymentStatus::Paid ? 'success' : 'error',
+                    $order->payment_status === PaymentStatus::Paid
+                        ? 'Payment confirmed. Thank you!'
+                        : 'Payment received. We are finalizing your order — please refresh shortly.'
+                );
         }
 
         $payment->update([

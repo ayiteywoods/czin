@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\PaymentStatus;
 use App\Models\Payment;
-use App\Services\OrderPaymentService;
 use App\Services\PaystackPaymentReconciliationService;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
@@ -14,7 +13,6 @@ class PaystackWebhookController extends Controller
 {
     public function __invoke(
         Request $request,
-        OrderPaymentService $payments,
         PaystackPaymentReconciliationService $reconciliation,
     ) {
         $signature = (string) $request->header('x-paystack-signature', '');
@@ -27,7 +25,9 @@ class PaystackWebhookController extends Controller
         $expected = app(PaystackService::class)->computeWebhookSignature($payload);
 
         if (! hash_equals($expected, $signature)) {
-            Log::warning('Paystack webhook signature mismatch');
+            Log::warning('Paystack webhook signature mismatch.', [
+                'paystack_mode' => app(PaystackService::class)->mode(),
+            ]);
 
             return response()->noContent();
         }
@@ -46,8 +46,7 @@ class PaystackWebhookController extends Controller
             return response()->noContent();
         }
 
-        $payment = $reconciliation->findPaymentByReference($reference)
-            ?? $reconciliation->recoverPaymentFromPaystackData($reference, $data);
+        $payment = $reconciliation->resolvePayment($reference, $data);
 
         if (! $payment || $payment->status === PaymentStatus::Paid) {
             return response()->noContent();
@@ -65,7 +64,15 @@ class PaystackWebhookController extends Controller
             ]),
         ]);
 
-        $payments->markAsPaid($order, $payment, $data);
+        $result = $reconciliation->applySuccessfulPaystackPayment($order, $payment, $data);
+
+        if (! $result['reconciled']) {
+            Log::error('Paystack webhook payment verified but order not marked paid.', [
+                'order_id' => $order->id,
+                'reference' => $reference,
+                'reason' => $result['reason'],
+            ]);
+        }
 
         return response()->noContent();
     }

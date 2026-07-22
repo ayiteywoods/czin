@@ -54,6 +54,9 @@ class PaystackPaymentReconciliationService
             Log::warning('Paystack payment reconciliation verify failed.', [
                 'payment_id' => $payment->id,
                 'reference' => $payment->reference,
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'paystack_mode' => $this->paystack->mode(),
                 'error' => $exception->getMessage(),
             ]);
 
@@ -64,12 +67,7 @@ class PaystackPaymentReconciliationService
             return ['reconciled' => false, 'reason' => 'Paystack status: '.($data['status'] ?? 'unknown')];
         }
 
-        $this->orderPayments->markAsPaid($order, $payment, $data);
-
-        return [
-            'reconciled' => $order->fresh()->payment_status === PaymentStatus::Paid,
-            'reason' => 'verified with Paystack',
-        ];
+        return $this->applySuccessfulPaystackPayment($order, $payment, $data);
     }
 
     public function reconcileOrder(Order $order, bool $searchPaystack = true): bool
@@ -97,7 +95,13 @@ class PaystackPaymentReconciliationService
     {
         try {
             $data = $this->paystack->verify($reference);
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            Log::warning('Paystack reconcile by reference failed.', [
+                'reference' => $reference,
+                'paystack_mode' => $this->paystack->mode(),
+                'error' => $exception->getMessage(),
+            ]);
+
             return false;
         }
 
@@ -105,14 +109,84 @@ class PaystackPaymentReconciliationService
             return false;
         }
 
-        $payment = $this->findPaymentByReference($reference)
-            ?? $this->recoverPaymentFromPaystackData($reference, $data);
+        $payment = $this->resolvePayment($reference, $data);
 
         if (! $payment) {
             return false;
         }
 
         return $this->reconcilePayment($payment)['reconciled'];
+    }
+
+    public function resolvePayment(string $reference, array $data = []): ?Payment
+    {
+        $payment = $this->findPaymentByReference($reference);
+
+        if ($payment) {
+            return $payment;
+        }
+
+        $payment = Payment::query()
+            ->where('provider', 'paystack')
+            ->where('metadata->initialization_reference', $reference)
+            ->first();
+
+        if ($payment) {
+            $payment->update(['reference' => $reference]);
+
+            return $payment->fresh();
+        }
+
+        $order = $this->findOrderFromPaystackData($data);
+
+        if ($order) {
+            $payment = Payment::query()
+                ->where('order_id', $order->id)
+                ->where('provider', 'paystack')
+                ->whereIn('status', [PaymentStatus::Pending, PaymentStatus::Failed])
+                ->latest('id')
+                ->first();
+
+            if ($payment) {
+                $payment->update(['reference' => $reference]);
+
+                return $payment->fresh();
+            }
+        }
+
+        return $this->recoverPaymentFromPaystackData($reference, $data);
+    }
+
+    /**
+     * @return array{reconciled: bool, reason: string}
+     */
+    public function applySuccessfulPaystackPayment(Order $order, Payment $payment, array $data): array
+    {
+        $this->orderPayments->markAsPaid($order, $payment, $data);
+
+        $order->refresh();
+
+        if ($order->payment_status === PaymentStatus::Paid) {
+            Log::info('Paystack payment synced to order.', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'payment_id' => $payment->id,
+                'reference' => $payment->reference,
+            ]);
+
+            return ['reconciled' => true, 'reason' => 'verified with Paystack'];
+        }
+
+        Log::error('Paystack payment verified but order still unpaid.', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'payment_id' => $payment->id,
+            'reference' => $payment->reference,
+            'order_status' => $order->status->value,
+            'payment_status' => $order->payment_status->value,
+        ]);
+
+        return ['reconciled' => false, 'reason' => 'mark as paid did not update order'];
     }
 
     protected function reconcileOrderFromPaystackTransactions(Order $order): bool
@@ -139,8 +213,8 @@ class PaystackPaymentReconciliationService
             }
 
             foreach ($transactions as $transaction) {
-                $orderId = data_get($transaction, 'metadata.order_id');
-                $orderNumber = data_get($transaction, 'metadata.order_number');
+                $orderId = $this->orderIdFromPaystackData($transaction);
+                $orderNumber = $this->orderNumberFromPaystackData($transaction);
 
                 if ((string) $orderId !== (string) $order->id && $orderNumber !== $order->order_number) {
                     continue;
@@ -152,10 +226,9 @@ class PaystackPaymentReconciliationService
                     continue;
                 }
 
-                $payment = $this->findPaymentByReference($reference)
-                    ?? $this->recoverPaymentFromPaystackData($reference, $transaction);
+                $payment = $this->resolvePayment($reference, $transaction);
 
-                if ($payment && $this->reconcilePayment($payment, false)['reconciled']) {
+                if ($payment && $this->applySuccessfulPaystackPayment($order, $payment, $transaction)['reconciled']) {
                     return true;
                 }
             }
@@ -179,19 +252,15 @@ class PaystackPaymentReconciliationService
             return $existing;
         }
 
-        $orderId = data_get($data, 'metadata.order_id');
-        $orderNumber = data_get($data, 'metadata.order_number');
-
-        $order = Order::query()
-            ->when($orderId, fn ($query) => $query->whereKey($orderId))
-            ->when(! $orderId && $orderNumber, fn ($query) => $query->where('order_number', $orderNumber))
-            ->first();
+        $order = $this->findOrderFromPaystackData($data);
 
         if (! $order) {
             Log::warning('Paystack payment could not be matched to an order.', [
                 'reference' => $reference,
-                'order_id' => $orderId,
-                'order_number' => $orderNumber,
+                'order_id' => $this->orderIdFromPaystackData($data),
+                'order_number' => $this->orderNumberFromPaystackData($data),
+                'customer_email' => data_get($data, 'customer.email'),
+                'amount' => data_get($data, 'amount'),
             ]);
 
             return null;
@@ -211,5 +280,97 @@ class PaystackPaymentReconciliationService
                 'recovered' => true,
             ],
         ]);
+    }
+
+    public function findOrderFromPaystackData(array $data): ?Order
+    {
+        $orderId = $this->orderIdFromPaystackData($data);
+        $orderNumber = $this->orderNumberFromPaystackData($data);
+
+        if ($orderId) {
+            $order = Order::query()->find($orderId);
+
+            if ($order) {
+                return $order;
+            }
+        }
+
+        if ($orderNumber) {
+            $order = Order::query()->where('order_number', $orderNumber)->first();
+
+            if ($order) {
+                return $order;
+            }
+        }
+
+        $email = data_get($data, 'customer.email')
+            ?? data_get($data, 'authorization.email');
+
+        $amount = isset($data['amount']) ? round((float) $data['amount'] / 100, 2) : null;
+
+        if (! $email || $amount === null) {
+            return null;
+        }
+
+        return Order::query()
+            ->where('payment_status', '!=', PaymentStatus::Paid)
+            ->where(function ($query) use ($email) {
+                $query->where('billing_email', $email)
+                    ->orWhere('shipping_email', $email);
+            })
+            ->where('total', $amount)
+            ->where('created_at', '>=', now()->subDays(14))
+            ->latest('id')
+            ->first();
+    }
+
+    public function orderIdFromPaystackData(array $data): ?int
+    {
+        $metadata = $this->normalizeMetadata($data['metadata'] ?? null);
+        $orderId = $metadata['order_id'] ?? null;
+
+        if ($orderId !== null && $orderId !== '') {
+            return (int) $orderId;
+        }
+
+        foreach ($metadata['custom_fields'] ?? [] as $field) {
+            if (($field['variable_name'] ?? null) === 'order_id' && filled($field['value'] ?? null)) {
+                return (int) $field['value'];
+            }
+        }
+
+        return null;
+    }
+
+    public function orderNumberFromPaystackData(array $data): ?string
+    {
+        $metadata = $this->normalizeMetadata($data['metadata'] ?? null);
+        $orderNumber = $metadata['order_number'] ?? null;
+
+        if (filled($orderNumber)) {
+            return (string) $orderNumber;
+        }
+
+        foreach ($metadata['custom_fields'] ?? [] as $field) {
+            if (($field['variable_name'] ?? null) === 'order_number' && filled($field['value'] ?? null)) {
+                return (string) $field['value'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function normalizeMetadata(mixed $metadata): array
+    {
+        if (is_string($metadata)) {
+            $decoded = json_decode($metadata, true);
+
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return is_array($metadata) ? $metadata : [];
     }
 }
