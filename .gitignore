@@ -14,7 +14,8 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
+# Track public/build so cPanel deploys work without Node on the server.
+# /public/build
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
