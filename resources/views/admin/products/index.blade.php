@@ -63,19 +63,30 @@
                         </td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">
                             <div>{{ $product->status->label() }}</div>
-                            @if ($product->isScheduledForFuture())
+                            @if ($product->is_86ed)
+                                <div class="mt-1 text-xs font-medium text-brand-red">86'd</div>
+                            @elseif ($product->isScheduledForFuture())
                                 <div class="mt-1 text-xs text-amber-700">Scheduled {{ $product->storefrontPublishLabel() }}</div>
                             @elseif ($product->storefrontPublishLabel())
                                 <div class="mt-1 text-xs text-brand-muted">Live since {{ $product->storefrontPublishLabel() }}</div>
                             @endif
                         </td>
                         <td class="admin-table-cell admin-col-actions">
-                            <x-admin-table-actions
-                                :view-detail-url="route('admin.details.products', $product)"
-                                :edit-url="route('admin.products.edit', $product)"
-                                :delete-url="route('admin.products.destroy', $product)"
-                                delete-confirm="Delete this product permanently?"
-                            />
+                            <div class="flex flex-col items-end gap-2">
+                                <x-admin-table-actions
+                                    :view-detail-url="route('admin.details.products', $product)"
+                                    :edit-url="route('admin.products.edit', $product)"
+                                    :delete-url="route('admin.products.destroy', $product)"
+                                    delete-confirm="Delete this product permanently?"
+                                />
+                                <form method="POST" action="{{ route('admin.products.toggle-86', $product) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="whitespace-nowrap text-xs text-brand-red hover:underline">
+                                        {{ $product->is_86ed ? 'Un-86' : '86' }}
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty

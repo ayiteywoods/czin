@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\FulfillmentType;
+use App\Enums\OrderSource;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
@@ -28,6 +30,17 @@ class OrderController extends Controller
             $perPage = 20;
         }
 
+        $orderSourceFilter = $request->string('order_source')->toString();
+        $fulfillmentTypeFilter = $request->string('fulfillment_type')->toString();
+
+        if (! in_array($orderSourceFilter, array_column(OrderSource::cases(), 'value'), true)) {
+            $orderSourceFilter = '';
+        }
+
+        if (! in_array($fulfillmentTypeFilter, array_column(FulfillmentType::cases(), 'value'), true)) {
+            $fulfillmentTypeFilter = '';
+        }
+
         $query = Order::query()->with('user');
 
         if ($request->filled('payment_status')) {
@@ -38,6 +51,14 @@ class OrderController extends Controller
             } elseif (in_array($paymentStatus, ['paid', 'pending', 'failed', 'refunded'], true)) {
                 $query->where('payment_status', $paymentStatus);
             }
+        }
+
+        if ($orderSourceFilter !== '') {
+            $query->where('order_source', $orderSourceFilter);
+        }
+
+        if ($fulfillmentTypeFilter !== '') {
+            $query->where('fulfillment_type', $fulfillmentTypeFilter);
         }
 
         $orders = AdminTable::paginate(
@@ -58,7 +79,14 @@ class OrderController extends Controller
 
         $paymentFilter = $request->string('payment_status')->toString();
 
-        return view('admin.orders.index', compact('orders', 'paymentFilter', 'perPage', 'perPageOptions'));
+        return view('admin.orders.index', compact(
+            'orders',
+            'paymentFilter',
+            'orderSourceFilter',
+            'fulfillmentTypeFilter',
+            'perPage',
+            'perPageOptions',
+        ));
     }
 
     public function show(Order $order): View

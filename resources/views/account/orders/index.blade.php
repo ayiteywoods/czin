@@ -1,6 +1,6 @@
 @extends('account.layout')
 
-@section('title', 'My Orders - SACYSHOES')
+@section('title', 'My Orders - CZIN')
 @section('account-heading', 'Track My Orders')
 @section('account-subheading', 'Follow payment, processing, shipping, and delivery updates for every order.')
 

@@ -16,22 +16,22 @@ class PageSeeder extends Seeder
                 'footer_group' => null,
                 'sort_order' => 0,
                 'body' => <<<'TEXT'
-SACYSHOES started with a simple idea: make premium footwear accessible to everyone in Ghana without compromising on quality or style.
+CZIN started with a simple idea: serve honest, flavourful meals that feel like home — ready when you are.
 
-What began as a passion for well-made shoes has grown into a curated collection spanning sneakers, formal wear, sandals, and boots — chosen for comfort, durability, and everyday versatility.
+What began as a love for Ghanaian kitchen classics has grown into a full menu of mains, sides, drinks, and desserts, prepared fresh for dine-in, pickup, and delivery.
 
 ## Our mission
 
-We believe great shoes should feel as good as they look. That is why we work with trusted suppliers, keep our range thoughtfully curated, and focus on a smooth shopping experience from browse to delivery.
+Great food should arrive hot, taste memorable, and feel worth every bite. That is why we cook with care, keep our menu clear, and focus on a smooth ordering experience from browse to delivery.
 
 ## What we stand for
 
-- **Quality first** — durable materials and careful selection
-- **Customer care** — responsive support before and after your order
-- **Honest pricing** — clear value with seasonal offers where it matters
-- **Local focus** — built for Ghanaian customers, delivered nationwide
+- **Fresh first** — meals prepared to order, not sitting under a lamp
+- **Guest care** — responsive support before and after your order
+- **Honest portions** — clear sizes and fair pricing
+- **Local focus** — built for Accra and surrounding communities
 
-Whether you are dressing for work, a night out, or a casual weekend, SACYSHOES is here to help you find the right pair.
+Whether you need a quick weekday lunch or a family dinner delivered, CZIN is here to feed you well.
 TEXT,
             ],
             [
@@ -40,14 +40,14 @@ TEXT,
                 'footer_group' => Page::FOOTER_CUSTOMER_CARE,
                 'sort_order' => 1,
                 'body' => <<<'TEXT'
-We deliver across Ghana through trusted courier partners.
+We deliver hot meals across Accra and nearby areas through trusted dispatch riders.
 
-Standard delivery: 2–5 business days within Accra and major cities.
-Regional delivery: 3–7 business days depending on location.
+Standard Accra delivery: typically 45–90 minutes depending on kitchen volume and location.
+Outer areas: timing may vary — we will confirm at checkout where possible.
 
-You will receive SMS or email updates once your order is dispatched. Please ensure your phone number and delivery address are correct at checkout.
+You will receive updates once your order is out for delivery. Please ensure your phone number and delivery address are correct at checkout.
 
-For urgent delivery requests, contact our support team before placing your order.
+For large or timed orders, contact our team before placing your order.
 TEXT,
             ],
             [
@@ -56,13 +56,13 @@ TEXT,
                 'footer_group' => null,
                 'sort_order' => 2,
                 'body' => <<<'TEXT'
-We want you to love your purchase. If something is not right, you may request a return within 7 days of delivery.
+Food orders are prepared fresh and generally cannot be returned once delivered in good condition.
 
-Items must be unused, in original packaging, and with proof of purchase. Sale items may have limited return eligibility.
+If something is wrong — missing items, incorrect order, or a quality issue — contact us within 2 hours of delivery with your order number and photos where helpful.
 
-To start a return, contact us with your order number. Once approved, we will guide you through the return or exchange process.
+Where we confirm an error on our side, we will offer a replacement, credit, or refund as appropriate.
 
-Refunds are processed to the original payment method within 5–10 business days after we receive and inspect the returned item.
+Refunds, when approved, are processed to the original payment method within 5–10 business days.
 TEXT,
             ],
             [
@@ -71,7 +71,7 @@ TEXT,
                 'footer_group' => Page::FOOTER_CUSTOMER_CARE,
                 'sort_order' => 3,
                 'body' => <<<'TEXT'
-We're here to help with orders, sizing, delivery questions, and anything else you need.
+We are here to help with orders, menu questions, delivery updates, and catering enquiries.
 
 Send us a message and our team will respond as soon as possible — typically within one business day.
 TEXT,
@@ -82,7 +82,7 @@ TEXT,
                 'footer_group' => Page::FOOTER_LEGAL,
                 'sort_order' => 1,
                 'body' => <<<'TEXT'
-At **Sacy's Shoes**, we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard the information you provide when shopping with us.
+At **CZIN**, we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard the information you provide when ordering with us.
 
 ## Information We Collect
 
@@ -101,7 +101,7 @@ We use your personal information to:
 - **Process and confirm** your orders.
 - **Arrange and complete** deliveries.
 - **Contact you** regarding your order, delivery, or customer support requests.
-- **Improve** our products and services.
+- **Improve** our menu and services.
 - **Send promotional offers or updates**, only if you have agreed to receive them.
 
 ## Sharing Your Information
@@ -145,16 +145,16 @@ If you visit our website or use our online services, we may use **cookies or sim
 
 ## Changes to This Privacy Policy
 
-**Sacy's Shoes** may update this Privacy Policy from time to time. Any changes will be posted on our platforms with the updated effective date.
+**CZIN** may update this Privacy Policy from time to time. Any changes will be posted on our platforms with the updated effective date.
 
 ## Contact Us
 
 If you have any questions about this Privacy Policy or how your personal information is handled, please contact us:
 
-**Sacy's Shoes**
+**CZIN**
 
 - **Phone:** +233 530 668 945
-- **Email:** support@sacyshoes.com
+- **Email:** support@czin.com
 - **Social media:** See the links in our website footer for our current Instagram, Facebook, and other profiles.
 TEXT,
             ],
@@ -164,53 +164,40 @@ TEXT,
                 'footer_group' => Page::FOOTER_LEGAL,
                 'sort_order' => 2,
                 'body' => <<<'TEXT'
-Welcome to **Sacy's Shoes**. By shopping with us, you agree to the following **Terms & Conditions**. Please read them carefully before placing your order.
+Welcome to **CZIN**. By ordering with us, you agree to the following **Terms & Conditions**. Please read them carefully before placing your order.
 
 ## General
 
-**Sacy's Shoes** specializes in **women's shoes, bags, and accessories**.
+**CZIN** is a restaurant offering **prepared meals, sides, drinks, and desserts** for pickup and delivery.
 
-We reserve the right to update **prices, policies, and availability** without prior notice.
+We reserve the right to update **prices, menu availability, and policies** without prior notice.
 
 ## Orders & Payment
 
 - Orders are confirmed only after **successful payment** or agreement with our designated payment method.
-- We reserve the right to **cancel any order** due to stock unavailability or payment issues.
+- We reserve the right to **cancel any order** due to stock unavailability, kitchen capacity, or payment issues.
 
 ## Shipping & Delivery
 
-- **Accra deliveries:** 24–48 hours.
-- **Outside Accra:** 48–72 hours.
-- Delivery times may vary slightly during **peak seasons, public holidays**, or due to unforeseen circumstances.
-- Customers are required to provide **accurate delivery details**. Sacy's Shoes will not be liable for failed deliveries caused by incorrect information.
+- **Accra deliveries:** typically 45–90 minutes.
+- **Nearby areas:** timing may vary with distance and demand.
+- Delivery times may vary during **peak hours, public holidays**, or due to unforeseen circumstances.
+- Customers are required to provide **accurate delivery details**. CZIN will not be liable for failed deliveries caused by incorrect information.
 
-## Returns & Exchanges
+## Food Quality & Issues
 
-We value customer satisfaction and allow exchanges under the following conditions:
-
-### Shoes
-
-- Exchange is only possible within **48 hours after purchase**, and items must be in their **original condition with tags intact**.
-- **Accepted reasons:** size too small, size too big, or product fault.
-- **Design changes are not allowed.**
-
-### Bags
-
-- Exchanges are only accepted if the item is delivered in a **damaged condition**.
-- Customers are encouraged to **inspect bags carefully** before the dispatch rider leaves.
-
-### Accessories
-
-- Accessories **cannot be exchanged or refunded** unless proven faulty on delivery.
+- Please inspect your order on arrival.
+- Report missing items, wrong dishes, or quality concerns **promptly** (ideally within 2 hours) with your order number.
+- Because meals are prepared fresh, **returns of consumed or correctly delivered food are not accepted**.
 
 ## Refunds
 
-- Refunds are **not guaranteed** and will only be considered if an exchange cannot be provided.
-- **Shipping and delivery fees are non-refundable.**
+- Refunds are **not guaranteed** and will only be considered where we confirm an error on our side or cannot fulfill a suitable replacement.
+- **Delivery fees are non-refundable** once a rider has been dispatched, except where we cancel the order.
 
 ## Liability
 
-**Sacy's Shoes** will not be held responsible for damages caused by mishandling after delivery. Our responsibility ends once the product is delivered in good condition and acknowledged by the customer.
+**CZIN** will not be held responsible for issues arising after a correctly delivered order has been accepted, including improper storage or reheating by the customer.
 TEXT,
             ],
         ];

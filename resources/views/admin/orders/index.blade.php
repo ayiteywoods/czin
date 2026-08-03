@@ -4,6 +4,8 @@
 
 @section('content')
     @php
+        use App\Enums\FulfillmentType;
+        use App\Enums\OrderSource;
         use App\Enums\OrderStatus;
         use App\Enums\PaymentStatus;
 
@@ -13,47 +15,25 @@
             PaymentStatus::Pending->value => 'Pending',
             OrderStatus::Cancelled->value => 'Cancelled',
         ];
+
+        $sourceOptions = [
+            '' => 'All sources',
+            OrderSource::Online->value => 'Online',
+            OrderSource::Pos->value => 'POS',
+        ];
+
+        $fulfillmentOptions = [
+            '' => 'All fulfillment',
+            FulfillmentType::DineIn->value => 'Dine in',
+            FulfillmentType::Takeaway->value => 'Takeaway',
+            FulfillmentType::Delivery->value => 'Delivery',
+        ];
     @endphp
 
-    <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <form method="GET" action="{{ route('admin.orders.index') }}" class="flex flex-wrap gap-2">
-            @foreach (request()->except(['payment_status', 'page']) as $key => $value)
-                @if (is_array($value))
-                    @foreach ($value as $item)
-                        <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
-                    @endforeach
-                @else
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endif
-            @endforeach
-
-            @foreach ($filterOptions as $value => $label)
-                <button
-                    type="submit"
-                    name="payment_status"
-                    value="{{ $value }}"
-                    class="admin-period-pill {{ ($paymentFilter ?? '') === $value ? 'admin-period-pill-active' : '' }}"
-                >
-                    {{ $label }}
-                </button>
-            @endforeach
-        </form>
-
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <p class="text-sm text-brand-muted">
-                @if (($paymentFilter ?? '') === PaymentStatus::Paid->value)
-                    Showing paid orders only
-                @elseif (($paymentFilter ?? '') === PaymentStatus::Pending->value)
-                    Showing pending payment orders only
-                @elseif (($paymentFilter ?? '') === OrderStatus::Cancelled->value)
-                    Showing cancelled orders only
-                @else
-                    Showing all orders
-                @endif
-            </p>
-
-            <form method="GET" action="{{ route('admin.orders.index') }}" class="flex items-center gap-2 text-sm">
-                @foreach (request()->except(['per_page', 'page']) as $key => $value)
+    <div class="mb-6 flex flex-col gap-4">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <form method="GET" action="{{ route('admin.orders.index') }}" class="flex flex-wrap gap-2">
+                @foreach (request()->except(['payment_status', 'page']) as $key => $value)
                     @if (is_array($value))
                         @foreach ($value as $item)
                             <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
@@ -63,17 +43,102 @@
                     @endif
                 @endforeach
 
-                <label for="orders-per-page" class="whitespace-nowrap text-brand-muted">Show</label>
-                <select
-                    id="orders-per-page"
-                    name="per_page"
-                    class="input-field mt-0 w-24 py-1.5 text-sm"
-                    onchange="this.form.submit()"
-                >
-                    @foreach ($perPageOptions as $option)
-                        <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }}</option>
+                @foreach ($filterOptions as $value => $label)
+                    <button
+                        type="submit"
+                        name="payment_status"
+                        value="{{ $value }}"
+                        class="admin-period-pill {{ ($paymentFilter ?? '') === $value ? 'admin-period-pill-active' : '' }}"
+                    >
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </form>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <p class="text-sm text-brand-muted">
+                    @if (($paymentFilter ?? '') === PaymentStatus::Paid->value)
+                        Showing paid orders only
+                    @elseif (($paymentFilter ?? '') === PaymentStatus::Pending->value)
+                        Showing pending payment orders only
+                    @elseif (($paymentFilter ?? '') === OrderStatus::Cancelled->value)
+                        Showing cancelled orders only
+                    @else
+                        Showing all orders
+                    @endif
+                </p>
+
+                <form method="GET" action="{{ route('admin.orders.index') }}" class="flex items-center gap-2 text-sm">
+                    @foreach (request()->except(['per_page', 'page']) as $key => $value)
+                        @if (is_array($value))
+                            @foreach ($value as $item)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
                     @endforeach
-                </select>
+
+                    <label for="orders-per-page" class="whitespace-nowrap text-brand-muted">Show</label>
+                    <select
+                        id="orders-per-page"
+                        name="per_page"
+                        class="input-field mt-0 w-24 py-1.5 text-sm"
+                        onchange="this.form.submit()"
+                    >
+                        @foreach ($perPageOptions as $option)
+                            <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }}</option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <form method="GET" action="{{ route('admin.orders.index') }}" class="flex flex-wrap gap-2">
+                @foreach (request()->except(['order_source', 'page']) as $key => $value)
+                    @if (is_array($value))
+                        @foreach ($value as $item)
+                            <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                        @endforeach
+                    @else
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+
+                @foreach ($sourceOptions as $value => $label)
+                    <button
+                        type="submit"
+                        name="order_source"
+                        value="{{ $value }}"
+                        class="admin-period-pill {{ ($orderSourceFilter ?? '') === $value ? 'admin-period-pill-active' : '' }}"
+                    >
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </form>
+
+            <form method="GET" action="{{ route('admin.orders.index') }}" class="flex flex-wrap gap-2">
+                @foreach (request()->except(['fulfillment_type', 'page']) as $key => $value)
+                    @if (is_array($value))
+                        @foreach ($value as $item)
+                            <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                        @endforeach
+                    @else
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+
+                @foreach ($fulfillmentOptions as $value => $label)
+                    <button
+                        type="submit"
+                        name="fulfillment_type"
+                        value="{{ $value }}"
+                        class="admin-period-pill {{ ($fulfillmentTypeFilter ?? '') === $value ? 'admin-period-pill-active' : '' }}"
+                    >
+                        {{ $label }}
+                    </button>
+                @endforeach
             </form>
         </div>
     </div>
@@ -149,6 +214,7 @@
                                 :view-detail-url="route('admin.details.orders', $order)"
                                 :edit-url="route('admin.orders.show', $order).'#delivery-tracking'"
                                 edit-title="Update tracking"
+                                :print-receipt-url="route('admin.orders.receipt', $order)"
                                 :delete-url="route('admin.orders.destroy', $order)"
                                 delete-confirm="Delete order {{ $order->order_number }}? This cannot be undone."
                             />

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\QuickAddCartItemRequest;
 use App\Http\Requests\StoreCartItemRequest;
 use App\Http\Requests\UpdateCartItemRequest;
 use App\Models\CartItem;
@@ -9,6 +10,7 @@ use App\Models\Product;
 use App\Services\CartService;
 use App\Services\CheckoutService;
 use App\Services\ProductVariantResolver;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -50,11 +52,46 @@ class CartController extends Controller
             $request->filled('variant_heel') ? $request->string('variant_heel')->toString() : null,
         );
 
-        $this->cart->add($product, $variant, $request->integer('quantity', 1));
+        $specialRequest = null;
+
+        if (strcasecmp($request->string('variant_color')->toString(), 'Custom') === 0) {
+            $specialRequest = $request->string('special_request')->toString();
+        }
+
+        $this->cart->add(
+            $product,
+            $variant,
+            $request->integer('quantity', 1),
+            $specialRequest,
+        );
 
         return redirect()
             ->route('cart.index')
             ->with('success', "{$product->name} added to your cart.");
+    }
+
+    public function quickAdd(QuickAddCartItemRequest $request): JsonResponse
+    {
+        $product = Product::query()
+            ->with(['variants' => fn ($query) => $query->where('is_active', true)])
+            ->findOrFail($request->integer('product_id'));
+
+        abort_unless($product->isVisibleOnStorefront(), 404);
+
+        $variant = $product->defaultOrderVariant();
+
+        if (! $variant) {
+            return response()->json([
+                'message' => "{$product->name} is currently unavailable.",
+            ], 422);
+        }
+
+        $this->cart->add($product, $variant, 1);
+
+        return response()->json([
+            'message' => "{$product->name} added to your cart.",
+            'cart_count' => $this->cart->count(),
+        ]);
     }
 
     public function update(UpdateCartItemRequest $request, CartItem $cartItem): RedirectResponse

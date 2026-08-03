@@ -113,6 +113,18 @@ class ProductController extends Controller
             ->with('success', 'Product deleted successfully.');
     }
 
+    public function toggle86(Product $product): RedirectResponse
+    {
+        $product->update(['is_86ed' => ! $product->is_86ed]);
+
+        return back()->with(
+            'success',
+            $product->is_86ed
+                ? $product->name.' marked as 86 (unavailable).'
+                : $product->name.' restored to the menu.',
+        );
+    }
+
     /**
      * @param  list<array<string, mixed>>  $variants
      */

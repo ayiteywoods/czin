@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\FulfillmentType;
+use App\Enums\OrderSource;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,6 +18,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'dining_table_id',
         'subtotal',
         'delivery_fee',
         'tax',
@@ -22,6 +26,9 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'status',
+        'order_source',
+        'fulfillment_type',
+        'created_by',
         'billing_full_name',
         'billing_phone',
         'billing_email',
@@ -44,6 +51,7 @@ class Order extends Model
         'discount_amount',
         'shipping_fee',
         'paid_at',
+        'kitchen_alert_sent_at',
         'payment_due_at',
     ];
 
@@ -57,8 +65,11 @@ class Order extends Model
             'discount_amount' => 'decimal:2',
             'total' => 'decimal:2',
             'status' => OrderStatus::class,
+            'order_source' => OrderSource::class,
+            'fulfillment_type' => FulfillmentType::class,
             'payment_status' => PaymentStatus::class,
             'paid_at' => 'datetime',
+            'kitchen_alert_sent_at' => 'datetime',
             'payment_due_at' => 'datetime',
             'user_id' => 'integer',
         ];
@@ -69,6 +80,117 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function diningTable(): BelongsTo
+    {
+        return $this->belongsTo(DiningTable::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function isPosOrder(): bool
+    {
+        return $this->order_source === OrderSource::Pos;
+    }
+
+    public function scopeKitchenActive(Builder $query): Builder
+    {
+        return $query
+            ->where('payment_status', PaymentStatus::Paid)
+            ->whereIn('status', [
+                OrderStatus::Paid,
+                OrderStatus::Processing,
+                OrderStatus::ReadyForDelivery,
+            ]);
+    }
+
+    public function kitchenColumn(): string
+    {
+        return match ($this->status) {
+            OrderStatus::Paid => 'new',
+            OrderStatus::Processing => 'preparing',
+            OrderStatus::ReadyForDelivery => 'ready',
+            default => 'new',
+        };
+    }
+
+    public function kitchenStatusLabel(): string
+    {
+        return match ($this->status) {
+            OrderStatus::Paid => 'New order',
+            OrderStatus::Processing => 'Preparing',
+            OrderStatus::ReadyForDelivery => 'Ready',
+            default => $this->status->label(),
+        };
+    }
+
+    public function kitchenFulfillmentLabel(): string
+    {
+        if ($this->fulfillment_type instanceof FulfillmentType) {
+            return $this->fulfillment_type->label();
+        }
+
+        return $this->isPosOrder() ? 'In-store' : 'Online delivery';
+    }
+
+    public function kitchenSourceLabel(): string
+    {
+        if ($this->order_source instanceof OrderSource) {
+            return $this->order_source->label();
+        }
+
+        return 'Online';
+    }
+
+    /**
+     * @return list<OrderStatus>
+     */
+    public function kitchenAllowedStatuses(): array
+    {
+        return [
+            OrderStatus::Processing,
+            OrderStatus::ReadyForDelivery,
+            OrderStatus::Delivered,
+        ];
+    }
+
+    /**
+     * @return array{status: OrderStatus, label: string}|null
+     */
+    public function kitchenNextAction(): ?array
+    {
+        return match ($this->status) {
+            OrderStatus::Paid => [
+                'status' => OrderStatus::Processing,
+                'label' => 'Start preparing',
+            ],
+            OrderStatus::Processing => [
+                'status' => OrderStatus::ReadyForDelivery,
+                'label' => 'Mark ready',
+            ],
+            OrderStatus::ReadyForDelivery => $this->canCompleteFromKitchen() ? [
+                'status' => OrderStatus::Delivered,
+                'label' => 'Mark served',
+            ] : null,
+            default => null,
+        };
+    }
+
+    public function canCompleteFromKitchen(): bool
+    {
+        if ($this->fulfillment_type === FulfillmentType::DineIn) {
+            return true;
+        }
+
+        if ($this->fulfillment_type === FulfillmentType::Takeaway) {
+            return true;
+        }
+
+        return $this->isPosOrder() && $this->fulfillment_type !== FulfillmentType::Delivery;
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -77,6 +199,11 @@ class Order extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    public function deliveryAssignment(): HasOne
+    {
+        return $this->hasOne(DeliveryAssignment::class);
     }
 
     public function coupon(): BelongsTo
@@ -174,6 +301,25 @@ class Order extends Model
     public function paymentMethodLabel(): string
     {
         return (string) config('shop.payment_method_label');
+    }
+
+    public function receiptPaymentMethodLabel(): string
+    {
+        if (filled($this->payment_method)) {
+            return match ($this->payment_method) {
+                'cash' => 'Cash',
+                'card' => 'Card',
+                'momo' => 'Mobile Money',
+                'paystack' => 'Paystack',
+                default => ucfirst(str_replace('_', ' ', $this->payment_method)),
+            };
+        }
+
+        if ($this->payment?->paystackChannel()) {
+            return ucfirst(str_replace('_', ' ', $this->payment->paystackChannel()));
+        }
+
+        return $this->paymentMethodLabel();
     }
 
     public function invoicePaymentMethodLabel(): string

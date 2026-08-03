@@ -34,6 +34,6 @@
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex rounded-none px-2 py-0.5 text-xs font-medium {$toneClass}"]) }}>
+<span {{ $attributes->merge(['class' => "inline-flex rounded-xl px-2 py-0.5 text-xs font-medium {$toneClass}"]) }}>
     {{ $label }}
 </span>

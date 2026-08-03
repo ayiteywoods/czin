@@ -25,4 +25,13 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function url(): string
+    {
+        if (str_starts_with($this->path, 'images/') || str_starts_with($this->path, 'http')) {
+            return asset($this->path);
+        }
+
+        return asset('storage/'.$this->path);
+    }
 }

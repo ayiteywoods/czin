@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="172" height="52" viewBox="0 0 172 52" role="img" aria-labelledby="title desc">
+  <title id="title">Get it on Google Play</title>
+  <desc id="desc">Google Play download badge</desc>
+  <rect x="1" y="1" width="170" height="50" rx="10" fill="#111111" stroke="#2f2f2f"/>
+  <text x="56" y="20" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="0.04em">GET IT ON</text>
+  <text x="56" y="36" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Google Play</text>
+  <g transform="translate(18 12)">
+    <polygon points="0,0 14,14 0,28" fill="#00d0ff"/>
+    <polygon points="0,0 19,9 14,14" fill="#00f076"/>
+    <polygon points="14,14 19,19 0,28" fill="#ff3e7f"/>
+    <polygon points="19,9 24,12 19,16 14,14" fill="#ffd43b"/>
+  </g>
+</svg>

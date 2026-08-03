@@ -12,6 +12,8 @@ enum AdminPermission: string
     case Users = 'users';
     case Content = 'content';
     case Reports = 'reports';
+    case Tables = 'tables';
+    case Kitchen = 'kitchen';
 
     public function label(): string
     {
@@ -24,6 +26,8 @@ enum AdminPermission: string
             self::Users => 'Admin users',
             self::Content => 'Website content',
             self::Reports => 'Reports',
+            self::Tables => 'Tables',
+            self::Kitchen => 'Kitchen',
         };
     }
 
@@ -38,6 +42,8 @@ enum AdminPermission: string
             self::Users => 'Create and manage admin users and permissions',
             self::Content => 'Edit homepage sections, store settings, testimonials, and legal pages',
             self::Reports => 'View and export sales reports',
+            self::Tables => 'Manage dining tables, areas, and seating status',
+            self::Kitchen => 'View the kitchen board and update food preparation status',
         };
     }
 

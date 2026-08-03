@@ -33,6 +33,16 @@ class StoreSettingController extends Controller
         $data['contact_page_phone'] = $request->input('contact_page_phone');
         $data['contact_page_phone_alt'] = $request->input('contact_page_phone_alt');
         $data['contact_page_address'] = $request->input('contact_page_address');
+        $data['kitchen_sms_enabled'] = $request->boolean('kitchen_sms_enabled');
+        $data['kitchen_whatsapp_enabled'] = $request->boolean('kitchen_whatsapp_enabled');
+        $data['online_ordering_enabled'] = $request->boolean('online_ordering_enabled');
+        $data['low_stock_threshold'] = $request->filled('low_stock_threshold')
+            ? $request->integer('low_stock_threshold')
+            : 10;
+        $data['upsell_category_slugs'] = $request->input('upsell_category_slugs', []);
+        $data['business_hours'] = $request->input('business_hours');
+
+        unset($data['business_hours_note']);
 
         if ($request->hasFile('about_image')) {
             if ($settings->about_image_path && ! str_starts_with($settings->about_image_path, 'images/')) {

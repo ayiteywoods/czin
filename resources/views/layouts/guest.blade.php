@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Sacy Shoes')</title>
-    <link rel="icon" type="image/webp" href="{{ asset('images/brand/logo1.webp') }}">
+    <title>@yield('title', 'CZIN')</title>
+    @include('partials.favicon')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-brand-light text-brand-black antialiased">

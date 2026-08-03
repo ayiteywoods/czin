@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\CartUpsellService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,10 @@ class ShopController extends Controller
 {
     private const PRODUCTS_PER_PAGE = 12;
 
+    public function __construct(
+        protected CartUpsellService $cartUpsell,
+    ) {}
+
     public function index(Request $request): View|JsonResponse
     {
         $products = $this->storefrontProductsQuery($request)
@@ -21,7 +26,10 @@ class ShopController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('storefront.partials.product-grid-items', compact('products'))->render(),
+                'html' => view('storefront.partials.product-grid-items', [
+                    'products' => $products,
+                    'layout' => 'menu',
+                ])->render(),
                 'has_more' => $products->hasMorePages(),
                 'next_page' => $products->hasMorePages() ? $products->currentPage() + 1 : null,
             ]);
@@ -50,7 +58,9 @@ class ShopController extends Controller
             ->limit(4)
             ->get();
 
-        return view('storefront.shop.show', compact('product', 'relatedProducts'));
+        $upsellProducts = $this->cartUpsell->suggestionsFor($product);
+
+        return view('storefront.shop.show', compact('product', 'relatedProducts', 'upsellProducts'));
     }
 
     private function storefrontProductsQuery(Request $request): Builder

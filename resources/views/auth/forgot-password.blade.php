@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Forgot Password - SACYSHOES')
+@section('title', 'Forgot Password - CZIN')
 
 @section('content')
     <h1 class="page-heading">Forgot password</h1>

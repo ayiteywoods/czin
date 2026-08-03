@@ -9,7 +9,7 @@
 @endphp
 
 @if (! $section || $section->is_active)
-    <div class="border-y border-neutral-800 bg-brand-black py-2.5 text-center text-xs text-white sm:text-sm">
+    <div class="border-y border-neutral-800 bg-brand-black py-2.5 text-center text-xs text-white sm:text-sm" data-storefront-reveal>
         <p>{{ $text }}</p>
     </div>
 @endif

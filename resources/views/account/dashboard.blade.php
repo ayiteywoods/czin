@@ -1,6 +1,6 @@
 @extends('account.layout')
 
-@section('title', 'Dashboard - SACYSHOES')
+@section('title', 'Dashboard - CZIN')
 @section('account-heading', 'Dashboard')
 @section('account-subheading', 'Welcome back, ' . auth()->user()->first_name . '.')
 

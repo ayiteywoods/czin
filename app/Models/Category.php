@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\CategoryStatus;
+use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +14,9 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
+    /** @use HasFactory<CategoryFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'parent_id',
         'name',
@@ -130,32 +135,56 @@ class Category extends Model
 
     public function storefrontImageUrl(): ?string
     {
-        $images = [
-            'boots' => 'images/brand/boots.jpg',
-            'formal' => 'images/brand/shoes.jpg',
-            'sandals' => 'images/brand/sandals.jpg',
-            'sneakers' => 'images/brand/sneakers.jpg',
-        ];
+        if ($this->image) {
+            if (str_starts_with($this->image, 'images/') || str_starts_with($this->image, 'http')) {
+                return asset($this->image);
+            }
 
-        if (isset($images[$this->slug])) {
-            return asset($images[$this->slug]);
+            return asset('storage/'.$this->image);
         }
 
-        return $this->image ? asset('storage/'.$this->image) : null;
+        return $this->storefrontFallbackImageUrl();
+    }
+
+    public function storefrontFallbackImageUrl(): string
+    {
+        $fallbacks = [
+            'mains' => 'images/brand/food-hero-1.jpg',
+            'sides' => 'images/brand/food-hero-2.jpg',
+            'drinks' => 'images/brand/food-hero-3.jpg',
+            'desserts' => 'images/brand/food-hero-4.jpg',
+        ];
+
+        $path = $fallbacks[$this->slug]
+            ?? $fallbacks[strtolower($this->name)]
+            ?? 'images/brand/food-hero-1.jpg';
+
+        return asset($path);
     }
 
     public function storefrontIcon(): string
     {
         $icons = [
-            'sneakers' => 'shoe',
-            'formal' => 'heel',
-            'sandals' => 'shoe',
-            'boots' => 'shoe',
-            'heels' => 'heel',
-            'flats' => 'shoe',
-            'bags' => 'bag',
+            'mains' => 'bag',
+            'sides' => 'tag',
+            'drinks' => 'sparkle',
+            'desserts' => 'sparkle',
+            'specials' => 'sparkle',
+            'grills' => 'bag',
+            'soups' => 'bag',
         ];
 
-        return $icons[$this->slug] ?? $icons[strtolower($this->name)] ?? 'shoe';
+        return $icons[$this->slug] ?? $icons[strtolower($this->name)] ?? 'bag';
+    }
+
+    public function storefrontTone(): string
+    {
+        return match ($this->slug) {
+            'mains' => 'mains',
+            'sides' => 'sides',
+            'drinks' => 'drinks',
+            'desserts' => 'desserts',
+            default => 'default',
+        };
     }
 }

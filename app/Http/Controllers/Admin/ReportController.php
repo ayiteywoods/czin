@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\AdminReportService;
 use App\Support\AdminTable;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -21,10 +20,14 @@ class ReportController extends Controller
             [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
         }
 
+        $orderSource = $request->string('order_source')->toString() ?: null;
+        $fulfillmentType = $request->string('fulfillment_type')->toString() ?: null;
+
         $summary = $reports->periodSummary($from, $to);
+        $segment = $reports->restaurantSegmentSummary($from, $to);
         $growth = $reports->growthRate($from, $to);
         $orders = AdminTable::paginate(
-            $reports->ordersForPeriodQuery($from, $to),
+            $reports->ordersForPeriodQuery($from, $to, $orderSource, $fulfillmentType),
             $request,
             [
                 'order_number' => 'order_number',
@@ -56,9 +59,12 @@ class ReportController extends Controller
             'from',
             'to',
             'summary',
+            'segment',
             'growth',
             'orders',
             'topSelling',
+            'orderSource',
+            'fulfillmentType',
         ));
     }
 
@@ -67,20 +73,22 @@ class ReportController extends Controller
         $from = $request->date('from') ?? now()->startOfMonth();
         $to = $request->date('to') ?? now();
         $format = $request->string('format', 'csv')->toString();
+        $orderSource = $request->string('order_source')->toString() ?: null;
+        $fulfillmentType = $request->string('fulfillment_type')->toString() ?: null;
 
         $summary = $reports->periodSummary($from, $to);
-        $orders = $reports->ordersForPeriod($from, $to);
+        $orders = $reports->ordersForPeriod($from, $to, $orderSource, $fulfillmentType);
 
         if ($format === 'pdf') {
             return view('admin.reports.print', compact('from', 'to', 'summary', 'orders'));
         }
 
-        $filename = 'sacyshoes-sales-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.csv';
+        $filename = 'czin-sales-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($orders, $summary, $from, $to) {
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, ['Sacy Shoes Sales Report']);
+            fputcsv($handle, ['CZIN Sales Report']);
             fputcsv($handle, ['Period', $from->format('M j, Y').' - '.$to->format('M j, Y')]);
             fputcsv($handle, ['Revenue', number_format($summary['revenue'], 2)]);
             fputcsv($handle, ['Orders', $summary['orders']]);

@@ -50,10 +50,10 @@ class ProductVariant extends Model
 
     public function displayLabel(): string
     {
-        $label = "Size {$this->size} · {$this->color}";
+        $label = "{$this->size} · {$this->color}";
 
         if (filled($this->heel_length)) {
-            $label .= " · {$this->heel_length} heel";
+            $label .= " · {$this->heel_length}";
         }
 
         return $label;

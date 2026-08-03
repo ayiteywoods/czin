@@ -7,29 +7,33 @@
 
 @php
     $imageClass = match ($size) {
-        'header' => 'h-8 w-auto object-contain',
-        'admin' => 'h-8 w-auto object-contain',
-        'auth' => 'h-12 w-auto object-contain',
-        default => 'h-8 w-auto object-contain',
+        'header' => 'h-11 w-11 object-contain sm:h-12 sm:w-12',
+        'admin' => 'h-10 w-10 object-contain',
+        'auth' => 'h-14 w-14 object-contain',
+        default => 'h-10 w-10 object-contain',
     };
 
     $textClass = match ($size) {
-        'header' => 'text-sm font-semibold tracking-[0.15em]',
-        'admin' => 'text-sm font-semibold tracking-[0.15em]',
-        'auth' => 'text-base font-semibold tracking-[0.2em] sm:text-lg',
-        default => 'text-sm font-semibold tracking-[0.15em]',
+        'header' => 'h-7 w-auto object-contain sm:h-8',
+        'admin' => 'h-5 w-auto object-contain',
+        'auth' => 'h-7 w-auto object-contain sm:h-8',
+        default => 'h-5 w-auto object-contain',
     };
 
-    $shoesColor = $variant === 'dark' ? 'text-white' : 'text-brand-black';
+    // light = light backgrounds (black/red wordmark via CSS); on-red/dark = white wordmark
+    $wordmarkFilter = $variant === 'light' ? 'logo-wordmark-on-light' : '';
 @endphp
 
-<a href="{{ $href }}" {{ $attributes->merge(['class' => 'inline-flex shrink-0 items-center gap-2.5']) }}>
+<a href="{{ $href }}" {{ $attributes->merge(['class' => 'inline-flex shrink-0 items-center gap-2']) }}>
     <img
-        src="{{ asset('images/brand/logo1.webp') }}"
-        alt="SACYSSHOES"
+        src="{{ asset('images/brand/clogo.png') }}"
+        alt="{{ config('shop.store_name') }}"
         class="{{ $imageClass }}"
     >
-    <span @class([$textClass, 'hidden sm:inline' => $hideTextOnMobile])>
-        <span class="text-brand-red">SACYS</span><span class="{{ $shoesColor }}">SHOES</span>
-    </span>
+    <img
+        src="{{ asset('images/brand/ctext.png') }}"
+        alt=""
+        aria-hidden="true"
+        @class([$textClass, $wordmarkFilter, 'hidden sm:block' => $hideTextOnMobile])
+    >
 </a>

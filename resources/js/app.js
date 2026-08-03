@@ -5,6 +5,7 @@ import './admin-confirm.js';
 import './admin-table.js';
 import './checkout-shipping.js';
 import './load-more-products.js';
+import './storefront-reveal.js';
 
 window.Alpine = Alpine;
 

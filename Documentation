@@ -1,7 +1,7 @@
 E-Commerce Sales Application Documentation
 1. Project Overview
 Project Name
-Sacy Shoes E-Commerce Platform
+CZInfoods E-Commerce Platform
 Purpose
 An online sales platform that allows customers to browse products, add items to a cart, pay online using Mobile Money and other payment methods through Paystack, track orders, and manage their accounts.
 The system will also provide an administrative dashboard for managing products, orders, customers, payments, and reports.

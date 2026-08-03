@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', $page->title.' - SACYSHOES')
+@section('title', $page->title.' - CZIN')
 
 @section('content')
     @php
@@ -47,7 +47,7 @@
                             </svg>
                         </div>
                         <h2 class="mt-5 text-sm font-semibold uppercase tracking-wider text-brand-black">Email</h2>
-                        <p class="mt-2 text-sm text-brand-muted">For order updates, sizing help, and general enquiries.</p>
+                        <p class="mt-2 text-sm text-brand-muted">For order updates, menu questions, and general enquiries.</p>
                         <a href="mailto:{{ $email }}" class="mt-4 inline-block text-base font-medium text-brand-red transition hover:underline">
                             {{ $email }}
                         </a>

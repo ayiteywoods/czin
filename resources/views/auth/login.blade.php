@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Login - SACYSHOES')
+@section('title', 'Login - CZIN')
 
 @section('content')
     <h1 class="page-heading">Sign in</h1>

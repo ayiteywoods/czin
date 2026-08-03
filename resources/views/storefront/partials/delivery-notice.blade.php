@@ -3,7 +3,7 @@
 @endphp
 
 @if (! $section || $section->is_active)
-    <section class="border-y border-neutral-200 bg-brand-white py-10">
+    <section class="border-y border-neutral-200 bg-brand-white py-10" data-storefront-reveal>
         <div class="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-center sm:gap-8 sm:px-6 sm:text-left lg:px-8">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-red/10">
                 <svg class="h-6 w-6 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">

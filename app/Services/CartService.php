@@ -19,6 +19,14 @@ class CartService
         protected StockReservationService $stock
     ) {}
 
+    public static function forCart(Cart $cart, StockReservationService $stock): self
+    {
+        $service = new self($stock);
+        $service->resolvedCart = $cart;
+
+        return $service;
+    }
+
     public function resolve(): Cart
     {
         if ($this->resolvedCart) {
@@ -56,12 +64,20 @@ class CartService
             foreach ($guestCart->items as $guestItem) {
                 $existing = $userCart->items()
                     ->where('product_variant_id', $guestItem->product_variant_id)
+                    ->where(function ($query) use ($guestItem) {
+                        if (filled($guestItem->special_request)) {
+                            $query->where('special_request', $guestItem->special_request);
+                        } else {
+                            $query->whereNull('special_request');
+                        }
+                    })
                     ->first();
 
                 if ($existing) {
                     $existing->update([
                         'quantity' => $existing->quantity + $guestItem->quantity,
                         'unit_price' => $guestItem->unit_price,
+                        'special_request' => $guestItem->special_request,
                     ]);
                 } else {
                     $userCart->items()->create([
@@ -69,6 +85,7 @@ class CartService
                         'product_variant_id' => $guestItem->product_variant_id,
                         'quantity' => $guestItem->quantity,
                         'unit_price' => $guestItem->unit_price,
+                        'special_request' => $guestItem->special_request,
                     ]);
                 }
             }
@@ -81,12 +98,23 @@ class CartService
         });
     }
 
-    public function add(Product $product, ProductVariant $variant, int $quantity = 1): CartItem
+    public function add(Product $product, ProductVariant $variant, int $quantity = 1, ?string $specialRequest = null): CartItem
     {
         $this->assertVariantAvailable($product, $variant, $quantity);
 
+        $specialRequest = filled($specialRequest) ? trim($specialRequest) : null;
+
         $cart = $this->resolve()->load('items');
-        $item = $cart->items()->where('product_variant_id', $variant->id)->first();
+        $item = $cart->items()
+            ->where('product_variant_id', $variant->id)
+            ->where(function ($query) use ($specialRequest) {
+                if ($specialRequest) {
+                    $query->where('special_request', $specialRequest);
+                } else {
+                    $query->whereNull('special_request');
+                }
+            })
+            ->first();
 
         if ($item) {
             $newQuantity = $item->quantity + $quantity;
@@ -95,6 +123,7 @@ class CartService
             $item->update([
                 'quantity' => $newQuantity,
                 'unit_price' => $variant->sellingPrice(),
+                'special_request' => $specialRequest,
             ]);
 
             return $item->fresh();
@@ -105,6 +134,7 @@ class CartService
             'product_variant_id' => $variant->id,
             'quantity' => $quantity,
             'unit_price' => $variant->sellingPrice(),
+            'special_request' => $specialRequest,
         ]);
     }
 

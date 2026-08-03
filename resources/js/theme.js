@@ -1,4 +1,4 @@
-const THEME_STORAGE_KEY = 'sacyshoes-theme';
+const THEME_STORAGE_KEY = 'czin-theme';
 
 export function getStoredTheme() {
   try {

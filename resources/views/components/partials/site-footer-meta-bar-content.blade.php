@@ -1,9 +1,48 @@
+@php
+    $footerSocialLinks = $socialLinks ?? [];
+@endphp
+
+<div class="space-y-3 sm:hidden">
+    <div class="flex flex-wrap items-center justify-center gap-2">
+        <a href="#" aria-label="Download on the App Store" class="inline-flex">
+            <img
+                src="{{ asset('images/brand/badge-app-store.svg') }}"
+                alt="Download on the App Store"
+                class="h-10 w-auto"
+                loading="lazy"
+                decoding="async"
+            >
+        </a>
+        <a href="#" aria-label="Get it on Google Play" class="inline-flex">
+            <img
+                src="{{ asset('images/brand/badge-google-play.svg') }}"
+                alt="Get it on Google Play"
+                class="h-10 w-auto"
+                loading="lazy"
+                decoding="async"
+            >
+        </a>
+    </div>
+
+    @if (count($footerSocialLinks) > 0)
+        <x-storefront-social-links :links="$footerSocialLinks" class="justify-center" />
+    @endif
+
+    <p @class([
+        'text-center',
+        'text-neutral-500' => $isDark,
+        'text-brand-muted' => ! $isDark,
+    ])>
+        &copy; {{ date('Y') }} CZIN. All rights reserved.
+    </p>
+</div>
+
 <p @class([
-    'text-center sm:text-left',
+    'hidden text-left sm:block',
     'text-neutral-500' => $isDark,
     'text-brand-muted' => ! $isDark,
 ])>
-    &copy; {{ date('Y') }} SACYSHOES. All rights reserved.
+    &copy; {{ date('Y') }} CZIN. All rights reserved.
 </p>
 
 <p @class([

@@ -13,7 +13,7 @@
         type="search"
         name="q"
         value="{{ $value }}"
-        placeholder="Search shoes by name or SKU..."
+        placeholder="Search the menu..."
         class="input-field mt-0 min-w-0 flex-1"
     >
     <button type="submit" class="btn-primary shrink-0 px-5">Search</button>

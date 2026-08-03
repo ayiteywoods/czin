@@ -182,16 +182,16 @@ function initProductVariantPicker(root) {
         }
 
         if (state.selectedSize && state.selectedColor && availableHeels().length > 1) {
-            return 'Multiple heel lengths are available. Please select one to continue.';
+            return 'Multiple extras are available. Please select one to continue.';
         }
 
         if (state.selectedSize || state.selectedColor || state.selectedHeel) {
-            return 'Select your size and color to continue.';
+            return 'Select your portion and option to continue.';
         }
 
         return showHeelSection()
-            ? 'Choose your size and color. Heel length is optional when only one option matches.'
-            : 'Choose your size and color.';
+            ? 'Choose your portion and option. Extra is optional when only one option matches.'
+            : 'Choose your portion and option.';
     }
 
     function renderSizeButtons() {
@@ -318,7 +318,8 @@ function initProductVariantPicker(root) {
         }
 
         if (els.submit) {
-            els.submit.disabled = els.submit.dataset.outOfStock === 'true';
+            const ready = Boolean(selectedVariant()) && els.submit.dataset.outOfStock !== 'true';
+            els.submit.disabled = !ready;
         }
     }
 
@@ -338,6 +339,26 @@ function initProductVariantPicker(root) {
         }
 
         render();
+    }
+
+    function autoSelectDefaults() {
+        if (!state.selectedSize) {
+            const preferredSizes = ['Regular', 'Large', 'Family'];
+            const sizes = [...new Set(inStockVariants().map((variant) => variant.size).filter(Boolean))];
+
+            state.selectedSize = preferredSizes.find((size) =>
+                sizes.some((available) => optionEquals(available, size)),
+            ) || sizes[0] || null;
+        }
+
+        if (state.selectedSize && !state.selectedColor) {
+            const colors = availableColors();
+            const preferredColors = ['Standard', 'Mild', 'Spicy'];
+
+            state.selectedColor = preferredColors.find((color) =>
+                colors.some((available) => optionEquals(available, color)),
+            ) || colors[0] || null;
+        }
     }
 
     root.addEventListener('click', (event) => {
@@ -385,6 +406,7 @@ function initProductVariantPicker(root) {
         state.selectedSize = null;
     }
 
+    autoSelectDefaults();
     render();
 }
 

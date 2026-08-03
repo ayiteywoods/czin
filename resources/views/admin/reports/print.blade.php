@@ -22,7 +22,7 @@
         <button onclick="window.print()">Print / Save as PDF</button>
     </div>
 
-    <h1>Sacy Shoes Sales Report</h1>
+    <h1>CZIN Sales Report</h1>
     <p class="muted">{{ $from->format('M j, Y') }} – {{ $to->format('M j, Y') }}</p>
 
     <div class="stats">

@@ -13,6 +13,7 @@ class CartItem extends Model
         'product_variant_id',
         'quantity',
         'unit_price',
+        'special_request',
         'reserved_until',
     ];
 
@@ -45,7 +46,15 @@ class CartItem extends Model
 
     public function optionLabel(): ?string
     {
-        return $this->variant?->displayLabel();
+        $label = $this->variant?->displayLabel();
+
+        if (filled($this->special_request)) {
+            $custom = 'Custom: '.$this->special_request;
+
+            return $label ? "{$label} · {$custom}" : $custom;
+        }
+
+        return $label;
     }
 
     public function lineTotal(): float

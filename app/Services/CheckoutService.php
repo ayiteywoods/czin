@@ -176,6 +176,12 @@ class CheckoutService
 
             foreach ($cart->items as $item) {
                 $variant = $item->variant;
+                $options = $variant?->optionSnapshot() ?? [];
+
+                if (filled($item->special_request)) {
+                    $options['color'] = 'Custom';
+                    $options['special_request'] = $item->special_request;
+                }
 
                 $order->items()->create([
                     'product_id' => $item->product_id,
@@ -183,7 +189,7 @@ class CheckoutService
                     'product_name' => $item->product->name,
                     'product_sku' => $item->product->sku,
                     'variant_sku' => $variant?->sku,
-                    'variant_options' => $variant?->optionSnapshot(),
+                    'variant_options' => $options,
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,
                     'total_price' => $item->lineTotal(),

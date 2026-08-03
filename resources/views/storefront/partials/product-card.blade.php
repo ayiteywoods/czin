@@ -11,15 +11,13 @@
         @endif
 
         <div class="product-card-image aspect-square overflow-hidden bg-neutral-100">
-            @if ($product->primaryImage())
-                <img
-                    src="{{ asset('storage/'.$product->primaryImage()->path) }}"
-                    alt="{{ $product->name }}"
-                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                >
-            @else
-                <div class="flex h-full items-center justify-center text-sm text-brand-muted">No image</div>
-            @endif
+            <img
+                src="{{ $product->storefrontImageUrl() }}"
+                alt="{{ $product->name }}"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+                decoding="async"
+            >
         </div>
 
         <div class="p-4 pb-2">

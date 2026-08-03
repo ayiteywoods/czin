@@ -7,7 +7,7 @@
     <button
         type="button"
         @click="notificationsOpen = !notificationsOpen; userOpen = false"
-        class="relative flex items-center justify-center rounded-none p-2 text-brand-black transition hover:bg-brand-light"
+        class="relative flex items-center justify-center rounded-xl p-2 text-brand-black transition hover:bg-brand-light"
         :class="notificationsOpen ? 'bg-brand-light text-brand-red' : ''"
         aria-label="Notifications"
         :aria-expanded="notificationsOpen"

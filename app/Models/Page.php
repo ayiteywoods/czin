@@ -103,7 +103,7 @@ class Page extends Model
             ],
             default => [
                 'eyebrow' => 'Information',
-                'description' => 'Helpful information from '.config('shop.store_name', 'SACYSHOES').'.',
+                'description' => 'Helpful information from '.config('shop.store_name', 'CZIN').'.',
                 'icon' => 'info',
                 'stats' => [
                     ['value' => $updated, 'label' => 'Updated', 'icon' => 'calendar', 'tone' => 'red'],

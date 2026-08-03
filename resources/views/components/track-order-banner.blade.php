@@ -19,7 +19,7 @@
         @auth
             <a
                 href="{{ route('account.orders.index') }}"
-                class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-none border border-white bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-red no-underline transition hover:bg-white/90"
+                class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-white bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-red no-underline transition hover:bg-white/90"
             >
                 Track my orders
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -30,7 +30,7 @@
             <div class="flex shrink-0 flex-wrap items-center gap-3 sm:justify-end">
                 <a
                     href="{{ route('login') }}"
-                    class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-none border border-white bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-red no-underline transition hover:bg-white/90"
+                    class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-white bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-red no-underline transition hover:bg-white/90"
                 >
                     Log in to track
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">

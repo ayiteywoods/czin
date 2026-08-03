@@ -44,6 +44,7 @@ class StoreSettingService
             'shop.delivery_info.items' => $settings->deliveryInfoItems(),
             'shop.maintenance_mode' => $settings->isMaintenanceModeEnabled(),
             'shop.maintenance_message' => $settings->maintenanceMessage(),
+            'shop.online_ordering_enabled' => $settings->isOnlineOrderingEnabled(),
         ]);
     }
 

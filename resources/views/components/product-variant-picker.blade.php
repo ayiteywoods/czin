@@ -108,30 +108,51 @@
 >
     <div>
         <div class="flex items-center gap-4">
-            <label for="variant-color-{{ $product->id }}" class="shrink-0 text-sm lowercase text-brand-muted">color</label>
+            <label for="variant-color-{{ $product->id }}" class="shrink-0 text-sm lowercase text-brand-muted">prep / spice</label>
             <select
                 id="variant-color-{{ $product->id }}"
                 data-variant-color
-                class="input-field mt-0 w-full max-w-[9rem]"
+                class="input-field mt-0 w-full max-w-[11rem]"
             >
-                <option value="">Select color</option>
+                <option value="">Select option</option>
                 @foreach ($allColors as $color)
                     <option value="{{ $color }}" @selected(old('variant_color') === $color)>{{ $color }}</option>
                 @endforeach
+                <option value="Custom" @selected(old('variant_color') === 'Custom')>Custom</option>
             </select>
+        </div>
+
+        <div
+            class="mt-3"
+            data-special-request-wrap
+            @if (old('variant_color') !== 'Custom') hidden @endif
+        >
+            <label for="special-request-{{ $product->id }}" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-brand-muted">
+                Your custom request
+            </label>
+            <textarea
+                id="special-request-{{ $product->id }}"
+                name="special_request"
+                rows="2"
+                maxlength="255"
+                data-special-request
+                class="input-field mt-0"
+                placeholder="e.g. no onions, extra pepper, half spicy..."
+            >{{ old('special_request') }}</textarea>
+            <p class="mt-1 text-xs text-brand-muted">Tell the kitchen exactly how you want it prepared.</p>
         </div>
     </div>
 
     <div data-variant-size-section>
-        <p class="text-xs font-semibold uppercase tracking-wide text-brand-muted">Size</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-brand-muted">Portion</p>
         <div class="mt-3 flex flex-wrap gap-2" data-variant-size-options>
-            <p class="text-sm text-brand-muted">Select a color to see available sizes.</p>
+            <p class="text-sm text-brand-muted">Select an option to see available portions.</p>
         </div>
     </div>
 
     <div data-variant-heel-section hidden>
         <p class="text-xs font-semibold uppercase tracking-wide text-brand-muted">
-            Heel length <span class="normal-case text-brand-muted">(optional)</span>
+            Extra <span class="normal-case text-brand-muted">(optional)</span>
         </p>
         <div class="mt-3 flex flex-wrap gap-2" data-variant-heel-buttons></div>
     </div>
@@ -182,7 +203,7 @@
             class="btn-primary w-full py-3 disabled:cursor-not-allowed disabled:opacity-50"
             @disabled(! $product->isInStock())
         >
-            {{ $product->isInStock() ? 'Add To Cart' : 'Out of Stock' }}
+            {{ $product->isInStock() ? 'Add To Order' : 'Unavailable' }}
         </button>
     </div>
 </div>

@@ -14,52 +14,52 @@ class HomeContentSeeder extends Seeder
             [
                 'key' => HomeSection::KEY_HERO,
                 'name' => 'Hero section',
-                'eyebrow' => 'Heels, Flats & More',
-                'title' => 'Step into',
-                'title_highlight' => 'something beautiful.',
-                'body' => 'Premium footwear curated for every occasion. Delivered across Ghana.',
-                'primary_label' => 'Shop From All Products',
+                'eyebrow' => 'Order · Pickup · Delivery',
+                'title' => 'Fresh meals,',
+                'title_highlight' => 'made to order.',
+                'body' => 'Homestyle Ghanaian favourites and everyday comfort food — cooked fresh and delivered across Accra.',
+                'primary_label' => 'View Menu',
                 'primary_url' => '/shop',
-                'secondary_label' => 'New Arrivals',
+                'secondary_label' => 'Today’s Specials',
                 'secondary_url' => '/shop',
-                'image_path' => 'images/brand/hero2.jpeg',
+                'image_path' => 'images/brand/food-hero-1.jpg',
                 'sort_order' => 1,
             ],
             [
                 'key' => HomeSection::KEY_FREE_DELIVERY,
                 'name' => 'Free delivery banner',
-                'body' => 'Free delivery on orders over {currency_symbol} {threshold} — Delivered across Ghana',
+                'body' => 'Free delivery on orders over {currency_symbol} {threshold} — Hot meals delivered across Accra',
                 'sort_order' => 2,
             ],
             [
                 'key' => HomeSection::KEY_SHOP_CATEGORY,
                 'name' => 'Shop by category',
-                'eyebrow' => 'Collections',
-                'title' => 'Shop by Category',
-                'body' => 'Find your perfect pair',
-                'primary_label' => 'View All',
+                'eyebrow' => 'Our Menu',
+                'title' => 'Browse by Category',
+                'body' => 'Mains, sides, drinks, and sweets — pick what you are craving',
+                'primary_label' => 'Full Menu',
                 'primary_url' => '/shop',
                 'sort_order' => 3,
             ],
             [
                 'key' => HomeSection::KEY_CTA,
                 'name' => 'Call to action',
-                'eyebrow' => 'Limited Drop',
-                'title' => 'Upgrade your wardrobe with a new pair today.',
-                'body' => 'Explore premium styles curated for every occasion — fast delivery across Ghana.',
-                'primary_label' => 'Shop All Products',
+                'eyebrow' => 'Hungry?',
+                'title' => 'Skip the wait. Order from CZIN today.',
+                'body' => 'Fresh kitchen favourites, clear portions, and reliable delivery across Accra.',
+                'primary_label' => 'Order Now',
                 'primary_url' => '/shop',
-                'secondary_label' => 'New Arrivals',
+                'secondary_label' => 'See Specials',
                 'secondary_url' => '/shop',
                 'sort_order' => 4,
             ],
             [
                 'key' => HomeSection::KEY_NEW_ARRIVALS,
                 'name' => 'New arrivals',
-                'eyebrow' => 'Just Dropped',
-                'title' => 'New Arrivals',
-                'body' => 'Shop the latest styles from SACYSHOES.',
-                'primary_label' => 'View Collection',
+                'eyebrow' => 'Kitchen Fresh',
+                'title' => 'Popular Dishes',
+                'body' => 'Guest favourites from the CZIN kitchen.',
+                'primary_label' => 'Browse Menu',
                 'primary_url' => '/shop',
                 'sort_order' => 5,
             ],
@@ -67,14 +67,14 @@ class HomeContentSeeder extends Seeder
                 'key' => HomeSection::KEY_TESTIMONIALS_HEADER,
                 'name' => 'Testimonials header',
                 'eyebrow' => 'Reviews',
-                'title' => 'What our customers say',
+                'title' => 'What our guests say',
                 'sort_order' => 6,
             ],
             [
                 'key' => HomeSection::KEY_DELIVERY_NOTICE,
                 'name' => 'Delivery notice',
                 'title' => 'Delivery Information',
-                'body' => 'Delivery fee is paid directly to the dispatch rider upon arrival. Fee varies by location across Ghana.',
+                'body' => 'Delivery fee is paid directly to the dispatch rider upon arrival. Fee varies by location across Accra and surrounding areas.',
                 'sort_order' => 7,
             ],
         ];
@@ -86,35 +86,31 @@ class HomeContentSeeder extends Seeder
             );
         }
 
+        Testimonial::query()->delete();
+
         $testimonials = [
             [
-                'quote' => 'The quality of shoes from SACYSHOES is amazing. Great customer service and fast delivery. I always come back!',
-                'author_name' => 'Sheila M.',
+                'quote' => 'The jollof tastes like home. Portions are generous and delivery was still hot. Ordering from CZIN is my new weekday habit.',
+                'author_name' => 'Ama K.',
                 'rating' => 5,
                 'sort_order' => 1,
             ],
             [
-                'quote' => 'I have bought shoes here multiple times and can attest the goods are of the best quality. Highly recommended.',
-                'author_name' => 'Charity E.',
+                'quote' => 'Great flavours, clear menu options, and friendly service. The grilled chicken with banku was excellent.',
+                'author_name' => 'Kwame B.',
                 'rating' => 5,
                 'sort_order' => 2,
             ],
             [
-                'quote' => 'Best shoe vendor in Ghana. Customer service is superb and the shoes are always exactly as pictured.',
-                'author_name' => 'Alishia Y.',
+                'quote' => 'Best takeaway experience I have had in Accra lately. Food arrived on time and everything was packed carefully.',
+                'author_name' => 'Efua S.',
                 'rating' => 5,
                 'sort_order' => 3,
             ],
         ];
 
         foreach ($testimonials as $testimonial) {
-            Testimonial::query()->updateOrCreate(
-                [
-                    'author_name' => $testimonial['author_name'],
-                    'quote' => $testimonial['quote'],
-                ],
-                array_merge(['is_active' => true], $testimonial),
-            );
+            Testimonial::query()->create(array_merge(['is_active' => true], $testimonial));
         }
     }
 }

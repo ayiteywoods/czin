@@ -24,51 +24,29 @@ class ProductVariantSeeder extends Seeder
 
     private function seedVariants(Product $product): void
     {
-        $sizes = ['38', '39', '40', '41'];
-        $colors = ['Black', 'Nude', 'Brown'];
-        $heels = ['Flat', '2in', '3in'];
+        $portions = ['Regular', 'Large'];
+        $options = ['Standard', 'Mild', 'Spicy'];
 
         $product->variants()->delete();
         $totalStock = 0;
         $variantIndex = 0;
 
-        foreach ($sizes as $size) {
-            foreach ($colors as $color) {
-                foreach ($heels as $heel) {
-                    $variantIndex++;
+        foreach ($portions as $portion) {
+            foreach ($options as $option) {
+                $variantIndex++;
+                $quantity = 8 + ($variantIndex % 5);
+                $totalStock += $quantity;
 
-                    if ($variantIndex % 3 === 0) {
-                        continue;
-                    }
-
-                    $quantity = 2 + ($variantIndex % 7);
-                    $totalStock += $quantity;
-
-                    ProductVariant::query()->create([
-                        'product_id' => $product->id,
-                        'sku' => strtoupper("{$product->sku}-{$size}-".Str::slug($color, '').'-'.Str::slug($heel, '')),
-                        'size' => $size,
-                        'color' => $color,
-                        'heel_length' => $heel,
-                        'quantity' => $quantity,
-                        'is_active' => true,
-                    ]);
-                }
+                ProductVariant::query()->create([
+                    'product_id' => $product->id,
+                    'sku' => strtoupper("{$product->sku}-".Str::slug($portion, '').'-'.Str::slug($option, '')),
+                    'size' => $portion,
+                    'color' => $option,
+                    'heel_length' => null,
+                    'quantity' => $quantity,
+                    'is_active' => true,
+                ]);
             }
-        }
-
-        if ($totalStock === 0) {
-            ProductVariant::query()->create([
-                'product_id' => $product->id,
-                'sku' => "{$product->sku}-38-BLK-FLAT",
-                'size' => '38',
-                'color' => 'Black',
-                'heel_length' => 'Flat',
-                'quantity' => 10,
-                'is_active' => true,
-            ]);
-
-            $totalStock = (int) $product->variants()->sum('quantity');
         }
 
         $product->update(['quantity' => $totalStock]);

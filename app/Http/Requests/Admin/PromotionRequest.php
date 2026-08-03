@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use App\Enums\PromotionType;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class PromotionRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::enum(PromotionType::class)],
+            'value' => ['required', 'numeric', 'min:0'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'product_id' => ['nullable', 'exists:products,id'],
+            'is_active' => ['nullable', 'boolean'],
+            'days_of_week' => ['nullable', 'array'],
+            'days_of_week.*' => ['integer', 'min:0', 'max:6'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'end_time' => ['nullable', 'date_format:H:i'],
+        ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->boolean('is_active'),
+        ]);
+    }
+}

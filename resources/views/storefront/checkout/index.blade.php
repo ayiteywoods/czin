@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', 'Checkout - SACYSHOES')
+@section('title', 'Checkout - CZIN')
 
 @section('content')
     @include('storefront.partials.checkout-hero')

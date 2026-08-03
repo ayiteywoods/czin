@@ -9,7 +9,7 @@
         <div>
             <p class="text-sm text-brand-muted">{{ now()->format('l, F j, Y') }}</p>
             <h2 class="mt-1 text-xl font-semibold">{{ $greeting }}, {{ auth()->user()->name }}</h2>
-            <p class="mt-1 text-sm text-brand-muted">Here is what is happening with SACYSHOES {{ strtolower($periodLabel) }}.</p>
+            <p class="mt-1 text-sm text-brand-muted">Here is what is happening with CZIN {{ strtolower($periodLabel) }}.</p>
         </div>
 
         <form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap gap-2">
@@ -32,6 +32,18 @@
             <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
             <span>Add product</span>
         </a>
+        @adminCan('kitchen')
+            <a href="{{ route('admin.kitchen.index') }}" class="admin-quick-action">
+                <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.38a48.474 48.474 0 00-6-.37c-2.032 0-3.97.132-5.814.37M15 16.5v1.5m0 0v1.5m0-1.5h-4.5m4.5 0h4.5"/></svg>
+                <span>Kitchen board</span>
+            </a>
+        @endadminCan
+        @adminCan('orders')
+        <a href="{{ route('admin.pos.index') }}" class="admin-quick-action">
+            <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+            <span>Open POS</span>
+        </a>
+        @endadminCan
         <a href="{{ route('admin.orders.index') }}" class="admin-quick-action">
             <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c1.01.005 2.047.052 3.064.15 1.13.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-7.5z"/></svg>
             <span>View orders</span>
@@ -40,6 +52,12 @@
             <a href="{{ route('admin.categories.shop') }}" class="admin-quick-action">
                 <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
                 <span>Shop categories</span>
+            </a>
+        @endadminCan
+        @adminCan('tables')
+            <a href="{{ route('admin.tables.index') }}" class="admin-quick-action">
+                <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                <span>Manage tables</span>
             </a>
         @endadminCan
         @adminCan('content')
@@ -211,6 +229,33 @@
             :value="$periodStats['new_customers']"
             :change="$comparison['customers_change']"
         />
+    </div>
+
+    {{-- Restaurant operations KPIs --}}
+    <div class="mt-8">
+        <h2 class="font-semibold uppercase tracking-wide">Restaurant operations · {{ $periodLabel }}</h2>
+        <p class="mt-1 text-sm text-brand-muted">POS vs online, fulfillment mix, kitchen queue, and table status</p>
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <x-admin-kpi-card label="POS revenue" :value="$restaurantMetrics['pos_revenue']" format="currency" />
+            <x-admin-kpi-card label="Online revenue" :value="$restaurantMetrics['online_revenue']" format="currency" />
+            <x-admin-kpi-card label="POS orders" :value="$restaurantMetrics['pos_orders']" />
+            <x-admin-kpi-card label="Online orders" :value="$restaurantMetrics['online_orders']" />
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <x-admin-kpi-card label="Dine-in" :value="$restaurantMetrics['dine_in_count']" />
+            <x-admin-kpi-card label="Takeaway" :value="$restaurantMetrics['takeaway_count']" />
+            <x-admin-kpi-card label="Delivery" :value="$restaurantMetrics['delivery_count']" />
+            <x-admin-kpi-card
+                label="Kitchen queue"
+                :value="$restaurantMetrics['kitchen_queue']['new'].' / '.$restaurantMetrics['kitchen_queue']['preparing'].' / '.$restaurantMetrics['kitchen_queue']['ready']"
+            />
+        </div>
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <x-admin-kpi-card label="Tables available" :value="$restaurantMetrics['table_stats']['available']" />
+            <x-admin-kpi-card label="Tables occupied" :value="$restaurantMetrics['table_stats']['occupied']" highlight />
+            <x-admin-kpi-card label="Tables reserved" :value="$restaurantMetrics['table_stats']['reserved']" />
+        </div>
+        <p class="mt-2 text-xs text-brand-muted">Kitchen queue shows new / preparing / ready.</p>
     </div>
 
     {{-- Secondary KPIs --}}

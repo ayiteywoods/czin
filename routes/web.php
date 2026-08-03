@@ -4,22 +4,37 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Account\DashboardController as AccountDashboardController;
 use App\Http\Controllers\Account\OrderController as AccountOrderController;
 use App\Http\Controllers\Account\ProfileController as AccountProfileController;
+use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DeliveryController as AdminDeliveryController;
+use App\Http\Controllers\Admin\DiningTableController as AdminDiningTableController;
 use App\Http\Controllers\Admin\DetailController as AdminDetailController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\HomeSectionController as AdminHomeSectionController;
+use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
+use App\Http\Controllers\Admin\KitchenController as AdminKitchenController;
+use App\Http\Controllers\Admin\LocationController as AdminLocationController;
+use App\Http\Controllers\Admin\LoyaltyController as AdminLoyaltyController;
 use App\Http\Controllers\Admin\MaintenanceModeController;
+use App\Http\Controllers\Admin\ModifierGroupController as AdminModifierGroupController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\OrderInvoiceBulkController;
+use App\Http\Controllers\Admin\PosController as AdminPosController;
+use App\Http\Controllers\Admin\PosReportController as AdminPosReportController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
+use App\Http\Controllers\Admin\RecipeController as AdminRecipeController;
+use App\Http\Controllers\Admin\ReceiptController as AdminReceiptController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\ShippingRegionController;
+use App\Http\Controllers\Admin\StaffShiftController as AdminStaffShiftController;
 use App\Http\Controllers\Admin\StoreSettingController;
 use App\Http\Controllers\Admin\TestimonialController as AdminTestimonialController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -49,16 +64,20 @@ Route::middleware('storefront.maintenance')->group(function () {
     Route::get('/pages/{page:slug}', [PageController::class, 'show'])->name('pages.show');
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
-    Route::patch('/cart/items/{cartItem}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/items/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
-    Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 
-    Route::middleware('cart.not_empty')->group(function () {
-        Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
-        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-        Route::post('/checkout/coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply');
-        Route::delete('/checkout/coupon', [CheckoutController::class, 'removeCoupon'])->name('checkout.coupon.remove');
+    Route::middleware('storefront.online_ordering')->group(function () {
+        Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+        Route::post('/cart/quick-add', [CartController::class, 'quickAdd'])->name('cart.quick-add');
+        Route::patch('/cart/items/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+        Route::delete('/cart/items/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
+        Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
+
+        Route::middleware('cart.not_empty')->group(function () {
+            Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+            Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+            Route::post('/checkout/coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply');
+            Route::delete('/checkout/coupon', [CheckoutController::class, 'removeCoupon'])->name('checkout.coupon.remove');
+        });
     });
 
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])
@@ -115,6 +134,16 @@ Route::prefix('admin')
             Route::get('details/products/{product}', [AdminDetailController::class, 'product'])->name('details.products');
             Route::resource('products', AdminProductController::class)->except(['show', 'update']);
             Route::match(['put', 'patch', 'post'], 'products/{product}', [AdminProductController::class, 'update'])->name('products.update');
+            Route::patch('products/{product}/toggle-86', [AdminProductController::class, 'toggle86'])->name('products.toggle-86');
+            Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
+            Route::get('inventory/create', [AdminInventoryController::class, 'create'])->name('inventory.create');
+            Route::post('inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
+            Route::resource('modifiers', AdminModifierGroupController::class)
+                ->except(['show'])
+                ->parameters(['modifiers' => 'modifier_group']);
+            Route::get('recipes', [AdminRecipeController::class, 'index'])->name('recipes.index');
+            Route::get('recipes/{product}/edit', [AdminRecipeController::class, 'edit'])->name('recipes.edit');
+            Route::put('recipes/{product}', [AdminRecipeController::class, 'update'])->name('recipes.update');
         });
 
         Route::middleware('admin.permission:categories')->group(function () {
@@ -127,9 +156,13 @@ Route::prefix('admin')
         });
 
         Route::middleware('admin.permission:orders')->group(function () {
+            Route::get('pos', [AdminPosController::class, 'index'])->name('pos.index');
+            Route::post('pos/orders', [AdminPosController::class, 'store'])->name('pos.store');
+            Route::get('pos-report', [AdminPosReportController::class, 'index'])->name('pos-report.index');
             Route::get('details/orders/{order}', [AdminDetailController::class, 'order'])->name('details.orders');
             Route::get('orders/{order}/invoice', [InvoiceController::class, 'show'])->name('orders.invoice');
             Route::get('orders/{order}/invoice/pdf', [InvoiceController::class, 'pdf'])->name('orders.invoice.pdf');
+            Route::get('orders/{order}/receipt', [AdminReceiptController::class, 'print'])->name('orders.receipt');
             Route::post('orders/invoices/export', [OrderInvoiceBulkController::class, 'export'])->name('orders.invoices.export');
             Route::post('orders/invoices/print', [OrderInvoiceBulkController::class, 'print'])->name('orders.invoices.print');
             Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
@@ -138,6 +171,10 @@ Route::prefix('admin')
             Route::post('orders/{order}/sync-paystack', [AdminOrderController::class, 'syncPaystack'])->name('orders.sync-paystack');
             Route::delete('orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
             Route::resource('coupons', AdminCouponController::class)->except(['show']);
+            Route::resource('promotions', AdminPromotionController::class)->except(['show']);
+            Route::get('delivery', [AdminDeliveryController::class, 'index'])->name('delivery.index');
+            Route::patch('delivery/{delivery}/status', [AdminDeliveryController::class, 'updateStatus'])->name('delivery.update-status');
+            Route::patch('delivery/{delivery}/assign', [AdminDeliveryController::class, 'assign'])->name('delivery.assign');
             Route::get('notifications/{notification}', [AdminNotificationController::class, 'show'])->name('notifications.show');
             Route::delete('notifications/{notification}', [AdminNotificationController::class, 'destroy'])->name('notifications.destroy');
             Route::delete('notifications', [AdminNotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
@@ -147,11 +184,19 @@ Route::prefix('admin')
             Route::get('details/customers/{user}', [AdminDetailController::class, 'customer'])->name('details.customers');
             Route::get('customers', [AdminCustomerController::class, 'index'])->name('customers.index');
             Route::patch('customers/{user}/toggle-status', [AdminCustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
+            Route::patch('customers/{user}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.update-notes');
+            Route::post('customers/{user}/tags', [AdminCustomerController::class, 'storeTag'])->name('customers.store-tag');
+            Route::delete('customers/{user}/tags/{tag}', [AdminCustomerController::class, 'destroyTag'])->name('customers.destroy-tag');
             Route::delete('customers/{user}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
+            Route::get('loyalty', [AdminLoyaltyController::class, 'index'])->name('loyalty.index');
+            Route::get('loyalty/{loyalty}', [AdminLoyaltyController::class, 'show'])->name('loyalty.show');
+            Route::post('loyalty/{loyalty}/adjust', [AdminLoyaltyController::class, 'adjust'])->name('loyalty.adjust');
         });
 
         Route::middleware('admin.permission:users')->group(function () {
             Route::resource('users', AdminUserController::class)->except(['show']);
+            Route::resource('locations', AdminLocationController::class)->except(['show']);
+            Route::resource('staff-shifts', AdminStaffShiftController::class)->except(['show']);
         });
 
         Route::middleware('admin.permission:content')->group(function () {
@@ -173,8 +218,22 @@ Route::prefix('admin')
             Route::resource('shipping-regions', ShippingRegionController::class)->except(['show']);
         });
 
+        Route::middleware('admin.permission:tables')->group(function () {
+            Route::patch('tables/{table}/status', [AdminDiningTableController::class, 'updateStatus'])->name('tables.update-status');
+            Route::resource('tables', AdminDiningTableController::class)->except(['show']);
+            Route::resource('reservations', AdminReservationController::class)->except(['show']);
+        });
+
+        Route::middleware('admin.permission:kitchen')->group(function () {
+            Route::get('kitchen', [AdminKitchenController::class, 'index'])->name('kitchen.index');
+            Route::get('kitchen/poll', [AdminKitchenController::class, 'poll'])->name('kitchen.poll');
+            Route::get('kitchen/orders/{order}/print', [AdminKitchenController::class, 'print'])->name('kitchen.print');
+            Route::patch('kitchen/orders/{order}/status', [AdminKitchenController::class, 'updateStatus'])->name('kitchen.update-status');
+        });
+
         Route::middleware('admin.permission:reports')->group(function () {
             Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
             Route::get('reports/export', [AdminReportController::class, 'export'])->name('reports.export');
+            Route::get('analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
         });
     });

@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\StoreSetting;
 use App\Services\AdminActivityService;
 use App\Services\AdminNotificationService;
+use App\Services\AdminOperationsService;
 use App\Services\AdminReportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,8 +20,13 @@ class DashboardController extends Controller
 {
     private const LIST_PER_PAGE = 5;
 
-    public function __invoke(Request $request, AdminReportService $reports, AdminNotificationService $notifications, AdminActivityService $activity): View
-    {
+    public function __invoke(
+        Request $request,
+        AdminReportService $reports,
+        AdminOperationsService $operations,
+        AdminNotificationService $notifications,
+        AdminActivityService $activity,
+    ): View {
         $period = in_array($request->string('period')->toString(), ['today', '7d', '30d', 'month'], true)
             ? $request->string('period')->toString()
             : '30d';
@@ -32,6 +38,8 @@ class DashboardController extends Controller
         $orderStatusBreakdown = $reports->orderStatusBreakdown();
         $paymentStatusBreakdown = $reports->paymentStatusBreakdown();
         $stats = $reports->dashboardStats();
+        $restaurantMetrics = $operations->restaurantMetrics($from, $to);
+        $lowStockThreshold = $operations->lowStockThreshold();
 
         $chartDays = $reports->chartDaysForPeriod($period);
         $dailyChart = $reports->dailySalesChart($chartDays);
@@ -51,7 +59,7 @@ class DashboardController extends Controller
         $lowStockProducts = Product::query()
             ->with('category')
             ->where('status', ProductStatus::Active)
-            ->where('quantity', '<', 10)
+            ->where('quantity', '<', $lowStockThreshold)
             ->orderBy('quantity')
             ->paginate(self::LIST_PER_PAGE, ['*'], 'low_stock_page')
             ->withQueryString();
@@ -87,6 +95,7 @@ class DashboardController extends Controller
             'orderStatusBreakdown' => $orderStatusBreakdown,
             'paymentStatusBreakdown' => $paymentStatusBreakdown,
             'stats' => $stats,
+            'restaurantMetrics' => $restaurantMetrics,
             'dailyChart' => $dailyChart,
             'monthlyChart' => $monthlyChart,
             'topSelling' => $topSelling,

@@ -1,6 +1,6 @@
 @extends('account.layout')
 
-@section('title', 'Favourites - SACYSHOES')
+@section('title', 'Favourites - CZIN')
 @section('account-heading', 'Favourites')
 @section('account-subheading', 'Products you have saved for later.')
 

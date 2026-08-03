@@ -1,6 +1,6 @@
 @extends('account.layout')
 
-@section('title', 'Profile Settings - SACYSHOES')
+@section('title', 'Profile Settings - CZIN')
 @section('account-heading', 'Profile Settings')
 @section('account-subheading', 'Update your account details and password.')
 

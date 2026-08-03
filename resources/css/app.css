@@ -12,33 +12,59 @@
     --color-brand-red: #e10600;
     --color-brand-red-dark: #b80500;
     --color-brand-red-light: #f04a45;
+    --color-brand-yellow: #ffcc00;
+    --color-brand-yellow-dark: #e6b800;
+    --color-brand-yellow-light: #ffe566;
+    --color-brand-yellow-deep: #c9a000;
     --color-brand-black: #0a0a0a;
     --color-brand-white: #ffffff;
     --color-brand-muted: #737373;
     --color-brand-light: #f5f5f5;
-    --color-brand-cream: #faf9f7;
-    --color-brand-purple: #7c3aed;
-    --color-brand-purple-dark: #5b21b6;
-    --color-brand-purple-deep: #4c1d95;
-    --color-brand-purple-light: #c4b5fd;
+    --color-brand-cream: #fffdf5;
     --color-brand-footer: #0a0a0a;
+
+    --radius-brand: 0.75rem;
+    --radius-brand-sm: 0.5rem;
+    --radius-brand-lg: 1rem;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer components {
+    .storefront-body {
+        @apply relative;
+    }
+
+    .storefront-food-icons {
+        @apply pointer-events-none fixed inset-0 z-0;
+        background-image: url('/images/brand/food-pattern.svg');
+        background-repeat: repeat;
+        background-size: 720px 720px;
+        background-position: 0 0;
+        opacity: 0.09;
+    }
+
+    .storefront-body > *:not(.storefront-food-icons) {
+        @apply relative z-[1];
+    }
+
     .btn-primary {
-        @apply inline-flex items-center justify-center rounded-none bg-brand-red px-5 py-2.5 text-xs font-normal tracking-wide text-white transition hover:bg-red-700;
+        @apply inline-flex items-center justify-center rounded-xl bg-brand-red px-5 py-2.5 text-xs font-normal tracking-wide text-white transition hover:bg-brand-red-dark;
+        text-transform: uppercase;
+    }
+
+    .btn-yellow {
+        @apply inline-flex items-center justify-center rounded-xl bg-brand-yellow px-5 py-2.5 text-xs font-normal tracking-wide text-brand-black transition hover:bg-brand-yellow-dark;
         text-transform: uppercase;
     }
 
     .btn-dark {
-        @apply inline-flex items-center justify-center rounded-none bg-brand-black px-5 py-2.5 text-xs font-normal tracking-wide text-white transition hover:bg-neutral-800;
+        @apply inline-flex items-center justify-center rounded-xl bg-brand-black px-5 py-2.5 text-xs font-normal tracking-wide text-white transition hover:bg-neutral-800;
         text-transform: uppercase;
     }
 
     .btn-outline {
-        @apply inline-flex items-center justify-center rounded-none border border-brand-black bg-transparent px-5 py-2.5 text-xs font-normal tracking-wide text-brand-black transition hover:bg-brand-black hover:text-white;
+        @apply inline-flex items-center justify-center rounded-xl border border-brand-black bg-transparent px-5 py-2.5 text-xs font-normal tracking-wide text-brand-black transition hover:bg-brand-black hover:text-white;
         text-transform: uppercase;
     }
 
@@ -46,8 +72,35 @@
         @apply text-xs font-normal uppercase tracking-wide transition hover:text-brand-red;
     }
 
+    .nav-link-on-red {
+        @apply text-xs font-normal uppercase tracking-wide text-white/90 transition hover:text-brand-yellow;
+    }
+
+    .nav-link-on-red-active {
+        @apply text-brand-yellow;
+    }
+
+    .logo-wordmark-on-light {
+        filter: brightness(0);
+    }
+
+    .storefront-navbar .currency-badge {
+        @apply border-white/30 bg-white/10 text-white;
+    }
+
+    .storefront-navbar-inner {
+        @apply mx-auto grid max-w-7xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8;
+        grid-template-columns: 1fr auto;
+    }
+
+    @media (min-width: 640px) {
+        .storefront-navbar-inner {
+            grid-template-columns: 1fr auto 1fr;
+        }
+    }
+
     .mobile-nav-panel {
-        @apply border-t border-neutral-200 bg-brand-white px-4 py-4 sm:hidden;
+        @apply border-t border-brand-red bg-brand-red px-4 py-4 sm:hidden;
     }
 
     .mobile-nav-list {
@@ -55,19 +108,19 @@
     }
 
     .mobile-nav-link {
-        @apply flex items-center justify-between border-b border-l-2 border-neutral-100 border-l-transparent py-3.5 pl-3 text-sm font-medium uppercase tracking-[0.12em] text-brand-black transition last:border-b-0;
+        @apply flex items-center justify-between border-b border-l-2 border-white/20 border-l-transparent py-3.5 pl-3 text-sm font-medium uppercase tracking-[0.12em] text-white transition last:border-b-0;
     }
 
     .mobile-nav-link:hover {
-        @apply text-brand-red;
+        @apply text-brand-yellow;
     }
 
     .mobile-nav-link-active {
-        @apply border-l-brand-red text-brand-red;
+        @apply border-l-brand-yellow text-brand-yellow;
     }
 
     .mobile-nav-link-icon {
-        @apply h-4 w-4 shrink-0 text-neutral-300 transition group-hover:text-brand-red;
+        @apply h-4 w-4 shrink-0 text-white/65 transition group-hover:text-brand-yellow;
     }
 
     .mobile-nav-auth {
@@ -79,15 +132,15 @@
     }
 
     .dropdown-menu {
-        @apply absolute right-0 top-full z-50 mt-1 w-52 border border-neutral-200 bg-brand-white py-1 shadow-lg;
+        @apply absolute right-0 top-full z-50 mt-1 w-52 rounded-xl border border-neutral-200 bg-brand-white py-1 shadow-lg;
     }
 
     .admin-notifications-menu {
-        @apply absolute right-0 top-full z-50 mt-1 w-[26rem] max-w-[calc(100vw-2rem)] border border-neutral-200 bg-brand-white shadow-lg;
+        @apply absolute right-0 top-full z-50 mt-1 w-[26rem] max-w-[calc(100vw-2rem)] rounded-xl border border-neutral-200 bg-brand-white shadow-lg;
     }
 
     .notification-action-btn {
-        @apply inline-flex h-8 w-8 items-center justify-center rounded-none border border-neutral-200 bg-white text-brand-black transition hover:border-brand-red hover:text-brand-red;
+        @apply inline-flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-brand-black transition hover:border-brand-red hover:text-brand-red;
     }
 
     .notification-action-btn-danger {
@@ -95,7 +148,7 @@
     }
 
     .admin-action-btn {
-        @apply inline-flex h-8 w-8 items-center justify-center rounded-none border border-neutral-200 bg-white text-brand-black transition hover:border-brand-red hover:text-brand-red;
+        @apply inline-flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-brand-black transition hover:border-brand-red hover:text-brand-red;
     }
 
     .admin-action-btn-danger {
@@ -193,15 +246,15 @@
     }
 
     .dropdown-item {
-        @apply block w-full rounded-none px-4 py-2.5 text-left text-xs font-normal uppercase tracking-wide text-brand-black transition hover:bg-brand-light hover:text-brand-red;
+        @apply block w-full rounded-lg px-4 py-2.5 text-left text-xs font-normal uppercase tracking-wide text-brand-black transition hover:bg-brand-light hover:text-brand-red;
     }
 
     .input-field {
-        @apply mt-1 w-full rounded-none border border-neutral-300 px-3 py-2 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20;
+        @apply mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20;
     }
 
     .card {
-        @apply rounded-none border border-neutral-200 bg-white;
+        @apply rounded-xl border border-neutral-200 bg-white;
     }
 
     .account-layout {
@@ -217,7 +270,7 @@
     }
 
     .account-nav {
-        @apply rounded-none border border-neutral-200 bg-white p-2;
+        @apply rounded-xl border border-neutral-200 bg-white p-2;
     }
 
     .account-nav-link {
@@ -249,7 +302,7 @@
     }
 
     .admin-sidebar-close {
-        @apply inline-flex h-8 w-8 items-center justify-center rounded-none border border-neutral-700 text-neutral-300 transition hover:border-neutral-500 hover:text-white;
+        @apply inline-flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-700 text-neutral-300 transition hover:border-neutral-500 hover:text-white;
     }
 
     .admin-sidebar-collapsed .admin-sidebar-text {
@@ -293,11 +346,11 @@
     }
 
     .admin-sidebar-toggle {
-        @apply h-8 w-8 items-center justify-center rounded-none border border-neutral-700 text-neutral-300 transition hover:border-neutral-500 hover:text-white;
+        @apply h-8 w-8 items-center justify-center rounded-lg border border-neutral-700 text-neutral-300 transition hover:border-neutral-500 hover:text-white;
     }
 
     .admin-header-menu-toggle {
-        @apply h-8 w-8 items-center justify-center rounded-none border border-brand-red text-brand-red transition hover:bg-brand-red hover:text-white;
+        @apply h-8 w-8 items-center justify-center rounded-lg border border-brand-red text-brand-red transition hover:bg-brand-red hover:text-white;
     }
 
     .admin-navbar-search-wrap {
@@ -309,11 +362,11 @@
     }
 
     .admin-navbar-search-input {
-        @apply w-full rounded-none border border-neutral-300 bg-brand-light py-2 pl-10 pr-4 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20;
+        @apply w-full rounded-lg border border-neutral-300 bg-brand-light py-2 pl-10 pr-4 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20;
     }
 
     .admin-period-pill {
-        @apply rounded-none border border-neutral-300 bg-white px-3 py-2 text-xs font-medium uppercase tracking-wide text-brand-black transition hover:border-brand-red hover:text-brand-red sm:px-4 sm:text-sm;
+        @apply rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-medium uppercase tracking-wide text-brand-black transition hover:border-brand-red hover:text-brand-red sm:px-4 sm:text-sm;
     }
 
     .admin-period-pill-active {
@@ -374,7 +427,362 @@
     }
 
     .admin-quick-action {
-        @apply flex items-center gap-3 rounded-none border border-neutral-200 bg-white p-4 text-sm font-medium transition hover:border-brand-red hover:bg-brand-light;
+        @apply flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-sm font-medium transition hover:border-brand-red hover:bg-brand-light;
+    }
+
+    .admin-table-stat {
+        @apply rounded-xl border border-neutral-200 bg-white p-4;
+    }
+
+    .admin-table-stat-primary {
+        @apply border-brand-red bg-brand-red text-white;
+    }
+
+    .admin-table-stat-label {
+        @apply text-xs font-medium uppercase tracking-wide text-brand-muted;
+    }
+
+    .admin-table-stat-primary .admin-table-stat-label {
+        @apply text-white/80;
+    }
+
+    .admin-table-stat-value {
+        @apply mt-2 text-2xl font-bold text-brand-black;
+    }
+
+    .admin-table-stat-primary .admin-table-stat-value {
+        @apply text-white;
+    }
+
+    .admin-table-card {
+        @apply rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-brand-red/30 hover:shadow-md;
+    }
+
+    .admin-table-card-header {
+        @apply mb-4 flex items-center justify-between gap-2;
+    }
+
+    .admin-table-card-code {
+        @apply text-sm font-semibold text-brand-black;
+    }
+
+    .admin-table-card-visual {
+        @apply relative mx-auto mb-4 flex h-28 w-full items-center justify-center;
+    }
+
+    .admin-table-card-meta {
+        @apply grid grid-cols-3 gap-2 border-t border-neutral-100 pt-3;
+    }
+
+    .admin-table-card-actions {
+        @apply mt-4 flex items-center gap-2 border-t border-neutral-100 pt-3;
+    }
+
+    .admin-pos-layout {
+        @apply grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)] xl:items-start;
+    }
+
+    .admin-pos-menu,
+    .admin-pos-cart {
+        @apply overflow-hidden p-0;
+    }
+
+    .admin-pos-toolbar {
+        @apply border-b border-neutral-200 p-4;
+    }
+
+    .admin-pos-search-wrap {
+        @apply relative;
+    }
+
+    .admin-pos-search-icon {
+        @apply pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-muted;
+    }
+
+    .admin-pos-search {
+        @apply pl-10;
+    }
+
+    .admin-pos-categories {
+        @apply flex gap-2 overflow-x-auto border-b border-neutral-200 p-4;
+    }
+
+    .admin-pos-category {
+        @apply shrink-0 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-brand-black transition hover:border-brand-red hover:text-brand-red;
+    }
+
+    .admin-pos-category-active {
+        @apply border-brand-black bg-brand-black text-white hover:border-brand-black hover:text-white;
+    }
+
+    .admin-pos-products {
+        @apply grid max-h-[calc(100vh-18rem)] gap-3 overflow-y-auto p-4 sm:grid-cols-2 lg:grid-cols-3;
+    }
+
+    .admin-pos-product {
+        @apply flex overflow-hidden rounded-xl border border-neutral-200 bg-white text-left transition hover:border-brand-red hover:shadow-sm;
+    }
+
+    .admin-pos-product-image-wrap {
+        @apply h-24 w-24 shrink-0 overflow-hidden bg-neutral-100;
+    }
+
+    .admin-pos-product-image {
+        @apply h-full w-full object-cover;
+    }
+
+    .admin-pos-product-body {
+        @apply flex min-w-0 flex-1 flex-col justify-center p-3;
+    }
+
+    .admin-pos-product-category {
+        @apply text-xs uppercase tracking-wide text-brand-muted;
+    }
+
+    .admin-pos-product-name {
+        @apply mt-1 line-clamp-2 text-sm font-semibold;
+    }
+
+    .admin-pos-product-price {
+        @apply mt-2 text-sm font-semibold text-brand-red;
+    }
+
+    .admin-pos-cart {
+        @apply flex max-h-[calc(100vh-8rem)] flex-col;
+    }
+
+    .admin-pos-cart-header {
+        @apply flex items-start justify-between gap-3 border-b border-neutral-200 p-4;
+    }
+
+    .admin-pos-cart-lines {
+        @apply min-h-40 flex-1 space-y-3 overflow-y-auto p-4;
+    }
+
+    .admin-pos-cart-line {
+        @apply flex items-center gap-3 rounded-lg border border-neutral-200 p-3;
+    }
+
+    .admin-pos-qty {
+        @apply flex items-center gap-2 rounded-lg border border-neutral-200 bg-brand-light;
+    }
+
+    .admin-pos-qty-btn {
+        @apply flex h-8 w-8 items-center justify-center text-lg font-medium text-brand-black transition hover:bg-white;
+    }
+
+    .admin-pos-qty-value {
+        @apply min-w-6 text-center text-sm font-semibold;
+    }
+
+    .admin-pos-remove {
+        @apply rounded-lg p-2 text-brand-muted transition hover:bg-red-50 hover:text-brand-red;
+    }
+
+    .admin-pos-options {
+        @apply space-y-4 border-t border-neutral-200 p-4;
+    }
+
+    .admin-pos-type-grid,
+    .admin-pos-pay-grid {
+        @apply grid grid-cols-3 gap-2;
+    }
+
+    .admin-pos-type,
+    .admin-pos-pay {
+        @apply rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium transition hover:border-brand-red;
+    }
+
+    .admin-pos-type-active,
+    .admin-pos-pay-active {
+        @apply border-brand-black bg-brand-black text-white hover:border-brand-black;
+    }
+
+    .admin-pos-totals {
+        @apply space-y-2 border-t border-neutral-200 p-4;
+    }
+
+    .admin-pos-submit {
+        @apply m-4 mt-0 w-[calc(100%-2rem)];
+    }
+
+    .admin-pos-empty {
+        @apply flex min-h-28 items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-brand-light px-4 text-center;
+    }
+
+    .admin-pos-modal-backdrop {
+        @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4;
+    }
+
+    .admin-pos-modal {
+        @apply w-full max-w-md p-5;
+    }
+
+    .admin-pos-variant {
+        @apply flex w-full items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 text-left text-sm transition hover:border-brand-red hover:bg-brand-light;
+    }
+
+    .admin-kitchen-board {
+        @apply grid gap-4 xl:grid-cols-3;
+    }
+
+    .admin-kitchen-column {
+        @apply flex min-h-[28rem] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white;
+    }
+
+    .admin-kitchen-column-header {
+        @apply flex items-center justify-between border-b border-neutral-200 px-4 py-4;
+    }
+
+    .admin-kitchen-column-header h2 {
+        @apply text-sm font-semibold uppercase tracking-wide;
+    }
+
+    .admin-kitchen-column-header-new {
+        @apply bg-blue-50 text-blue-900;
+    }
+
+    .admin-kitchen-column-header-preparing {
+        @apply bg-amber-50 text-amber-900;
+    }
+
+    .admin-kitchen-column-header-ready {
+        @apply bg-green-50 text-green-900;
+    }
+
+    .admin-kitchen-count {
+        @apply inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-white px-2 text-xs font-bold;
+    }
+
+    .admin-kitchen-column-body {
+        @apply flex flex-1 flex-col gap-3 overflow-y-auto p-4;
+    }
+
+    .admin-kitchen-card {
+        @apply rounded-xl border border-neutral-200 bg-brand-light p-4 shadow-sm;
+    }
+
+    .admin-kitchen-card-header {
+        @apply flex items-start justify-between gap-3;
+    }
+
+    .admin-kitchen-card-number {
+        @apply text-base font-bold text-brand-black;
+    }
+
+    .admin-kitchen-card-time {
+        @apply text-xs text-brand-muted;
+    }
+
+    .admin-kitchen-pill {
+        @apply inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
+    }
+
+    .admin-kitchen-pill-paid {
+        @apply bg-blue-100 text-blue-800;
+    }
+
+    .admin-kitchen-pill-processing {
+        @apply bg-amber-100 text-amber-800;
+    }
+
+    .admin-kitchen-pill-ready_for_delivery {
+        @apply bg-green-100 text-green-800;
+    }
+
+    .admin-kitchen-card-meta {
+        @apply mt-3 flex flex-wrap gap-2 text-xs text-brand-muted;
+    }
+
+    .admin-kitchen-card-customer {
+        @apply mt-2 text-sm font-medium text-brand-black;
+    }
+
+    .admin-kitchen-items {
+        @apply mt-4 space-y-2;
+    }
+
+    .admin-kitchen-item {
+        @apply flex gap-3 rounded-lg bg-white px-3 py-2;
+    }
+
+    .admin-kitchen-item-qty {
+        @apply shrink-0 text-sm font-bold text-brand-red;
+    }
+
+    .admin-kitchen-item-name {
+        @apply text-sm font-medium text-brand-black;
+    }
+
+    .admin-kitchen-item-options {
+        @apply text-xs text-brand-muted;
+    }
+
+    .admin-kitchen-note {
+        @apply mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2;
+    }
+
+    .admin-kitchen-action {
+        @apply mt-4 w-full rounded-lg bg-brand-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .admin-kitchen-waiting {
+        @apply mt-4 rounded-lg border border-dashed border-neutral-300 bg-white px-3 py-2 text-center text-xs font-medium text-brand-muted;
+    }
+
+    .admin-kitchen-empty {
+        @apply flex flex-1 items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-white px-4 py-10 text-center text-sm text-brand-muted;
+    }
+
+    .admin-kitchen-card--new {
+        animation: kitchen-card-flash 1.2s ease-in-out 2;
+        border-color: #e10600;
+        box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.15);
+    }
+
+    .admin-kitchen-alert-banner {
+        @apply mb-4 rounded-lg border border-brand-red bg-brand-red/10 px-4 py-3 text-sm font-medium text-brand-red;
+        animation: kitchen-banner-pulse 0.8s ease-in-out 3;
+    }
+
+    .admin-kitchen-toolbar {
+        @apply mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4;
+    }
+
+    .admin-kitchen-toggle {
+        @apply inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm font-medium transition hover:border-brand-red;
+    }
+
+    .admin-kitchen-toggle-active {
+        @apply border-brand-black bg-brand-black text-white hover:border-brand-black;
+    }
+
+    .admin-kitchen-card-actions {
+        @apply mt-3 flex items-center gap-3;
+    }
+
+    .admin-kitchen-print-link {
+        @apply text-sm font-medium text-brand-red hover:underline;
+    }
+
+    @keyframes kitchen-card-flash {
+        0%, 100% { background-color: #fafafa; }
+        50% { background-color: #fff4cc; }
+    }
+
+    @keyframes kitchen-banner-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+    }
+
+    .admin-kitchen-flash-overlay {
+        @apply pointer-events-none fixed inset-0 z-40 bg-brand-red/10;
+        animation: kitchen-overlay-flash 0.45s ease-out;
+    }
+
+    @keyframes kitchen-overlay-flash {
+        from { opacity: 1; }
+        to { opacity: 0; }
     }
 
     .admin-attention-item {
@@ -410,7 +818,7 @@
     }
 
     .admin-sidebar-link {
-        @apply flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition hover:bg-neutral-900;
+        @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition hover:bg-neutral-900;
     }
 
     .admin-sidebar-link-active {
@@ -418,7 +826,7 @@
     }
 
     .admin-sidebar-logout {
-        @apply flex w-full items-center gap-3 rounded-none bg-brand-red px-3 py-2.5 text-left text-sm font-medium text-white transition hover:bg-brand-red-dark;
+        @apply flex w-full items-center gap-3 rounded-lg bg-brand-red px-3 py-2.5 text-left text-sm font-medium text-white transition hover:bg-brand-red-dark;
     }
 
     .section-eyebrow {
@@ -427,6 +835,23 @@
 
     .section-title {
         @apply text-2xl font-semibold uppercase tracking-wide text-brand-black sm:text-3xl;
+    }
+
+    .menu-section-accent {
+        @apply mt-0.5 shrink-0;
+    }
+
+    .menu-section-accent img {
+        width: 88px;
+        height: auto;
+        border-radius: 0.5rem;
+        filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.14));
+    }
+
+    @media (min-width: 640px) {
+        .menu-section-accent img {
+            width: 112px;
+        }
     }
 
     .page-heading {
@@ -450,11 +875,234 @@
     }
 
     .hero-section-overlay {
-        @apply bg-black/20;
+        @apply bg-black/55;
+    }
+
+    .restaurant-hero {
+        @apply relative flex h-[34dvh] min-h-[34dvh] items-end overflow-hidden bg-brand-black sm:h-auto sm:min-h-[72dvh];
+    }
+
+    .restaurant-hero-slides {
+        @apply absolute inset-0;
+    }
+
+    .restaurant-hero-slide {
+        @apply absolute inset-0 bg-cover bg-center opacity-0 scale-105 transition-all duration-[1400ms] ease-out;
+    }
+
+    .restaurant-hero-slide.is-active {
+        @apply opacity-100 scale-100;
+    }
+
+    .restaurant-hero-overlay {
+        @apply absolute inset-0 z-[1] bg-gradient-to-r from-black/55 via-black/35 to-black/20;
+    }
+
+    .restaurant-hero-animate {
+        animation: restaurant-hero-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .restaurant-hero-animate-delay-1 {
+        animation-delay: 0.12s;
+    }
+
+    .restaurant-hero-animate-delay-2 {
+        animation-delay: 0.28s;
+    }
+
+    .restaurant-hero-animate-delay-3 {
+        animation-delay: 0.44s;
+    }
+
+    .restaurant-hero-animate-delay-4 {
+        animation-delay: 0.6s;
+    }
+
+    .restaurant-hero-animate-delay-5 {
+        animation-delay: 0.76s;
+    }
+
+    .restaurant-hero-animate-delay-6 {
+        animation-delay: 0.92s;
+    }
+
+    .hero-typewriter {
+        @apply min-h-[2.6em] sm:min-h-[2.5em] lg:min-h-[2.2em];
+    }
+
+    .hero-typewriter-cursor {
+        @apply ml-0.5 inline-block font-light text-brand-yellow;
+        animation: hero-typewriter-cursor 1s step-end infinite;
+    }
+
+    [data-storefront-reveal] {
+        opacity: 0;
+        transform: translateY(1.5rem);
+        transition:
+            opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+            transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--reveal-delay, 0ms);
+    }
+
+    [data-storefront-reveal].is-revealed {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .restaurant-hero-stat {
+        @apply rounded-xl border border-white/15 bg-black/40 px-3 py-3 text-center backdrop-blur-sm sm:px-4 sm:py-4;
+    }
+
+    .restaurant-hero-dot {
+        @apply h-2.5 w-2.5 rounded-full border border-white/40 bg-white/25 transition;
+    }
+
+    .restaurant-hero-dot.is-active {
+        @apply w-7 border-brand-yellow bg-brand-yellow;
+    }
+
+    .restaurant-cta-image {
+        @apply absolute inset-y-0 right-0 w-full bg-cover bg-center sm:w-[55%] lg:w-[48%];
+    }
+
+    .restaurant-cta-fade {
+        @apply absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black to-brand-black/55 sm:via-brand-black/90 sm:to-brand-black/25;
+    }
+
+    .restaurant-reviews-image {
+        @apply absolute inset-y-0 left-0 w-full bg-cover bg-center sm:w-[55%] lg:w-[48%];
+    }
+
+    .restaurant-reviews-fade {
+        @apply absolute inset-0 bg-gradient-to-l from-brand-black via-brand-black/85 to-brand-black/20 sm:via-brand-black/75 sm:to-transparent;
+    }
+
+    .menu-category-chip {
+        @apply relative inline-flex shrink-0 items-center overflow-hidden rounded-xl border border-neutral-800 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:border-brand-yellow;
+        min-width: 8.5rem;
+    }
+
+    .menu-category-card {
+        @apply relative flex min-h-[11.5rem] overflow-hidden rounded-xl bg-brand-black text-white sm:min-h-[14rem] lg:min-h-[16rem];
+    }
+
+    .menu-category-card-image {
+        @apply absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105;
+    }
+
+    .menu-category-card-overlay {
+        @apply absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/15;
+    }
+
+    .menu-category-card-content {
+        @apply relative z-10 mt-auto flex w-full flex-col gap-1 p-4 sm:p-5;
+    }
+
+    .menu-category-card-label {
+        @apply text-base font-semibold uppercase tracking-wide sm:text-lg;
+    }
+
+    .menu-category-card-desc {
+        @apply text-xs leading-relaxed text-white/75;
+    }
+
+    .menu-category-card-cta {
+        @apply mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-yellow transition group-hover:text-white;
+    }
+
+    .menu-category-rail {
+        @apply mt-8 grid grid-cols-2 gap-3;
+    }
+
+    .menu-category-rail-item {
+        @apply w-full;
+    }
+
+    .menu-item-rail {
+        @apply -mx-4 flex gap-3 overflow-x-auto px-4 pb-1;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .menu-item-rail::-webkit-scrollbar {
+        display: none;
+    }
+
+    .menu-item-rail > .menu-item-card {
+        @apply shrink-0;
+        flex: 0 0 calc(50% - 0.375rem);
+        scroll-snap-align: start;
+    }
+
+    @media (min-width: 640px) {
+        .menu-item-rail {
+            @apply mx-0 grid grid-cols-2 gap-4 overflow-visible px-0 pb-0 lg:grid-cols-2;
+            scroll-snap-type: none;
+        }
+
+        .menu-item-rail > .menu-item-card {
+            flex: none;
+            scroll-snap-align: unset;
+        }
+    }
+
+    .cart-upsell-modal {
+        @apply fixed inset-0 z-[100] items-center justify-center bg-black/75 p-4;
+        display: none;
+    }
+
+    .cart-upsell-modal.is-open {
+        display: flex;
+    }
+
+    .cart-upsell-dialog {
+        @apply relative isolate w-full max-w-sm rounded-2xl border-2 border-brand-red/40 bg-white p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)];
+        background-color: #ffffff;
+    }
+
+    .menu-item-card {
+        @apply flex flex-col gap-2 rounded-xl border border-neutral-200 bg-brand-white p-2 transition hover:border-brand-red/40 hover:shadow-md sm:flex-row sm:gap-4 sm:p-4;
+    }
+
+    .menu-item-card-media {
+        @apply relative h-24 w-full overflow-hidden rounded-lg bg-neutral-100 sm:h-28 sm:w-28 sm:shrink-0;
+    }
+
+    .menu-item-card-placeholder {
+        @apply flex h-full w-full items-center justify-center bg-brand-black;
+    }
+
+    .menu-item-card-body {
+        @apply flex min-w-0 flex-1 flex-col justify-between gap-2;
+    }
+
+    .menu-item-card-category {
+        @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-muted;
+    }
+
+    .menu-item-card-title {
+        @apply mt-0.5 text-sm font-semibold tracking-tight text-brand-black sm:text-lg;
+    }
+
+    .menu-item-card-desc {
+        @apply mt-1 text-sm leading-relaxed text-brand-muted;
+    }
+
+    .menu-item-card-actions {
+        @apply flex items-center justify-between gap-3;
+    }
+
+    .menu-tab {
+        @apply inline-flex shrink-0 items-center rounded-full border border-neutral-300 bg-brand-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-brand-black transition hover:border-brand-red hover:text-brand-red;
+    }
+
+    .menu-tab-active {
+        @apply border-brand-red bg-brand-red text-white hover:border-brand-red hover:text-white;
     }
 
     .hero-btn-outline {
-        @apply inline-flex items-center justify-center rounded-none border border-white bg-transparent px-5 py-2.5 text-xs font-normal uppercase tracking-wide text-white transition hover:bg-white hover:text-brand-black;
+        @apply inline-flex items-center justify-center rounded-xl border border-white bg-transparent px-5 py-2.5 text-xs font-normal uppercase tracking-wide text-white transition hover:bg-white hover:text-brand-black;
     }
 
     .variant-size-option {
@@ -497,7 +1145,7 @@
     }
 
     .btn-outline-red {
-        @apply inline-flex items-center justify-center rounded-none border border-brand-red bg-brand-white px-5 py-2.5 text-xs font-normal tracking-wide text-brand-red transition hover:bg-brand-red hover:text-white;
+        @apply inline-flex items-center justify-center rounded-xl border border-brand-red bg-brand-white px-5 py-2.5 text-xs font-normal tracking-wide text-brand-red transition hover:bg-brand-red hover:text-white;
         text-transform: uppercase;
     }
 
@@ -518,7 +1166,36 @@
     }
 
     .category-card {
-        @apply relative block min-h-80 overflow-hidden rounded-none bg-brand-black text-white lg:min-h-96;
+        @apply relative block min-h-80 overflow-hidden rounded-xl bg-brand-black text-white lg:min-h-96;
+    }
+
+    .category-card-tone-mains {
+        background:
+            linear-gradient(145deg, rgba(225, 6, 0, 0.55), rgba(10, 10, 10, 0.92)),
+            radial-gradient(circle at 20% 20%, rgba(255, 204, 0, 0.35), transparent 45%);
+    }
+
+    .category-card-tone-sides {
+        background:
+            linear-gradient(145deg, rgba(201, 160, 0, 0.45), rgba(10, 10, 10, 0.92)),
+            radial-gradient(circle at 80% 30%, rgba(225, 6, 0, 0.25), transparent 40%);
+    }
+
+    .category-card-tone-drinks {
+        background:
+            linear-gradient(145deg, rgba(255, 204, 0, 0.4), rgba(10, 10, 10, 0.95)),
+            radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.12), transparent 45%);
+    }
+
+    .category-card-tone-desserts {
+        background:
+            linear-gradient(145deg, rgba(225, 6, 0, 0.35), rgba(10, 10, 10, 0.95)),
+            radial-gradient(circle at 70% 20%, rgba(255, 204, 0, 0.4), transparent 40%);
+    }
+
+    .category-card-tone-default {
+        background:
+            linear-gradient(145deg, rgba(255, 204, 0, 0.25), rgba(10, 10, 10, 0.95));
     }
 
     .category-card-image {
@@ -567,15 +1244,15 @@
     }
 
     .sale-badge {
-        @apply absolute left-3 top-3 z-10 rounded-none bg-brand-red px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white;
+        @apply absolute left-3 top-3 z-10 rounded-md bg-brand-red px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white;
     }
 
     .sold-out-badge {
-        @apply absolute left-3 top-3 z-10 rounded-none bg-brand-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white;
+        @apply absolute left-3 top-3 z-10 rounded-md bg-brand-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white;
     }
 
     .ticker-bar {
-        @apply min-h-8 overflow-hidden bg-brand-red-light py-2.5 sm:min-h-9 sm:py-3;
+        @apply min-h-8 overflow-hidden border-b border-neutral-200 bg-white py-2.5 sm:min-h-9 sm:py-3;
     }
 
     .ticker-track {
@@ -592,15 +1269,15 @@
     }
 
     .ticker-item {
-        @apply inline-flex shrink-0 items-center gap-1.5 px-5 text-[9px] font-normal uppercase tracking-wide text-white transition hover:text-white;
+        @apply inline-flex shrink-0 items-center gap-1.5 px-5 text-[9px] font-normal uppercase tracking-wide text-brand-black transition hover:text-brand-red;
     }
 
     .ticker-separator {
-        @apply mx-3 text-[9px] text-white/50;
+        @apply mx-3 text-[9px] text-brand-muted;
     }
 
     .track-order-banner-btn {
-        @apply inline-flex shrink-0 items-center justify-center gap-1.5 rounded-none border border-white bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-red transition hover:bg-white/90;
+        @apply inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-brand-black bg-brand-black px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-yellow transition hover:bg-brand-black/90;
     }
 
     .product-action-btn {
@@ -628,7 +1305,7 @@
     }
 
     .shop-hero-glow-right {
-        @apply -right-10 bottom-0 h-48 w-48 bg-brand-red/20;
+        @apply -right-10 bottom-0 h-48 w-48 bg-brand-yellow/25;
     }
 
     .shop-hero-icon {
@@ -652,7 +1329,44 @@
     }
 
     .shop-hero-chip {
-        @apply inline-flex items-center gap-1.5 border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white transition hover:border-brand-red hover:bg-brand-red/20;
+        @apply inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white transition hover:border-brand-red hover:bg-brand-red/20;
+    }
+}
+
+@keyframes restaurant-hero-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(1.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hero-typewriter-cursor {
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .restaurant-hero-animate {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .hero-typewriter-cursor {
+        animation: none;
+        display: none;
+    }
+
+    [data-storefront-reveal] {
+        opacity: 1;
+        transform: none;
+        transition: none;
     }
 }
 
@@ -829,7 +1543,7 @@
     }
 
     .theme-toggle {
-        @apply inline-flex h-9 w-9 items-center justify-center rounded-none border border-transparent text-brand-black transition hover:border-brand-red hover:text-brand-red;
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-brand-black transition hover:border-brand-red hover:text-brand-red;
     }
 
     .site-footer {
@@ -839,111 +1553,115 @@
 
 .dark {
     color-scheme: dark;
-    --color-brand-red: #a78bfa;
-    --color-brand-red-dark: #8b5cf6;
-    --color-brand-red-light: #c4b5fd;
-    --color-brand-black: #faf5ff;
-    --color-brand-white: #1a1028;
-    --color-brand-muted: #c4b5fd;
-    --color-brand-light: #241636;
-    --color-brand-cream: #110818;
-    --color-brand-footer: #5b21b6;
+    --color-brand-red: #ff3b30;
+    --color-brand-red-dark: #e10600;
+    --color-brand-red-light: #ff6b63;
+    --color-brand-yellow: #ffcc00;
+    --color-brand-yellow-dark: #e6b800;
+    --color-brand-yellow-light: #ffe566;
+    --color-brand-yellow-deep: #c9a000;
+    --color-brand-black: #f5f5f5;
+    --color-brand-white: #121212;
+    --color-brand-muted: #a3a3a3;
+    --color-brand-light: #1c1c1c;
+    --color-brand-cream: #0a0a0a;
+    --color-brand-footer: #000000;
 }
 
 .dark .btn-primary {
-    @apply bg-brand-purple hover:bg-brand-purple-dark;
+    @apply bg-brand-red hover:bg-brand-red-dark;
 }
 
 .dark .btn-outline {
-    @apply border-brand-purple-light text-brand-black hover:bg-brand-purple hover:text-white;
+    @apply border-brand-yellow text-brand-black hover:bg-brand-yellow hover:text-brand-cream;
 }
 
 .dark .btn-dark {
-    @apply bg-brand-purple-dark hover:bg-brand-purple;
+    @apply bg-brand-yellow text-brand-cream hover:bg-brand-yellow-dark;
 }
 
 .dark .nav-link {
-    @apply text-brand-black hover:text-brand-purple-light;
+    @apply text-brand-black hover:text-brand-yellow;
 }
 
 .dark .mobile-nav-panel {
-    @apply border-purple-900/50 bg-brand-white;
+    @apply border-brand-red bg-brand-red;
 }
 
 .dark .mobile-nav-link {
-    @apply border-purple-900/30 text-brand-black;
+    @apply border-white/20 text-white;
 }
 
 .dark .mobile-nav-link:hover,
 .dark .mobile-nav-link-active {
-    @apply text-brand-purple-light;
+    @apply text-brand-yellow;
 }
 
 .dark .mobile-nav-link-active {
-    @apply border-l-brand-purple-light text-brand-purple-light;
+    @apply border-l-brand-yellow text-brand-yellow;
 }
 
 .dark .mobile-nav-link-icon {
-    @apply text-brand-muted;
+    @apply text-white/65;
 }
 
 .dark .mobile-nav-auth {
-    @apply border-purple-900/50;
+    @apply border-neutral-800;
 }
 
 .dark .mobile-nav-auth-link {
-    @apply text-brand-black hover:text-brand-purple-light;
+    @apply text-brand-black hover:text-brand-yellow;
 }
 
 .dark .theme-toggle {
-    @apply text-brand-black hover:border-brand-purple-light hover:text-brand-purple-light;
+    @apply text-brand-black hover:border-brand-yellow hover:text-brand-yellow;
 }
 
 .dark .card {
-    @apply border-purple-900/40 bg-brand-white text-brand-black;
+    @apply border-neutral-800 bg-brand-white text-brand-black;
 }
 
 .dark .input-field {
-    @apply border-purple-900/50 bg-brand-light text-brand-black placeholder:text-brand-muted;
+    @apply border-neutral-700 bg-brand-light text-brand-black placeholder:text-brand-muted;
 }
 
 .dark .dropdown-menu,
 .dark .admin-notifications-menu {
-    @apply border-purple-900/50 bg-brand-white;
+    @apply border-neutral-800 bg-brand-white;
 }
 
 .dark .dropdown-item {
-    @apply text-brand-black hover:bg-brand-light hover:text-brand-purple-light;
+    @apply text-brand-black hover:bg-brand-light hover:text-brand-yellow;
 }
 
 .dark .admin-action-btn,
 .dark .notification-action-btn {
-    @apply border-purple-900/50 bg-brand-white text-brand-black hover:border-brand-purple-light hover:text-brand-purple-light;
+    @apply border-neutral-700 bg-brand-white text-brand-black hover:border-brand-yellow hover:text-brand-yellow;
 }
 
 .dark .admin-detail-panel {
-    @apply border-purple-900/50 bg-brand-white;
+    @apply border-neutral-800 bg-brand-white;
 }
 
 .dark .admin-detail-toolbar,
 .dark .admin-detail-body {
-    @apply border-purple-900/40;
+    @apply border-neutral-800;
 }
 
 .dark .admin-sidebar {
-    @apply border-purple-900 bg-brand-purple-deep;
+    @apply border-neutral-800 bg-black;
 }
 
 .dark .admin-sidebar-link-active {
-    @apply bg-brand-purple text-white;
+    @apply bg-brand-red text-white;
 }
 
 .dark .admin-sidebar-link {
-    @apply text-purple-100 hover:bg-brand-purple hover:text-white;
+    @apply text-neutral-300 hover:bg-neutral-900 hover:text-brand-yellow;
 }
 
 .dark .admin-col-actions {
-    @apply bg-brand-white shadow-[-6px_0_10px_-8px_rgba(76,29,149,0.45)];
+    @apply bg-brand-white shadow-[-6px_0_10px_-8px_rgba(0,0,0,0.55)];
 }
 
 .dark .admin-data-table thead .admin-col-actions {
@@ -955,11 +1673,11 @@
 }
 
 .dark .account-nav {
-    @apply border-purple-900/40 bg-brand-white;
+    @apply border-neutral-800 bg-brand-white;
 }
 
 .dark .account-nav-link-active {
-    @apply bg-brand-purple;
+    @apply bg-brand-red;
 }
 
 .dark .account-nav-link-inactive {
@@ -967,35 +1685,35 @@
 }
 
 .dark .site-footer {
-    @apply border-purple-900 bg-brand-footer;
+    @apply border-neutral-800 bg-brand-footer;
 }
 
 .dark .hero-btn-outline {
-    @apply border-brand-purple-light text-white hover:bg-brand-purple-light hover:text-brand-purple-deep;
+    @apply border-brand-yellow text-brand-yellow hover:bg-brand-yellow hover:text-brand-cream;
 }
 
 .dark .hero-section-overlay {
-    @apply bg-brand-purple-deep/35;
+    @apply bg-black/45;
 }
 
 .dark .admin-period-pill {
-    @apply border-purple-700/60 bg-brand-light text-purple-100 hover:border-brand-purple-light hover:bg-brand-purple/70 hover:text-white;
+    @apply border-neutral-700 bg-brand-light text-neutral-200 hover:border-brand-yellow hover:bg-brand-yellow/20 hover:text-brand-yellow;
 }
 
 .dark .admin-period-pill.admin-period-pill-active {
-    @apply border-brand-purple-light bg-brand-purple text-white shadow-[0_0_0_1px_rgba(167,139,250,0.35)] hover:border-brand-purple-light hover:bg-brand-purple-dark hover:text-white;
+    @apply border-brand-yellow bg-brand-yellow text-brand-cream shadow-none hover:border-brand-yellow-dark hover:bg-brand-yellow-dark hover:text-brand-cream;
 }
 
 .dark .admin-attention-grid {
-    @apply bg-purple-900/60;
+    @apply bg-neutral-900;
 }
 
 .dark .admin-attention-item {
-    @apply bg-brand-light text-purple-100 hover:bg-brand-purple/25;
+    @apply bg-brand-light text-neutral-200 hover:bg-neutral-800;
 }
 
 .dark .admin-attention-item .text-amber-700 {
-    @apply text-amber-400;
+    @apply text-brand-yellow;
 }
 
 .dark .admin-attention-item .text-blue-700 {
@@ -1007,29 +1725,41 @@
 }
 
 .dark .admin-quick-action {
-    @apply border-purple-900/40 bg-brand-white text-brand-black hover:border-brand-purple-light hover:text-brand-purple-light;
+    @apply border-neutral-800 bg-brand-white text-brand-black hover:border-brand-yellow hover:text-brand-yellow;
 }
 
 .dark .shop-hero {
-    @apply border-purple-900/50 bg-brand-purple-deep;
+    @apply border-neutral-800 bg-black;
 }
 
 .dark .ticker-bar {
-    @apply bg-brand-purple;
+    @apply border-neutral-200 bg-white;
+}
+
+.dark .ticker-item {
+    @apply text-brand-black hover:text-brand-red;
+}
+
+.dark .ticker-separator {
+    @apply text-brand-muted;
+}
+
+.dark .track-order-banner-btn {
+    @apply border-black bg-black text-brand-yellow hover:bg-neutral-900;
 }
 
 .dark .product-action-btn {
-    @apply border-purple-900/40 bg-white/95 text-neutral-900 hover:border-brand-purple hover:text-brand-purple-dark;
+    @apply border-neutral-700 bg-white/95 text-neutral-900 hover:border-brand-yellow hover:text-brand-yellow-deep;
 }
 
 .dark .product-action-btn-active {
-    @apply border-brand-purple bg-brand-purple text-white hover:border-brand-purple hover:bg-brand-purple-dark hover:text-white;
+    @apply border-brand-red bg-brand-red text-white hover:border-brand-red-dark hover:bg-brand-red-dark hover:text-white;
 }
 
 .dark .checkout-payment-badge-visa {
-    @apply border-brand-purple-dark bg-brand-purple-dark;
+    @apply border-brand-red-dark bg-brand-red-dark;
 }
 
 .dark .checkout-payment-badge-momo {
-    @apply border-yellow-400 bg-yellow-400;
+    @apply border-brand-yellow bg-brand-yellow;
 }

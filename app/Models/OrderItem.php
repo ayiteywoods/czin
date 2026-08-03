@@ -50,15 +50,24 @@ class OrderItem extends Model
             $size = $this->variant_options['size'] ?? null;
             $color = $this->variant_options['color'] ?? null;
             $heel = $this->variant_options['heel_length'] ?? null;
+            $special = $this->variant_options['special_request'] ?? null;
 
             if ($size && $color) {
-                $label = "Size {$size} · {$color}";
+                $label = "{$size} · {$color}";
 
                 if ($heel) {
-                    $label .= " · {$heel} heel";
+                    $label .= " · {$heel}";
+                }
+
+                if (filled($special)) {
+                    $label .= ' · Custom: '.$special;
                 }
 
                 return $label;
+            }
+
+            if (filled($special)) {
+                return 'Custom: '.$special;
             }
         }
 
@@ -94,6 +103,10 @@ class OrderItem extends Model
 
         if ($heel = $this->variant_options['heel_length'] ?? null) {
             $lines[] = 'heel: '.strtolower((string) $heel);
+        }
+
+        if ($special = $this->variant_options['special_request'] ?? null) {
+            $lines[] = 'custom: '.$special;
         }
 
         return $lines;

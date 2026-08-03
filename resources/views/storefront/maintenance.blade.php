@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Maintenance - {{ config('shop.store_name') }}</title>
-    <link rel="icon" type="image/webp" href="{{ asset('images/brand/logo1.webp') }}">
+    @include('partials.favicon')
     @vite(['resources/css/app.css'])
 </head>
 <body class="min-h-screen bg-brand-cream text-brand-black antialiased">

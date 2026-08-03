@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\FulfillmentType;
+use App\Enums\OrderSource;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductStatus;
@@ -9,6 +11,7 @@ use App\Enums\UserRole;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\StoreSetting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -38,9 +41,45 @@ class AdminReportService
             'total_products' => Product::count(),
             'total_customers' => User::query()->where('role', UserRole::Customer)->count(),
             'low_stock_products' => Product::query()
-                ->where('quantity', '<', 10)
+                ->where('quantity', '<', $this->lowStockThreshold())
                 ->where('status', ProductStatus::Active)
                 ->count(),
+        ];
+    }
+
+    public function lowStockThreshold(): int
+    {
+        return StoreSetting::current()->lowStockThreshold();
+    }
+
+    /**
+     * @return array{
+     *     pos_revenue: float,
+     *     online_revenue: float,
+     *     pos_orders: int,
+     *     online_orders: int,
+     *     dine_in_count: int,
+     *     takeaway_count: int,
+     *     delivery_count: int
+     * }
+     */
+    public function restaurantSegmentSummary(Carbon $from, Carbon $to): array
+    {
+        $paid = Order::query()
+            ->where('payment_status', PaymentStatus::Paid)
+            ->whereBetween('paid_at', [$from->copy()->startOfDay(), $to->copy()->endOfDay()]);
+
+        $pos = (clone $paid)->where('order_source', OrderSource::Pos->value);
+        $online = (clone $paid)->where('order_source', OrderSource::Online->value);
+
+        return [
+            'pos_revenue' => (float) (clone $pos)->sum('total'),
+            'online_revenue' => (float) (clone $online)->sum('total'),
+            'pos_orders' => (clone $pos)->count(),
+            'online_orders' => (clone $online)->count(),
+            'dine_in_count' => (clone $paid)->where('fulfillment_type', FulfillmentType::DineIn->value)->count(),
+            'takeaway_count' => (clone $paid)->where('fulfillment_type', FulfillmentType::Takeaway->value)->count(),
+            'delivery_count' => (clone $paid)->where('fulfillment_type', FulfillmentType::Delivery->value)->count(),
         ];
     }
 
@@ -125,7 +164,7 @@ class AdminReportService
                 ->count(),
             'low_stock' => Product::query()
                 ->where('status', ProductStatus::Active)
-                ->where('quantity', '<', 10)
+                ->where('quantity', '<', $this->lowStockThreshold())
                 ->count(),
             'new_customers_today' => User::query()
                 ->where('role', UserRole::Customer)
@@ -325,20 +364,38 @@ class AdminReportService
     /**
      * @return \Illuminate\Database\Eloquent\Builder<Order>
      */
-    public function ordersForPeriodQuery(Carbon $from, Carbon $to): \Illuminate\Database\Eloquent\Builder
-    {
-        return Order::query()
+    public function ordersForPeriodQuery(
+        Carbon $from,
+        Carbon $to,
+        ?string $orderSource = null,
+        ?string $fulfillmentType = null,
+    ): \Illuminate\Database\Eloquent\Builder {
+        $query = Order::query()
             ->with('user')
             ->where('payment_status', PaymentStatus::Paid)
             ->whereBetween('paid_at', [$from->copy()->startOfDay(), $to->copy()->endOfDay()]);
+
+        if (filled($orderSource)) {
+            $query->where('order_source', $orderSource);
+        }
+
+        if (filled($fulfillmentType)) {
+            $query->where('fulfillment_type', $fulfillmentType);
+        }
+
+        return $query;
     }
 
     /**
      * @return Collection<int, Order>
      */
-    public function ordersForPeriod(Carbon $from, Carbon $to): Collection
-    {
-        return $this->ordersForPeriodQuery($from, $to)
+    public function ordersForPeriod(
+        Carbon $from,
+        Carbon $to,
+        ?string $orderSource = null,
+        ?string $fulfillmentType = null,
+    ): Collection {
+        return $this->ordersForPeriodQuery($from, $to, $orderSource, $fulfillmentType)
             ->orderByDesc('paid_at')
             ->get();
     }

@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('orders:reconcile-paystack')->everyFiveMinutes();
 Schedule::command('orders:cancel-unpaid')->everyFiveMinutes();
+Schedule::command('sanctum:prune-expired --hours=2160')->daily(); // prune tokens older than 90 days

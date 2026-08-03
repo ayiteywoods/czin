@@ -16,11 +16,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::query()->updateOrCreate(
-            ['email' => 'admin@sacyshoes.com'],
+            ['email' => 'admin@czin.com'],
             [
-                'first_name' => 'Sacy',
+                'first_name' => 'CZIN',
                 'last_name' => 'Admin',
-                'name' => 'Sacy Admin',
+                'name' => 'CZIN Admin',
                 'phone' => '0200000000',
                 'password' => 'password',
                 'role' => UserRole::Admin,
@@ -30,10 +30,46 @@ class DatabaseSeeder extends Seeder
         );
 
         $categories = [
-            ['name' => 'Sneakers', 'description' => 'Casual and sporty sneakers for everyday wear.', 'image' => 'images/brand/sneakers.jpg', 'navbar_sort_order' => 1],
-            ['name' => 'Formal', 'description' => 'Elegant formal shoes for office and events.', 'image' => 'images/brand/shoes.jpg', 'navbar_sort_order' => 2],
-            ['name' => 'Sandals', 'description' => 'Comfortable sandals for warm weather.', 'image' => 'images/brand/sandals.jpg', 'navbar_sort_order' => 3],
-            ['name' => 'Boots', 'description' => 'Durable boots for all seasons.', 'image' => 'images/brand/boots.jpg', 'navbar_sort_order' => 4],
+            [
+                'name' => 'Mains',
+                'description' => 'Hearty plates and signature restaurant favourites.',
+                'navbar_sort_order' => 1,
+                'products' => [
+                    ['name' => 'Jollof Rice Special', 'price' => 55, 'discount' => 45, 'desc' => 'Smoky party jollof served with your choice of protein and salad.'],
+                    ['name' => 'Grilled Chicken Plate', 'price' => 70, 'discount' => null, 'desc' => 'Charcoal-grilled chicken with banku or fries and pepper sauce.'],
+                    ['name' => 'Waakye Combo', 'price' => 50, 'discount' => null, 'desc' => 'Classic waakye with gari, spaghetti, egg, and shito.'],
+                ],
+            ],
+            [
+                'name' => 'Sides',
+                'description' => 'Extras and shareable sides to complete your meal.',
+                'navbar_sort_order' => 2,
+                'products' => [
+                    ['name' => 'Fried Plantain', 'price' => 20, 'discount' => null, 'desc' => 'Crispy golden plantain, lightly seasoned.'],
+                    ['name' => 'Coleslaw', 'price' => 15, 'discount' => null, 'desc' => 'Fresh creamy slaw — a cool contrast to spicy mains.'],
+                    ['name' => 'Extra Banku', 'price' => 12, 'discount' => null, 'desc' => 'Soft banku portion to round out your plate.'],
+                ],
+            ],
+            [
+                'name' => 'Drinks',
+                'description' => 'Cold drinks and local favourites to go with your order.',
+                'navbar_sort_order' => 3,
+                'products' => [
+                    ['name' => 'Sobolo', 'price' => 15, 'discount' => null, 'desc' => 'Chilled hibiscus drink with a hint of ginger.'],
+                    ['name' => 'Fresh Juice', 'price' => 18, 'discount' => null, 'desc' => 'Seasonal fruit blend, made to order.'],
+                    ['name' => 'Bottled Water', 'price' => 5, 'discount' => null, 'desc' => '500ml still water.'],
+                ],
+            ],
+            [
+                'name' => 'Desserts',
+                'description' => 'Sweet finishes after a satisfying meal.',
+                'navbar_sort_order' => 4,
+                'products' => [
+                    ['name' => 'Chocolate Cake Slice', 'price' => 25, 'discount' => 20, 'desc' => 'Rich chocolate sponge with cream frosting.'],
+                    ['name' => 'Ice Cream Cup', 'price' => 18, 'discount' => null, 'desc' => 'Two scoops of rotating seasonal flavours.'],
+                    ['name' => 'Puff Puff (6pcs)', 'price' => 15, 'discount' => null, 'desc' => 'Warm golden doughnuts dusted with sugar.'],
+                ],
+            ],
         ];
 
         foreach ($categories as $categoryData) {
@@ -42,7 +78,7 @@ class DatabaseSeeder extends Seeder
                 [
                     'name' => $categoryData['name'],
                     'description' => $categoryData['description'],
-                    'image' => $categoryData['image'],
+                    'image' => null,
                     'status' => CategoryStatus::Active,
                     'show_in_navbar' => true,
                     'navbar_sort_order' => $categoryData['navbar_sort_order'],
@@ -50,21 +86,20 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
-            for ($i = 1; $i <= 3; $i++) {
-                $name = "{$categoryData['name']} Style {$i}";
-                $sku = strtoupper(Str::slug($categoryData['name'], ''))."-00{$i}";
-                $basePrice = 149.99 + ($i * 50) + ($categoryData['navbar_sort_order'] * 10);
+            foreach ($categoryData['products'] as $index => $item) {
+                $sku = strtoupper(Str::slug($categoryData['name'], '')).'-'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT);
                 $product = Product::query()->updateOrCreate(
                     ['sku' => $sku],
                     [
                         'category_id' => $category->id,
-                        'name' => $name,
-                        'slug' => Str::slug($name),
-                        'price' => round($basePrice, 2),
-                        'discount_price' => $i === 1 ? round($basePrice - 30, 2) : null,
-                        'description' => 'Premium quality footwear from the Sacy Shoes collection.',
+                        'name' => $item['name'],
+                        'slug' => Str::slug($item['name']),
+                        'price' => $item['price'],
+                        'discount_price' => $item['discount'],
+                        'description' => $item['desc'],
                         'quantity' => 0,
                         'status' => ProductStatus::Active,
+                        'published_at' => now()->subDays($index),
                     ]
                 );
 
@@ -74,6 +109,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(ShippingSeeder::class);
         $this->call(CouponSeeder::class);
+        $this->call(ProductImageSeeder::class);
+        $this->call(DiningTableSeeder::class);
         $this->call(HomeContentSeeder::class);
         $this->call(PageSeeder::class);
         $this->call(EmailTemplateSeeder::class);

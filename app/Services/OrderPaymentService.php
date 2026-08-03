@@ -117,5 +117,14 @@ class OrderPaymentService
 
         $this->notifications->paymentReceived($order);
         app(AdminNotificationService::class)->sync();
+
+        try {
+            app(KitchenAlertService::class)->notify($order);
+        } catch (\Throwable $exception) {
+            Log::warning('Kitchen alert failed after payment.', [
+                'order_id' => $order->id,
+                'message' => $exception->getMessage(),
+            ]);
+        }
     }
 }

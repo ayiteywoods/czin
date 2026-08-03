@@ -3,6 +3,34 @@
 @section('heading', 'Order '.$order->order_number)
 
 @section('content')
+    <div class="mb-6 flex flex-wrap gap-2">
+        <a
+            href="{{ route('admin.orders.receipt', $order) }}"
+            class="btn-primary"
+            target="_blank"
+            rel="noopener"
+        >
+            Print receipt
+        </a>
+        @if ($order->payment_status === \App\Enums\PaymentStatus::Paid)
+            <a
+                href="{{ route('admin.orders.invoice', $order) }}"
+                class="btn-outline"
+                target="_blank"
+                rel="noopener"
+            >
+                View invoice
+            </a>
+        @endif
+        <a href="{{ route('admin.orders.index') }}" class="btn-outline">Back to orders</a>
+    </div>
+
+    @if (request()->boolean('print_receipt') || session('print_receipt'))
+        <script>
+            window.open(@js(route('admin.orders.receipt', ['order' => $order, 'autoprint' => 1])), '_blank', 'noopener');
+        </script>
+    @endif
+
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <div id="delivery-tracking" class="card p-6">

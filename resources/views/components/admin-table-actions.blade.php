@@ -3,6 +3,7 @@
     'viewUrl' => null,
     'editUrl' => null,
     'editTitle' => 'Edit',
+    'printReceiptUrl' => null,
     'deleteUrl' => null,
     'viewNewTab' => false,
     'deleteConfirm' => 'Are you sure you want to delete this item?',
@@ -41,6 +42,21 @@
         <a href="{{ $editUrl }}" class="admin-action-btn" title="{{ $editTitle }}" aria-label="{{ $editTitle }}">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+            </svg>
+        </a>
+    @endif
+
+    @if ($printReceiptUrl)
+        <a
+            href="{{ $printReceiptUrl }}"
+            class="admin-action-btn"
+            title="Print receipt"
+            aria-label="Print receipt"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c3.021 0 5.567-2.001 6.32-4.74M6.72 13.829l-1.05 3.18a.75.75 0 00.727.97h1.05M6.72 13.829h10.56M18.28 13.829c-3.021 0-5.567-2.001-6.32-4.74M18.28 13.829l1.05 3.18a.75.75 0 01-.727.97h-1.05M18.28 13.829H7.72M9 6.75h6m-6 3h6m-7.5 9.75h9a2.25 2.25 0 002.25-2.25v-4.5A2.25 2.25 0 0016.5 12h-9A2.25 2.25 0 005.25 14.25v4.5A2.25 2.25 0 007.5 21z"/>
             </svg>
         </a>
     @endif

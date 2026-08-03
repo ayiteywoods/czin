@@ -27,6 +27,8 @@
         sizeInput: root.querySelector('[data-variant-size-input]'),
         colorInput: root.querySelector('[data-variant-color-input]'),
         heelInput: root.querySelector('[data-variant-heel-input]'),
+        specialWrap: root.querySelector('[data-special-request-wrap]'),
+        specialRequest: root.querySelector('[data-special-request]'),
         message: root.querySelector('[data-variant-message]'),
         quantityInput: root.querySelector('[data-variant-quantity]'),
         submit: root.querySelector('[data-variant-submit]'),
@@ -38,6 +40,24 @@
 
     function optionEquals(left, right) {
         return normalizeOption(left) === normalizeOption(right);
+    }
+
+    function isCustomColor(color = state.selectedColor) {
+        return optionEquals(color, 'Custom');
+    }
+
+    function stockColorForSelection() {
+        if (!isCustomColor()) {
+            return state.selectedColor;
+        }
+
+        const preferred = ['Standard', 'Mild', 'Spicy', 'Extra Spicy'];
+        const stocked = inStockVariants();
+        const colors = [...new Set(stocked.map((variant) => variant.color).filter(Boolean))];
+
+        return preferred.find((color) =>
+            colors.some((available) => optionEquals(available, color)),
+        ) || colors[0] || null;
     }
 
     function hasHeel(variant) {
@@ -55,9 +75,15 @@
     }
 
     function isSizeInStockForColor(size, color) {
+        const stockColor = optionEquals(color, 'Custom') ? stockColorForSelection() : color;
+
+        if (!stockColor) {
+            return false;
+        }
+
         return variants.some((variant) =>
             optionEquals(variant.size, size)
-            && optionEquals(variant.color, color)
+            && optionEquals(variant.color, stockColor)
             && variant.quantity > 0,
         );
     }
@@ -76,9 +102,14 @@
 
     function sizesForColor(color) {
         const seen = new Set();
+        const stockColor = optionEquals(color, 'Custom') ? stockColorForSelection() : color;
+
+        if (!stockColor) {
+            return [];
+        }
 
         return variants
-            .filter((variant) => optionEquals(variant.color, color))
+            .filter((variant) => optionEquals(variant.color, stockColor))
             .map((variant) => variant.size)
             .filter((size) => {
                 const key = normalizeOption(size);
@@ -123,9 +154,15 @@
             return [];
         }
 
+        const stockColor = stockColorForSelection();
+
+        if (!stockColor) {
+            return [];
+        }
+
         return inStockVariants().filter((variant) =>
             optionEquals(variant.size, state.selectedSize)
-            && optionEquals(variant.color, state.selectedColor),
+            && optionEquals(variant.color, stockColor),
         );
     }
 
@@ -180,28 +217,40 @@
     }
 
     function canChangeQuantity() {
-        return Boolean(state.selectedSize && state.selectedColor && quantityCap() > 0);
+        return Boolean(state.selectedSize && state.selectedColor && quantityCap() > 0 && customRequestReady());
+    }
+
+    function customRequestReady() {
+        if (!isCustomColor()) {
+            return true;
+        }
+
+        return Boolean(els.specialRequest?.value?.trim());
     }
 
     function selectionMessage() {
-        if (selectedVariant()) {
+        if (selectedVariant() && customRequestReady()) {
             return '';
         }
 
         if (!state.selectedColor) {
-            return 'Choose a color first.';
+            return 'Choose an option first (for example Standard, Spicy, or Custom).';
+        }
+
+        if (isCustomColor() && !customRequestReady()) {
+            return 'Type your custom prep or spice request.';
         }
 
         if (!state.selectedSize) {
-            return 'Choose your size.';
+            return 'Choose a portion size.';
         }
 
         if (state.selectedSize && state.selectedColor && availableHeels().length > 1) {
-            return 'Multiple heel lengths are available. Please select one to continue.';
+            return 'Multiple extras are available. Please select one to continue.';
         }
 
         return showHeelSection()
-            ? 'Heel length is optional when only one option matches.'
+            ? 'Extra is optional when only one option matches.'
             : '';
     }
 
@@ -237,7 +286,7 @@
         if (!state.selectedColor) {
             const prompt = document.createElement('p');
             prompt.className = 'text-sm text-brand-muted';
-            prompt.textContent = 'Select a color to see available sizes.';
+            prompt.textContent = 'Select an option to see available portions.';
             els.sizeOptions.appendChild(prompt);
             state.selectedSize = null;
 
@@ -249,7 +298,7 @@
         if (sizes.length === 0) {
             const empty = document.createElement('p');
             empty.className = 'text-sm text-brand-muted';
-            empty.textContent = 'No sizes available for this color.';
+            empty.textContent = 'No portions available for this option.';
             els.sizeOptions.appendChild(empty);
             state.selectedSize = null;
 
@@ -258,6 +307,15 @@
 
         if (state.selectedSize && !sizes.some((size) => optionEquals(size, state.selectedSize))) {
             state.selectedSize = null;
+        }
+
+        if (!state.selectedSize) {
+            const stockedSizes = sizes.filter((size) => isSizeInStockForColor(size, state.selectedColor));
+            const preferredSizes = ['Regular', 'Large', 'Family'];
+
+            state.selectedSize = preferredSizes.find((size) =>
+                stockedSizes.some((available) => optionEquals(available, size)),
+            ) || stockedSizes[0] || null;
         }
 
         sizes.forEach((size) => {
@@ -353,11 +411,22 @@
         }
 
         if (els.colorInput) {
-            els.colorInput.value = variant?.color || state.selectedColor || '';
+            els.colorInput.value = state.selectedColor || '';
         }
 
         if (els.heelInput) {
             els.heelInput.value = variant?.heel_length || state.selectedHeel || '';
+        }
+
+        if (els.specialWrap) {
+            els.specialWrap.hidden = !isCustomColor();
+        }
+
+        if (els.specialRequest && !isCustomColor()) {
+            // Keep typed text if they toggle back later; only clear required state.
+            els.specialRequest.required = false;
+        } else if (els.specialRequest) {
+            els.specialRequest.required = true;
         }
 
         if (els.message) {
@@ -384,7 +453,10 @@
         }
 
         if (els.submit) {
-            els.submit.disabled = els.submit.dataset.outOfStock === 'true';
+            const ready = Boolean(selectedVariant())
+                && customRequestReady()
+                && els.submit.dataset.outOfStock !== 'true';
+            els.submit.disabled = !ready;
         }
     }
 
@@ -396,6 +468,29 @@
         state.selectedSize = size;
         state.selectedHeel = null;
         render();
+    }
+
+    function autoSelectDefaults() {
+        if (!state.selectedColor) {
+            const preferredColors = ['Standard', 'Mild', 'Spicy'];
+            const stocked = inStockVariants();
+            const colors = [...new Set(stocked.map((variant) => variant.color).filter(Boolean))];
+
+            state.selectedColor = preferredColors.find((color) =>
+                colors.some((available) => optionEquals(available, color)),
+            ) || colors[0] || null;
+        }
+
+        if (state.selectedColor && !state.selectedSize) {
+            const sizes = sizesForColor(state.selectedColor).filter((size) =>
+                isSizeInStockForColor(size, state.selectedColor),
+            );
+            const preferredSizes = ['Regular', 'Large', 'Family'];
+
+            state.selectedSize = preferredSizes.find((size) =>
+                sizes.some((available) => optionEquals(available, size)),
+            ) || sizes[0] || null;
+        }
     }
 
     root.addEventListener('change', (event) => {
@@ -448,6 +543,26 @@
         state.selectedColor = els.colorSelect.value || null;
         state.selectedSize = null;
         state.selectedHeel = null;
+
+        if (state.selectedColor) {
+            const sizes = sizesForColor(state.selectedColor).filter((size) =>
+                isSizeInStockForColor(size, state.selectedColor),
+            );
+            const preferredSizes = ['Regular', 'Large', 'Family'];
+
+            state.selectedSize = preferredSizes.find((size) =>
+                sizes.some((available) => optionEquals(available, size)),
+            ) || sizes[0] || null;
+        }
+
+        render();
+
+        if (isCustomColor()) {
+            els.specialRequest?.focus();
+        }
+    });
+
+    els.specialRequest?.addEventListener('input', () => {
         render();
     });
 
@@ -457,6 +572,11 @@
 
     if (!state.selectedColor) {
         state.selectedSize = null;
+    }
+
+    // Don't auto-select Custom; prefer Standard.
+    if (!isCustomColor()) {
+        autoSelectDefaults();
     }
 
     render();

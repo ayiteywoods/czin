@@ -4,17 +4,24 @@ namespace App\Providers;
 
 use App\Enums\AdminPermission;
 use App\Models\CartItem;
+use App\Models\DeliveryAssignment;
+use App\Models\DiningTable;
+use App\Models\LoyaltyAccount;
 use App\Models\Order;
 use App\Observers\OrderObserver;
 use App\Services\CartService;
 use App\Services\StoreSettingService;
 use App\View\Composers\StorefrontComposer;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        Sanctum::usePersonalAccessTokenModel(\App\Models\PersonalAccessToken::class);
     }
 
     /**
@@ -31,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
+        });
+
         if (str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
@@ -64,5 +75,9 @@ class AppServiceProvider extends ServiceProvider
                 ->whereKey($value)
                 ->firstOrFail();
         });
+
+        Route::bind('table', fn (string $value) => DiningTable::query()->findOrFail($value));
+        Route::bind('loyalty', fn (string $value) => LoyaltyAccount::query()->findOrFail($value));
+        Route::bind('delivery', fn (string $value) => DeliveryAssignment::query()->findOrFail($value));
     }
 }

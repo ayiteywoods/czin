@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin - Sacy Shoes')</title>
-    <link rel="icon" type="image/webp" href="{{ asset('images/brand/logo1.webp') }}">
+    <title>@yield('title', 'Admin - CZIN')</title>
+    @include('partials.favicon')
     {{-- Dark mode disabled for now
     @include('partials.theme-init')
     --}}
@@ -77,7 +77,7 @@
     <x-admin-sidebar />
 
     <div class="admin-main" :class="sidebarCollapsed ? 'admin-main-collapsed' : ''">
-            <header class="border-b border-neutral-200 bg-brand-white px-4 py-4 sm:px-6 dark:border-purple-900/50 dark:bg-brand-white">
+            <header class="border-b border-neutral-200 bg-brand-white px-4 py-4 sm:px-6 dark:border-neutral-800 dark:bg-brand-white">
                 <div class="flex items-center justify-between gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,56rem)_auto] lg:items-center lg:gap-6">
                     <div class="flex min-w-0 items-center gap-3">
                         <button

@@ -132,8 +132,8 @@
     ]])))">
         <div class="flex items-center justify-between gap-3">
             <div>
-                <label class="block text-sm font-medium">Size & color options<span class="text-brand-red" aria-hidden="true"> *</span></label>
-                <p class="mt-1 text-xs text-brand-muted">Add the combinations customers can choose from. Heel length is optional. Color names appear on the shop exactly as you type them.</p>
+                <label class="block text-sm font-medium">Portion & option combinations<span class="text-brand-red" aria-hidden="true"> *</span></label>
+                <p class="mt-1 text-xs text-brand-muted">Add the combinations guests can choose from. Extra is optional. Option names appear on the menu exactly as you type them.</p>
             </div>
             <button type="button" class="btn-outline px-3 py-2 text-xs" @click="addRow()">Add option</button>
         </div>
@@ -142,9 +142,9 @@
             <table class="min-w-full text-sm">
                 <thead class="border-b border-neutral-200 text-left text-xs uppercase tracking-wide text-brand-muted">
                     <tr>
-                        <th class="px-2 py-2">Size <span class="text-brand-red">*</span></th>
-                        <th class="px-2 py-2">Color <span class="text-brand-red">*</span></th>
-                        <th class="px-2 py-2">Heel length <span class="normal-case text-brand-muted">(optional)</span></th>
+                        <th class="px-2 py-2">Portion <span class="text-brand-red">*</span></th>
+                        <th class="px-2 py-2">Option <span class="text-brand-red">*</span></th>
+                        <th class="px-2 py-2">Extra <span class="normal-case text-brand-muted">(optional)</span></th>
                         <th class="px-2 py-2">Qty <span class="text-brand-red">*</span></th>
                         <th class="px-2 py-2">SKU</th>
                         <th class="px-2 py-2">Active</th>

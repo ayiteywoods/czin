@@ -1,3 +1,5 @@
+import { revealStorefrontElements } from './storefront-reveal.js';
+
 function initLoadMoreProducts() {
   document.querySelectorAll('[data-load-more]').forEach((button) => {
     if (button.dataset.loadMoreBound === 'true') {
@@ -39,6 +41,8 @@ function initLoadMoreProducts() {
         if (window.Alpine && appendedNodes.length > 0) {
           window.Alpine.initTree(target);
         }
+
+        revealStorefrontElements(appendedNodes.filter((node) => node.matches?.('[data-storefront-reveal]')));
 
         if (data.has_more) {
           button.dataset.page = String(data.next_page);

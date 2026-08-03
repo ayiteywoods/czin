@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
@@ -46,7 +47,20 @@ class DetailController extends Controller
     {
         abort_unless($user->role === UserRole::Customer, 404);
 
-        $user->loadCount('orders');
+        $user->load(['customerTags', 'loyaltyAccount'])->loadCount('orders');
+
+        $paidOrders = Order::query()
+            ->where('user_id', $user->id)
+            ->where('payment_status', PaymentStatus::Paid);
+
+        $totalSpend = (float) (clone $paidOrders)->sum('total');
+        $paidCount = (clone $paidOrders)->count();
+        $averageOrder = $paidCount > 0 ? round($totalSpend / $paidCount, 2) : 0.0;
+        $lastOrderDate = Order::query()
+            ->where('user_id', $user->id)
+            ->latest('created_at')
+            ->value('created_at');
+
         $recentOrders = Order::query()
             ->where('user_id', $user->id)
             ->latest()
@@ -55,7 +69,13 @@ class DetailController extends Controller
 
         return response()->json([
             'title' => $user->name,
-            'html' => view('admin.details.customer', compact('user', 'recentOrders'))->render(),
+            'html' => view('admin.details.customer', compact(
+                'user',
+                'recentOrders',
+                'totalSpend',
+                'averageOrder',
+                'lastOrderDate',
+            ))->render(),
         ]);
     }
 }

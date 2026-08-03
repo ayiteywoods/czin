@@ -5,7 +5,7 @@
     <button
         type="button"
         @click="userOpen = !userOpen; notificationsOpen = false"
-        class="flex items-center gap-2 rounded-none px-2 py-1.5 text-brand-black transition hover:bg-brand-light"
+        class="flex items-center gap-2 rounded-xl px-2 py-1.5 text-brand-black transition hover:bg-brand-light"
         :class="userOpen ? 'bg-brand-light text-brand-red' : ''"
         aria-label="Account menu"
         :aria-expanded="userOpen"

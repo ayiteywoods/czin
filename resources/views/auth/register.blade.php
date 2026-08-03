@@ -1,10 +1,10 @@
 @extends('layouts.guest')
 
-@section('title', 'Register - SACYSHOES')
+@section('title', 'Register - CZIN')
 
 @section('content')
     <h1 class="page-heading">Create account</h1>
-    <p class="mt-1 text-sm text-brand-muted">Shop shoes and track your orders.</p>
+    <p class="mt-1 text-sm text-brand-muted">Order meals and track your deliveries.</p>
 
     <form method="POST" action="{{ route('register') }}" class="mt-6 space-y-4">
         @csrf

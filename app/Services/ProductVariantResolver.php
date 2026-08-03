@@ -15,6 +15,10 @@ class ProductVariantResolver
         string $color,
         ?string $heelLength = null
     ): ProductVariant {
+        if ($this->normalize($color) === 'custom') {
+            $color = $this->fallbackColorForSize($product, $size);
+        }
+
         $candidates = $this->matchingVariants($product, $size, $color);
 
         if ($candidates->isEmpty()) {
@@ -77,6 +81,39 @@ class ProductVariantResolver
             ->filter(fn (ProductVariant $variant) => $this->normalize($variant->size) === $normalizedSize)
             ->filter(fn (ProductVariant $variant) => $this->normalize($variant->color) === $normalizedColor)
             ->values();
+    }
+
+    protected function fallbackColorForSize(Product $product, string $size): string
+    {
+        $normalizedSize = $this->normalize($size);
+        $preferred = ['standard', 'mild', 'spicy', 'extra spicy'];
+
+        $variants = $product->variants()
+            ->where('is_active', true)
+            ->get()
+            ->filter(fn (ProductVariant $variant) => $variant->quantity > 0)
+            ->filter(fn (ProductVariant $variant) => $this->normalize($variant->size) === $normalizedSize)
+            ->values();
+
+        foreach ($preferred as $color) {
+            $match = $variants->first(
+                fn (ProductVariant $variant) => $this->normalize($variant->color) === $color
+            );
+
+            if ($match) {
+                return $match->color;
+            }
+        }
+
+        $first = $variants->first();
+
+        if ($first) {
+            return $first->color;
+        }
+
+        throw ValidationException::withMessages([
+            'variant_size' => 'No portion options are available for a custom request.',
+        ]);
     }
 
     protected function normalize(?string $value): string

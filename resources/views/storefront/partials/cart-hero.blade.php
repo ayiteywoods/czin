@@ -1,8 +1,8 @@
 @php
     $itemCount = $items->count();
     $description = $itemCount > 0
-        ? "Review your selected styles, update quantities, and proceed when you're ready."
-        : 'Your bag is empty. Browse our collection and add something you love.';
+        ? "Review your dishes, update quantities, and continue to checkout when you're ready."
+        : 'Your order is empty. Browse the menu and add something delicious.';
 
     $stats = $itemCount > 0
         ? [
@@ -13,13 +13,13 @@
         : [
             ['value' => '0', 'label' => 'Items', 'icon' => 'bag', 'tone' => 'red'],
             ['value' => config('shop.currency_symbol').' 0', 'label' => 'Subtotal', 'icon' => 'cart', 'tone' => 'white'],
-            ['value' => 'Shop', 'label' => 'Browse', 'icon' => 'tag', 'tone' => 'red'],
+            ['value' => 'Menu', 'label' => 'Browse', 'icon' => 'tag', 'tone' => 'red'],
         ];
 @endphp
 
 <x-page-hero
-    eyebrow="Your Bag"
-    title="Shopping Cart"
+    eyebrow="Your Order"
+    title="Your Cart"
     :description="$description"
     icon="cart"
     :stats="$stats"
@@ -29,7 +29,7 @@
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
-            Continue Shopping
+            Back to Menu
         </a>
     </x-slot:actions>
 </x-page-hero>

@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', $page->title.' - SACYSHOES')
+@section('title', $page->title.' - CZIN')
 
 @section('content')
     @php
@@ -35,7 +35,7 @@
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-brand-muted">
-                    Please read this document carefully. It explains your rights and our responsibilities when you shop with {{ config('shop.store_name', "Sacy's Shoes") }}.
+                    Please read this document carefully. It explains your rights and our responsibilities when you shop with {{ config('shop.store_name', "CZIN") }}.
                 </p>
                 <p class="shrink-0 text-xs font-semibold uppercase tracking-wider text-brand-black">
                     Effective {{ $page->updated_at?->format('F j, Y') ?? '—' }}
@@ -81,7 +81,7 @@
                                 @if ($section['level'] === 2)
                                     <a
                                         href="#{{ $section['id'] }}"
-                                        class="rounded-none border border-neutral-200 px-3 py-1.5 text-xs font-medium text-brand-black transition hover:border-brand-red hover:text-brand-red"
+                                        class="rounded-xl border border-neutral-200 px-3 py-1.5 text-xs font-medium text-brand-black transition hover:border-brand-red hover:text-brand-red"
                                     >
                                         {{ $section['title'] }}
                                     </a>

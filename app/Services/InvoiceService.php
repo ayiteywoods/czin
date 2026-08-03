@@ -125,6 +125,8 @@ class InvoiceService
     public function logoDataUri(): ?string
     {
         $candidates = [
+            public_path(config('shop.logo')),
+            public_path('images/brand/czin.png'),
             public_path('images/brand/logo1.webp'),
             public_path('images/brand/logo1.png'),
             public_path('images/brand/logo1.jpg'),

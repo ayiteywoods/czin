@@ -6,8 +6,8 @@
 
 @php
     $shareUrl = route('shop.show', $product);
-    $shareTitle = $product->name.' - SACYSHOES';
-    $shareText = 'Check out '.$product->name.' on SACYSHOES';
+    $shareTitle = $product->name.' - CZIN';
+    $shareText = 'Check out '.$product->name.' on CZIN';
 @endphp
 
 <div

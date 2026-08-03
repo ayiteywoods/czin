@@ -27,7 +27,7 @@
 
             <div>
                 <x-form-label for="contact_email" :required="true">Store email</x-form-label>
-                <input id="contact_email" type="email" name="contact_email" value="{{ old('contact_email', $settings->contact_email) }}" required class="input-field" placeholder="hello@sacyshoes.com">
+                <input id="contact_email" type="email" name="contact_email" value="{{ old('contact_email', $settings->contact_email) }}" required class="input-field" placeholder="hello@czin.com">
                 <p class="mt-1 text-xs text-brand-muted">Transactional email shown on invoices and order notifications.</p>
                 @error('contact_email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
@@ -72,7 +72,7 @@
                             value="{{ old('footer_tagline', $settings->footer_tagline ?: $settings->footerTagline()) }}"
                             required
                             class="input-field"
-                            placeholder="Premium footwear curated for every occasion."
+                            placeholder="Fresh meals made to order."
                         >
                         @error('footer_tagline')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
@@ -85,7 +85,7 @@
                             value="{{ old('footer_subline', $settings->footer_subline ?: $settings->footerSubline()) }}"
                             required
                             class="input-field"
-                            placeholder="Quality shoes delivered across Ghana."
+                            placeholder="Hot food delivered across Accra."
                         >
                         @error('footer_subline')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
@@ -130,6 +130,136 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card space-y-4 p-6">
+                <div>
+                    <h2 class="font-semibold">Kitchen alerts</h2>
+                    <p class="mt-1 text-sm text-brand-muted">Notify kitchen staff by SMS or WhatsApp when a paid order arrives. Requires Twilio credentials in your <code>.env</code> file.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="flex items-start gap-3">
+                        <input
+                            type="checkbox"
+                            name="kitchen_sms_enabled"
+                            value="1"
+                            class="mt-1 rounded border-neutral-300"
+                            @checked(old('kitchen_sms_enabled', $settings->kitchen_sms_enabled))
+                        >
+                        <span>
+                            <span class="block text-sm font-medium">Send SMS alerts</span>
+                            <span class="block text-xs text-brand-muted">Texts the kitchen phone when an order is paid (online or POS).</span>
+                        </span>
+                    </label>
+
+                    <div>
+                        <label for="kitchen_sms_phone" class="block text-sm font-medium">Kitchen SMS phone</label>
+                        <input id="kitchen_sms_phone" type="text" name="kitchen_sms_phone" value="{{ old('kitchen_sms_phone', $settings->kitchen_sms_phone) }}" class="input-field" placeholder="{{ $settings->contact_phone }}">
+                        <p class="mt-1 text-xs text-brand-muted">Leave blank to use the store phone.</p>
+                        @error('kitchen_sms_phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <label class="flex items-start gap-3">
+                        <input
+                            type="checkbox"
+                            name="kitchen_whatsapp_enabled"
+                            value="1"
+                            class="mt-1 rounded border-neutral-300"
+                            @checked(old('kitchen_whatsapp_enabled', $settings->kitchen_whatsapp_enabled))
+                        >
+                        <span>
+                            <span class="block text-sm font-medium">Send WhatsApp alerts</span>
+                            <span class="block text-xs text-brand-muted">WhatsApp message to the kitchen line via Twilio.</span>
+                        </span>
+                    </label>
+
+                    <div>
+                        <label for="kitchen_whatsapp_phone" class="block text-sm font-medium">Kitchen WhatsApp phone</label>
+                        <input id="kitchen_whatsapp_phone" type="text" name="kitchen_whatsapp_phone" value="{{ old('kitchen_whatsapp_phone', $settings->kitchen_whatsapp_phone) }}" class="input-field" placeholder="{{ $settings->social_whatsapp ?: $settings->contact_phone }}">
+                        <p class="mt-1 text-xs text-brand-muted">Leave blank to use the store WhatsApp or phone number.</p>
+                        @error('kitchen_whatsapp_phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="card space-y-4 p-6">
+                <div>
+                    <h2 class="font-semibold">Restaurant operations</h2>
+                    <p class="mt-1 text-sm text-brand-muted">Stock alerts, cart upsells, ordering availability, and a simple hours note.</p>
+                </div>
+
+                <div>
+                    <label for="low_stock_threshold" class="block text-sm font-medium">Low stock threshold</label>
+                    <input
+                        id="low_stock_threshold"
+                        type="number"
+                        name="low_stock_threshold"
+                        min="0"
+                        max="10000"
+                        value="{{ old('low_stock_threshold', $settings->low_stock_threshold ?? 10) }}"
+                        class="input-field"
+                    >
+                    <p class="mt-1 text-xs text-brand-muted">Products below this quantity appear as low stock on the dashboard.</p>
+                    @error('low_stock_threshold')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="upsell_category_slugs" class="block text-sm font-medium">Upsell category slugs</label>
+                    @php
+                        $upsellSlugsValue = old(
+                            'upsell_category_slugs',
+                            is_array($settings->upsell_category_slugs)
+                                ? implode(', ', $settings->upsell_category_slugs)
+                                : implode(', ', $settings->upsellCategorySlugs())
+                        );
+                        if (is_array($upsellSlugsValue)) {
+                            $upsellSlugsValue = implode(', ', $upsellSlugsValue);
+                        }
+                    @endphp
+                    <input
+                        id="upsell_category_slugs"
+                        type="text"
+                        name="upsell_category_slugs"
+                        value="{{ $upsellSlugsValue }}"
+                        class="input-field"
+                        placeholder="sides, drinks, desserts"
+                    >
+                    <p class="mt-1 text-xs text-brand-muted">Comma-separated category slugs suggested after add-to-cart.</p>
+                    @error('upsell_category_slugs')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('upsell_category_slugs.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="business_hours_note" class="block text-sm font-medium">Business hours note</label>
+                    <input
+                        id="business_hours_note"
+                        type="text"
+                        name="business_hours_note"
+                        value="{{ old('business_hours_note', data_get($settings->business_hours, 'note')) }}"
+                        class="input-field"
+                        placeholder="Open daily 10:00 AM – 10:00 PM"
+                    >
+                    <p class="mt-1 text-xs text-brand-muted">Optional note for internal reference. Public hours still use the Contact page fields.</p>
+                    @error('business_hours_note')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('business_hours.note')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <label class="flex items-start gap-3">
+                    <input type="hidden" name="online_ordering_enabled" value="0">
+                    <input
+                        type="checkbox"
+                        name="online_ordering_enabled"
+                        value="1"
+                        class="mt-1 rounded border-neutral-300"
+                        @checked(old('online_ordering_enabled', $settings->online_ordering_enabled ?? true))
+                    >
+                    <span>
+                        <span class="block text-sm font-medium">Enable online ordering</span>
+                        <span class="block text-xs text-brand-muted">When unchecked, customers cannot place new online orders.</span>
+                    </span>
+                </label>
+                @error('online_ordering_enabled')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
         </div>
 
         <div class="space-y-6">
@@ -147,9 +277,34 @@
 
                 <div>
                     <label for="about_image" class="block text-sm font-medium">Banner image</label>
-                    <input id="about_image" type="file" name="about_image" accept="image/*" class="mt-1 w-full text-sm">
-                    <p class="mt-1 text-xs text-brand-muted">Large images are automatically compressed to {{ \App\Support\ImageUpload::targetLabel(5120) }}.</p>
-                    <img src="{{ $settings->aboutImageUrl() }}" alt="About page banner" class="mt-3 aspect-[21/9] w-full object-cover border border-neutral-200">
+                    <input
+                        id="about_image"
+                        type="file"
+                        name="about_image"
+                        accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.bmp,.avif,.heic,.heif"
+                        class="mt-1 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-brand-red file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-red-dark"
+                    >
+                    <p class="mt-1 text-xs text-brand-muted">Recommended wide image (about 21:9). Large uploads are compressed to {{ \App\Support\ImageUpload::targetLabel(5120) }}.</p>
+
+                    @php
+                        $aboutBannerUrl = $settings->aboutImageUrl();
+                        $hasCustomAboutBanner = filled($settings->about_image_path);
+                    @endphp
+
+                    <div class="mt-3 overflow-hidden border border-neutral-200 bg-neutral-50">
+                        <img
+                            src="{{ $aboutBannerUrl }}"
+                            alt="About page banner"
+                            class="aspect-[21/9] w-full object-cover"
+                            onerror="this.classList.add('hidden'); const fallback = this.nextElementSibling; if (fallback) { fallback.classList.remove('hidden'); fallback.classList.add('flex'); }"
+                        >
+                        <div class="hidden aspect-[21/9] w-full items-center justify-center px-4 text-center text-sm text-brand-muted">
+                            Banner preview unavailable. Choose a new image and save settings.
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-brand-muted">
+                        {{ $hasCustomAboutBanner ? 'Custom banner is currently set.' : 'Showing the default banner until you upload a custom image.' }}
+                    </p>
                     @error('about_image')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
@@ -178,7 +333,7 @@
                         value="{{ old('contact_page_email', $settings->contact_page_email ?: $settings->contactPageEmail()) }}"
                         required
                         class="input-field"
-                        placeholder="support@sacyshoes.com"
+                        placeholder="support@czin.com"
                     >
                     @error('contact_page_email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>

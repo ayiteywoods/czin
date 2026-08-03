@@ -1,6 +1,6 @@
 @extends('account.layout')
 
-@section('title', 'Order ' . $order->order_number . ' - SACYSHOES')
+@section('title', 'Order ' . $order->order_number . ' - CZIN')
 @section('account-heading', 'Order ' . $order->order_number)
 @section('account-subheading', 'Placed on ' . $order->created_at->format('M j, Y'))
 

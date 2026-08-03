@@ -5,7 +5,7 @@
 
     $description = $product->description
         ? \Illuminate\Support\Str::limit(strip_tags($product->description), 160)
-        : 'Premium footwear curated for every occasion.';
+        : 'Fresh meals made to order for pickup and delivery.';
 
     $stats = [
         [
@@ -38,7 +38,7 @@
 >
     <x-slot:chips>
         <a href="{{ route('home') }}" class="shop-hero-chip">Home</a>
-        <a href="{{ route('shop.index') }}" class="shop-hero-chip">Shop</a>
+        <a href="{{ route('shop.index') }}" class="shop-hero-chip">Menu</a>
         @if ($product->category->parent)
             <a href="{{ route('shop.index', ['category' => $product->category->parent->id]) }}" class="shop-hero-chip">
                 {{ $product->category->parent->name }}

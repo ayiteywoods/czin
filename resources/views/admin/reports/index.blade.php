@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="card p-4 sm:p-6">
-        <form method="GET" action="{{ route('admin.reports.index') }}" class="grid gap-4 md:grid-cols-4 md:items-end">
+        <form method="GET" action="{{ route('admin.reports.index') }}" class="grid gap-4 md:grid-cols-6 md:items-end">
             <div>
                 <label for="from" class="block text-sm font-medium">From</label>
                 <input id="from" type="date" name="from" value="{{ $from->format('Y-m-d') }}" class="input-field">
@@ -15,18 +15,58 @@
                 <input id="to" type="date" name="to" value="{{ $to->format('Y-m-d') }}" class="input-field">
             </div>
             <div>
+                <label for="order_source" class="block text-sm font-medium">Source</label>
+                <select id="order_source" name="order_source" class="input-field">
+                    <option value="">All</option>
+                    <option value="pos" @selected(($orderSource ?? '') === 'pos')>POS</option>
+                    <option value="online" @selected(($orderSource ?? '') === 'online')>Online</option>
+                </select>
+            </div>
+            <div>
+                <label for="fulfillment_type" class="block text-sm font-medium">Fulfillment</label>
+                <select id="fulfillment_type" name="fulfillment_type" class="input-field">
+                    <option value="">All</option>
+                    <option value="dine_in" @selected(($fulfillmentType ?? '') === 'dine_in')>Dine in</option>
+                    <option value="takeaway" @selected(($fulfillmentType ?? '') === 'takeaway')>Takeaway</option>
+                    <option value="delivery" @selected(($fulfillmentType ?? '') === 'delivery')>Delivery</option>
+                </select>
+            </div>
+            <div>
                 <button type="submit" class="btn-primary w-full py-2.5">Apply</button>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row">
-                <a href="{{ route('admin.reports.export', ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d'), 'format' => 'csv']) }}" class="btn-outline w-full py-2.5 text-center">
+                <a href="{{ route('admin.reports.export', ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d'), 'format' => 'csv', 'order_source' => $orderSource, 'fulfillment_type' => $fulfillmentType]) }}" class="btn-outline w-full py-2.5 text-center">
                     Export CSV
                 </a>
-                <a href="{{ route('admin.reports.export', ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d'), 'format' => 'pdf']) }}" target="_blank" class="btn-outline w-full py-2.5 text-center">
+                <a href="{{ route('admin.reports.export', ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d'), 'format' => 'pdf', 'order_source' => $orderSource, 'fulfillment_type' => $fulfillmentType]) }}" target="_blank" class="btn-outline w-full py-2.5 text-center">
                     Export PDF
                 </a>
             </div>
         </form>
     </div>
+
+    @isset($segment)
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="card p-4 sm:p-5">
+                <p class="text-xs uppercase tracking-wide text-brand-muted">POS revenue</p>
+                <p class="mt-2 text-xl font-semibold">GHS {{ number_format($segment['pos_revenue'], 2) }}</p>
+                <p class="mt-1 text-xs text-brand-muted">{{ $segment['pos_orders'] }} orders</p>
+            </div>
+            <div class="card p-4 sm:p-5">
+                <p class="text-xs uppercase tracking-wide text-brand-muted">Online revenue</p>
+                <p class="mt-2 text-xl font-semibold">GHS {{ number_format($segment['online_revenue'], 2) }}</p>
+                <p class="mt-1 text-xs text-brand-muted">{{ $segment['online_orders'] }} orders</p>
+            </div>
+            <div class="card p-4 sm:p-5">
+                <p class="text-xs uppercase tracking-wide text-brand-muted">Dine in / Takeaway</p>
+                <p class="mt-2 text-xl font-semibold">{{ $segment['dine_in_count'] }} / {{ $segment['takeaway_count'] }}</p>
+            </div>
+            <div class="card p-4 sm:p-5">
+                <p class="text-xs uppercase tracking-wide text-brand-muted">Delivery</p>
+                <p class="mt-2 text-xl font-semibold">{{ $segment['delivery_count'] }}</p>
+            </div>
+        </div>
+    @endisset
 
     <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="card p-4 sm:p-5">

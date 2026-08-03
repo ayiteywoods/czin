@@ -27,11 +27,14 @@ return [
 
     'order_payment_timeout_hours' => (int) env('SHOP_ORDER_PAYMENT_TIMEOUT_HOURS', 24),
 
-    'store_name' => env('SHOP_STORE_NAME', "Sacy's"),
+    'store_name' => env('SHOP_STORE_NAME', "CZIN"),
 
-    'contact_email' => env('SHOP_CONTACT_EMAIL', 'hello@sacyshoes.com'),
+    'logo' => 'images/brand/clogo.png',
+    'logo_text' => 'images/brand/ctext.png',
 
-    'contact_page_email' => env('SHOP_CONTACT_PAGE_EMAIL', 'support@sacyshoes.com'),
+    'contact_email' => env('SHOP_CONTACT_EMAIL', 'hello@czin.com'),
+
+    'contact_page_email' => env('SHOP_CONTACT_PAGE_EMAIL', 'support@czin.com'),
 
     'contact_phone' => env('SHOP_CONTACT_PHONE', '+233 530 668 945'),
 
@@ -53,42 +56,39 @@ return [
 
     'maintenance_message' => 'We are currently performing scheduled maintenance. Please check back soon.',
 
-    'product_sizes' => ['36', '37', '38', '39', '40', '41', '42'],
+    'online_ordering_enabled' => true,
 
-    'product_colors' => ['Black', 'Brown', 'Nude', 'White', 'Red', 'Beige', 'Gold', 'Pink'],
+    // Mapped to ProductVariant.size (portion / pack size on the menu).
+    'product_sizes' => ['Regular', 'Large', 'Family'],
+
+    // Mapped to ProductVariant.color (prep / spice / style option).
+    'product_colors' => ['Standard', 'Mild', 'Spicy', 'Extra Spicy'],
 
     /*
-    | Maps color names (lowercase keys) to CSS color values for the storefront picker.
-    | Names not listed here still work when they are valid CSS color names (e.g. pink, navy).
+    | Maps option names (lowercase keys) to CSS color values for the storefront picker.
+    | Food options like Mild/Spicy fall back to neutral accents when not listed.
     */
     'product_color_map' => [
-        'black' => '#1a1a1a',
-        'brown' => '#6b4423',
-        'nude' => '#e3bc9a',
+        'standard' => '#737373',
+        'mild' => '#22c55e',
+        'spicy' => '#e10600',
+        'extra spicy' => '#b80500',
+        'black' => '#1a1a0a',
         'white' => '#ffffff',
         'red' => '#c41e3a',
-        'beige' => '#d4b896',
         'gold' => '#d4af37',
-        'pink' => '#ffc0cb',
-        'blue' => '#2563eb',
-        'navy' => '#1e3a5f',
-        'green' => '#16a34a',
-        'grey' => '#9ca3af',
-        'gray' => '#9ca3af',
-        'silver' => '#c0c0c0',
-        'wine' => '#722f37',
         'cream' => '#fffdd0',
-        'tan' => '#d2b48c',
     ],
 
-    'product_heel_lengths' => ['Flat', '1in', '2in', '3in', '4in'],
+    // Optional third option (ProductVariant.heel_length) — unused for most menu items.
+    'product_heel_lengths' => [],
 
     'delivery_info' => [
-        'shipping_note' => 'Shipping calculated at checkout.',
+        'shipping_note' => 'Delivery fee calculated at checkout.',
         'items' => [
             [
                 'icon' => 'truck',
-                'text' => 'Delivery within 48 hours in Accra, excluding Sundays. Payment is made directly to the delivery person upon arrival.',
+                'text' => 'Hot meals delivered across Accra, typically within 45–90 minutes. Delivery fee is paid to the rider on arrival where applicable.',
             ],
         ],
     ],

@@ -12,6 +12,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Order numbers cannot be restored to the previous SACY format.
+        // Order numbers cannot be restored to the previous branded format.
     }
 };

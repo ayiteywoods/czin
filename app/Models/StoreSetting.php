@@ -33,6 +33,14 @@ class StoreSetting extends Model
         'social_x',
         'social_youtube',
         'social_whatsapp',
+        'kitchen_sms_enabled',
+        'kitchen_sms_phone',
+        'kitchen_whatsapp_enabled',
+        'kitchen_whatsapp_phone',
+        'low_stock_threshold',
+        'upsell_category_slugs',
+        'business_hours',
+        'online_ordering_enabled',
         'maintenance_mode',
         'maintenance_message',
     ];
@@ -41,6 +49,12 @@ class StoreSetting extends Model
     {
         return [
             'maintenance_mode' => 'boolean',
+            'kitchen_sms_enabled' => 'boolean',
+            'kitchen_whatsapp_enabled' => 'boolean',
+            'low_stock_threshold' => 'integer',
+            'upsell_category_slugs' => 'array',
+            'business_hours' => 'array',
+            'online_ordering_enabled' => 'boolean',
         ];
     }
 
@@ -52,7 +66,7 @@ class StoreSetting extends Model
     public function aboutImageUrl(): string
     {
         if (! $this->about_image_path) {
-            return asset('images/brand/shoes.jpg');
+            return asset('images/brand/hero2.jpeg');
         }
 
         if (str_starts_with($this->about_image_path, 'images/') || str_starts_with($this->about_image_path, 'http')) {
@@ -95,7 +109,7 @@ class StoreSetting extends Model
     {
         return filled($this->contact_page_email)
             ? $this->contact_page_email
-            : (string) config('shop.contact_page_email', 'support@sacyshoes.com');
+            : (string) config('shop.contact_page_email', 'support@czin.com');
     }
 
     public function contactPageAddress(): string
@@ -186,17 +200,17 @@ class StoreSetting extends Model
     public function aboutHeroDescription(): string
     {
         return $this->about_hero_description
-            ?: config('shop.store_name').' is a Ghanaian footwear brand built on quality, comfort, and style — delivering premium shoes for every occasion, nationwide.';
+            ?: config('shop.store_name').' is a Ghanaian restaurant kitchen serving fresh meals, sides, and drinks — made to order for pickup and delivery across Accra.';
     }
 
     public function footerTagline(): string
     {
-        return $this->footer_tagline ?: 'Premium footwear curated for every occasion.';
+        return $this->footer_tagline ?: 'Fresh meals made to order.';
     }
 
     public function footerSubline(): string
     {
-        return $this->footer_subline ?: 'Quality shoes delivered across Ghana.';
+        return $this->footer_subline ?: 'Hot food delivered across Accra.';
     }
 
     public function isMaintenanceModeEnabled(): bool
@@ -284,5 +298,50 @@ class StoreSetting extends Model
         }
 
         return 'https://'.ltrim($value, '/');
+    }
+
+    public function kitchenSmsPhone(): ?string
+    {
+        return filled($this->kitchen_sms_phone)
+            ? $this->kitchen_sms_phone
+            : $this->contact_phone;
+    }
+
+    public function kitchenWhatsappPhone(): ?string
+    {
+        if (filled($this->kitchen_whatsapp_phone)) {
+            return $this->kitchen_whatsapp_phone;
+        }
+
+        return filled($this->social_whatsapp)
+            ? $this->social_whatsapp
+            : $this->contact_phone;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function upsellCategorySlugs(): array
+    {
+        $slugs = $this->upsell_category_slugs;
+
+        if (! is_array($slugs) || $slugs === []) {
+            return ['sides', 'drinks', 'desserts'];
+        }
+
+        return array_values(array_filter(array_map(
+            fn ($slug) => is_string($slug) ? trim($slug) : '',
+            $slugs,
+        )));
+    }
+
+    public function lowStockThreshold(): int
+    {
+        return max(0, (int) ($this->low_stock_threshold ?? 10));
+    }
+
+    public function isOnlineOrderingEnabled(): bool
+    {
+        return (bool) ($this->online_ordering_enabled ?? true);
     }
 }

@@ -8,8 +8,8 @@
         <button
             type="button"
             @click="userOpen = !userOpen"
-            class="flex items-center gap-2 rounded-none px-2 py-1.5 text-brand-black transition hover:bg-brand-light"
-            :class="userOpen ? 'bg-brand-light text-brand-red' : ''"
+            class="flex items-center gap-2 rounded-xl px-2 py-1.5 text-white transition hover:bg-white/15"
+            :class="userOpen ? 'bg-white/20 text-brand-yellow' : ''"
             aria-label="Account menu"
             :aria-expanded="userOpen"
         >
@@ -57,7 +57,7 @@
     </div>
 @else
     <div class="hidden items-center gap-2 sm:flex">
-        <a href="{{ route('login') }}" class="nav-link" title="Log in to track your orders">Login</a>
-        <a href="{{ route('register') }}" class="btn-primary">Register</a>
+        <a href="{{ route('login') }}" class="nav-link-on-red" title="Log in to track your orders">Login</a>
+        <a href="{{ route('register') }}" class="rounded-xl bg-brand-yellow px-4 py-2 text-xs font-bold uppercase tracking-wide text-brand-black transition hover:bg-brand-yellow-dark">Register</a>
     </div>
 @endauth

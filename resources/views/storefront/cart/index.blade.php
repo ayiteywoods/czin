@@ -1,15 +1,15 @@
 @extends('layouts.storefront')
 
-@section('title', 'Your Cart - SACYSHOES')
+@section('title', 'Your Cart - CZIN')
 
 @section('content')
     @include('storefront.partials.cart-hero')
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         @if ($items->isEmpty())
-            <div class="border border-neutral-200 bg-brand-white p-10 text-center">
+            <div class="rounded-xl border border-neutral-200 bg-brand-white p-10 text-center">
                 <p class="text-brand-muted">Your cart is empty.</p>
-                <a href="{{ route('shop.index') }}" class="btn-primary mt-6 inline-flex px-8 py-3">Browse Products</a>
+                <a href="{{ route('shop.index') }}" class="btn-primary mt-6 inline-flex px-8 py-3">Browse Menu</a>
             </div>
         @else
             @if ($hasUnavailableItems ?? false)
@@ -26,15 +26,13 @@
                         @endphp
                         <div class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center {{ ($row['is_out_of_stock'] || $row['exceeds_stock']) ? 'border-red-200 bg-red-50/30' : '' }}">
                             <a href="{{ route('shop.show', $item->product) }}" class="shrink-0">
-                                @if ($item->product?->primaryImage())
-                                    <img
-                                        src="{{ asset('storage/'.$item->product->primaryImage()->path) }}"
-                                        alt="{{ $item->product->name }}"
-                                        class="h-28 w-28 object-cover"
-                                    >
-                                @else
-                                    <div class="flex h-28 w-28 items-center justify-center bg-neutral-100 text-xs text-brand-muted">No image</div>
-                                @endif
+                                <img
+                                    src="{{ $item->product?->storefrontImageUrl() }}"
+                                    alt="{{ $item->product?->name }}"
+                                    class="h-28 w-28 rounded-lg object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
                             </a>
 
                             <div class="min-w-0 flex-1">
