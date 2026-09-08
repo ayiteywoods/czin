@@ -80,10 +80,6 @@
         @apply text-brand-yellow;
     }
 
-    .logo-wordmark-on-light {
-        filter: brightness(0);
-    }
-
     .storefront-navbar .currency-badge {
         @apply border-white/30 bg-white/10 text-white;
     }

@@ -20,8 +20,10 @@
         default => 'h-5 w-auto object-contain',
     };
 
-    // light = light backgrounds (black/red wordmark via CSS); on-red/dark = white wordmark
-    $wordmarkFilter = $variant === 'light' ? 'logo-wordmark-on-light' : '';
+    // light = black wordmark (keeps colored i-dot); on-red/dark = white wordmark
+    $wordmarkSrc = $variant === 'light'
+        ? asset('images/brand/ctext-on-light.png')
+        : asset('images/brand/ctext.png');
 @endphp
 
 <a href="{{ $href }}" {{ $attributes->merge(['class' => 'inline-flex shrink-0 items-center gap-2']) }}>
@@ -31,9 +33,9 @@
         class="{{ $imageClass }}"
     >
     <img
-        src="{{ asset('images/brand/ctext.png') }}"
+        src="{{ $wordmarkSrc }}"
         alt=""
         aria-hidden="true"
-        @class([$textClass, $wordmarkFilter, 'hidden sm:block' => $hideTextOnMobile])
+        @class([$textClass, 'hidden sm:block' => $hideTextOnMobile])
     >
 </a>
