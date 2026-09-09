@@ -31,6 +31,8 @@ return [
 
     'logo' => 'images/brand/clogo.png',
     'logo_text' => 'images/brand/ctext.png',
+    'logo_text_on_light' => 'images/brand/ctext-on-light.png',
+    'footer_logo' => null,
 
     'contact_email' => env('SHOP_CONTACT_EMAIL', 'hello@czin.com'),
 

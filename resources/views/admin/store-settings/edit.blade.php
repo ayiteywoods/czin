@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('heading', 'Store settings')
-@section('subheading', 'Contact details, footer copy, product delivery info, about page, and contact page')
+@section('subheading', 'Contact details, brand logos, footer copy, product delivery info, about page, and contact page')
 
 @section('content')
     <form
@@ -56,6 +56,87 @@
                 <label for="contact_website" class="block text-sm font-medium">Website URL</label>
                 <input id="contact_website" type="url" name="contact_website" value="{{ old('contact_website', $settings->contact_website) }}" class="input-field" placeholder="{{ config('app.url') }}">
                 @error('contact_website')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="border-t border-neutral-200 pt-4">
+                <h3 class="font-semibold">Brand logos</h3>
+                <p class="mt-1 text-sm text-brand-muted">
+                    Upload PNG or WebP with a transparent background. Leave blank to keep the current image.
+                </p>
+
+                <div class="mt-4 space-y-6">
+                    @php
+                        $logoFields = [
+                            [
+                                'name' => 'logo',
+                                'label' => 'Navbar round logo',
+                                'help' => 'Circular mark shown in the red navbar, favicon, emails, and invoices.',
+                                'url' => $settings->logoUrl(),
+                                'custom' => filled($settings->logo_path),
+                                'preview' => 'h-16 w-16 object-contain',
+                            ],
+                            [
+                                'name' => 'logo_text',
+                                'label' => 'Navbar text logo',
+                                'help' => 'White “czin” wordmark for the red navbar (and footer, unless a footer logo is set).',
+                                'url' => $settings->logoTextUrl(false),
+                                'custom' => filled($settings->logo_text_path),
+                                'preview' => 'h-10 w-auto max-w-[14rem] object-contain',
+                                'previewBg' => 'bg-brand-black',
+                            ],
+                            [
+                                'name' => 'logo_text_on_light',
+                                'label' => 'Text logo (light backgrounds)',
+                                'help' => 'Dark wordmark for login and other light pages. Keep the colored i-dot.',
+                                'url' => $settings->logoTextUrl(true),
+                                'custom' => filled($settings->logo_text_on_light_path),
+                                'preview' => 'h-10 w-auto max-w-[14rem] object-contain',
+                                'previewBg' => 'bg-white',
+                            ],
+                            [
+                                'name' => 'footer_logo',
+                                'label' => 'Footer logo',
+                                'help' => 'Optional. Replaces the round + text logos in the website footer only.',
+                                'url' => $settings->footerLogoUrl() ?: $settings->logoUrl(),
+                                'custom' => filled($settings->footer_logo_path),
+                                'preview' => 'h-12 w-auto max-w-[14rem] object-contain',
+                                'previewBg' => 'bg-brand-black',
+                                'removable' => true,
+                            ],
+                        ];
+                    @endphp
+
+                    @foreach ($logoFields as $field)
+                        <div>
+                            <label for="{{ $field['name'] }}" class="block text-sm font-medium">{{ $field['label'] }}</label>
+                            <p class="mt-0.5 text-xs text-brand-muted">{{ $field['help'] }}</p>
+                            <input
+                                id="{{ $field['name'] }}"
+                                type="file"
+                                name="{{ $field['name'] }}"
+                                accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.bmp,.avif,.heic,.heif"
+                                class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-brand-red file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-red-dark"
+                            >
+                            <div class="mt-3 inline-flex items-center justify-center border border-neutral-200 p-3 {{ $field['previewBg'] ?? 'bg-neutral-50' }}">
+                                <img
+                                    src="{{ $field['url'] }}"
+                                    alt="{{ $field['label'] }} preview"
+                                    class="{{ $field['preview'] }}"
+                                >
+                            </div>
+                            <p class="mt-1 text-xs text-brand-muted">
+                                {{ $field['custom'] ? 'Custom image is currently set.' : 'Showing the default until you upload a custom image.' }}
+                            </p>
+                            @if (! empty($field['removable']) && $field['custom'])
+                                <label class="mt-2 flex items-center gap-2 text-sm text-brand-muted">
+                                    <input type="checkbox" name="remove_footer_logo" value="1" class="rounded border-neutral-300 text-brand-red focus:ring-brand-red">
+                                    Remove custom footer logo (use navbar logos again)
+                                </label>
+                            @endif
+                            @error($field['name'])<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    @endforeach
+                </div>
             </div>
 
             <div class="border-t border-neutral-200 pt-4">

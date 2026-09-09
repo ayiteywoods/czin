@@ -6,6 +6,8 @@
 ])
 
 @php
+    $settings = \App\Models\StoreSetting::current();
+
     $imageClass = match ($size) {
         'header' => 'h-11 w-11 object-contain sm:h-12 sm:w-12',
         'admin' => 'h-10 w-10 object-contain',
@@ -20,15 +22,13 @@
         default => 'h-5 w-auto object-contain',
     };
 
-    // light = black wordmark (keeps colored i-dot); on-red/dark = white wordmark
-    $wordmarkSrc = $variant === 'light'
-        ? asset('images/brand/ctext-on-light.png')
-        : asset('images/brand/ctext.png');
+    $markSrc = $settings->logoUrl();
+    $wordmarkSrc = $settings->logoTextUrl($variant === 'light');
 @endphp
 
 <a href="{{ $href }}" {{ $attributes->merge(['class' => 'inline-flex shrink-0 items-center gap-2']) }}>
     <img
-        src="{{ asset('images/brand/clogo.png') }}"
+        src="{{ $markSrc }}"
         alt="{{ config('shop.store_name') }}"
         class="{{ $imageClass }}"
     >

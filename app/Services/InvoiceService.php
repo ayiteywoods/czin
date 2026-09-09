@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\PaymentStatus;
 use App\Models\Order;
+use App\Models\StoreSetting;
 use App\Support\GuestOrderAccess;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
@@ -124,13 +125,16 @@ class InvoiceService
 
     public function logoDataUri(): ?string
     {
-        $candidates = [
-            public_path(config('shop.logo')),
+        $primary = StoreSetting::current()->logoAbsolutePath();
+
+        $candidates = array_values(array_filter([
+            $primary,
+            public_path('images/brand/clogo.png'),
             public_path('images/brand/czin.png'),
             public_path('images/brand/logo1.webp'),
             public_path('images/brand/logo1.png'),
             public_path('images/brand/logo1.jpg'),
-        ];
+        ]));
 
         foreach ($candidates as $path) {
             if (! is_file($path)) {

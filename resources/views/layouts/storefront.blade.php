@@ -207,7 +207,7 @@
         <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
             <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
                 <div class="text-center sm:col-span-2 sm:text-left lg:col-span-1">
-                    <x-logo href="{{ route('home') }}" size="header" variant="dark" class="mx-auto sm:mx-0" />
+                    <x-footer-logo href="{{ route('home') }}" size="header" class="mx-auto sm:mx-0" />
                     <p class="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-neutral-400 sm:mx-0">
                         {{ $footerTagline }}@if ($footerSubline)<br>{{ $footerSubline }}@endif
                     </p>

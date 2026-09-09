@@ -9,11 +9,48 @@ use App\Models\StoreSetting;
 use App\Services\StoreSettingService;
 use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class StoreSettingController extends Controller
 {
+    /**
+     * @var array<string, array{column: string, directory: string, maxKb: int, maxDimension: int}>
+     */
+    private const IMAGE_UPLOADS = [
+        'about_image' => [
+            'column' => 'about_image_path',
+            'directory' => 'about',
+            'maxKb' => 5120,
+            'maxDimension' => 2400,
+        ],
+        'logo' => [
+            'column' => 'logo_path',
+            'directory' => 'brand',
+            'maxKb' => 2048,
+            'maxDimension' => 1200,
+        ],
+        'logo_text' => [
+            'column' => 'logo_text_path',
+            'directory' => 'brand',
+            'maxKb' => 2048,
+            'maxDimension' => 1600,
+        ],
+        'logo_text_on_light' => [
+            'column' => 'logo_text_on_light_path',
+            'directory' => 'brand',
+            'maxKb' => 2048,
+            'maxDimension' => 1600,
+        ],
+        'footer_logo' => [
+            'column' => 'footer_logo_path',
+            'directory' => 'brand',
+            'maxKb' => 2048,
+            'maxDimension' => 1600,
+        ],
+    ];
+
     public function edit(StoreSettingService $settings): View
     {
         $settings = $settings->current();
@@ -26,7 +63,7 @@ class StoreSettingController extends Controller
     public function update(StoreSettingRequest $request, StoreSettingService $settingsService): RedirectResponse
     {
         $settings = StoreSetting::current();
-        $data = $request->safe()->except(['about_image']);
+        $data = $request->safe()->except(array_keys(self::IMAGE_UPLOADS));
 
         $data['contact_phone_alt'] = $request->input('contact_phone_alt');
         $data['contact_website'] = $request->input('contact_website');
@@ -44,12 +81,37 @@ class StoreSettingController extends Controller
 
         unset($data['business_hours_note']);
 
-        if ($request->hasFile('about_image')) {
-            if ($settings->about_image_path && ! str_starts_with($settings->about_image_path, 'images/')) {
-                Storage::disk('public')->delete($settings->about_image_path);
+        foreach (self::IMAGE_UPLOADS as $input => $meta) {
+            if (! $request->hasFile($input)) {
+                continue;
             }
 
-            $data['about_image_path'] = ImageUpload::store($request->file('about_image'), 'about', 5120, 2400);
+            $file = $request->file($input);
+
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
+            $column = $meta['column'];
+            $existing = $settings->{$column};
+
+            if ($existing && ! str_starts_with($existing, 'images/')) {
+                Storage::disk('public')->delete($existing);
+            }
+
+            $data[$column] = ImageUpload::store(
+                $file,
+                $meta['directory'],
+                $meta['maxKb'],
+                $meta['maxDimension'],
+            );
+        }
+
+        if ($request->boolean('remove_footer_logo') && ! $request->hasFile('footer_logo')) {
+            if ($settings->footer_logo_path && ! str_starts_with($settings->footer_logo_path, 'images/')) {
+                Storage::disk('public')->delete($settings->footer_logo_path);
+            }
+            $data['footer_logo_path'] = null;
         }
 
         $settings->update($data);

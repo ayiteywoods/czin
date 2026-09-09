@@ -2,11 +2,13 @@
 
 namespace App\Support;
 
+use App\Models\StoreSetting;
+
 class MailBranding
 {
     public static function logoUrl(): string
     {
-        return asset(config('shop.logo'));
+        return StoreSetting::current()->logoUrl();
     }
 
     public static function storeName(): string

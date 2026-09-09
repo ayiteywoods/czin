@@ -22,6 +22,10 @@ class StoreSetting extends Model
         'contact_page_hours_time',
         'contact_page_hours_note',
         'about_image_path',
+        'logo_path',
+        'logo_text_path',
+        'logo_text_on_light_path',
+        'footer_logo_path',
         'about_hero_description',
         'footer_tagline',
         'footer_subline',
@@ -65,15 +69,82 @@ class StoreSetting extends Model
 
     public function aboutImageUrl(): string
     {
-        if (! $this->about_image_path) {
-            return asset('images/brand/hero2.jpeg');
+        return $this->resolveBrandImageUrl($this->about_image_path, 'images/brand/hero2.jpeg');
+    }
+
+    public function logoUrl(): string
+    {
+        return $this->resolveBrandImageUrl($this->logo_path, 'images/brand/clogo.png');
+    }
+
+    public function logoTextUrl(bool $onLight = false): string
+    {
+        if ($onLight) {
+            return $this->resolveBrandImageUrl(
+                $this->logo_text_on_light_path,
+                'images/brand/ctext-on-light.png',
+            );
         }
 
-        if (str_starts_with($this->about_image_path, 'images/') || str_starts_with($this->about_image_path, 'http')) {
-            return asset($this->about_image_path);
+        return $this->resolveBrandImageUrl($this->logo_text_path, 'images/brand/ctext.png');
+    }
+
+    public function footerLogoUrl(): ?string
+    {
+        if (! filled($this->footer_logo_path)) {
+            return null;
         }
 
-        return Storage::disk('public')->url($this->about_image_path);
+        return $this->resolveBrandImageUrl($this->footer_logo_path, '');
+    }
+
+    public function hasCustomFooterLogo(): bool
+    {
+        return filled($this->footer_logo_path);
+    }
+
+    /**
+     * Absolute filesystem path for invoice embedding, or null when unavailable.
+     */
+    public function logoAbsolutePath(): ?string
+    {
+        return $this->resolveBrandImageAbsolutePath($this->logo_path, 'images/brand/clogo.png');
+    }
+
+    protected function resolveBrandImageUrl(?string $path, string $default): string
+    {
+        if (! filled($path)) {
+            return $default !== '' ? asset($default) : '';
+        }
+
+        if (str_starts_with($path, 'images/') || str_starts_with($path, 'http')) {
+            return asset($path);
+        }
+
+        return Storage::disk('public')->url($path);
+    }
+
+    protected function resolveBrandImageAbsolutePath(?string $path, string $default): ?string
+    {
+        if (! filled($path)) {
+            $fallback = public_path($default);
+
+            return is_file($fallback) ? $fallback : null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'images/')) {
+            $absolute = public_path($path);
+
+            return is_file($absolute) ? $absolute : null;
+        }
+
+        $absolute = Storage::disk('public')->path($path);
+
+        return is_file($absolute) ? $absolute : null;
     }
 
     public function contactPhoneAlt(): ?string
