@@ -155,10 +155,13 @@ Route::prefix('admin')
             Route::resource('categories', AdminCategoryController::class)->except(['show']);
         });
 
-        Route::middleware('admin.permission:orders')->group(function () {
+        Route::middleware('admin.permission:pos')->group(function () {
             Route::get('pos', [AdminPosController::class, 'index'])->name('pos.index');
             Route::post('pos/orders', [AdminPosController::class, 'store'])->name('pos.store');
             Route::get('pos-report', [AdminPosReportController::class, 'index'])->name('pos-report.index');
+        });
+
+        Route::middleware('admin.permission:orders')->group(function () {
             Route::get('details/orders/{order}', [AdminDetailController::class, 'order'])->name('details.orders');
             Route::get('orders/{order}/invoice', [InvoiceController::class, 'show'])->name('orders.invoice');
             Route::get('orders/{order}/invoice/pdf', [InvoiceController::class, 'pdf'])->name('orders.invoice.pdf');

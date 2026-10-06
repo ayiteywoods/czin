@@ -73,6 +73,7 @@ class User extends Authenticatable
     {
         $routes = [
             AdminPermission::Dashboard->value => 'admin.dashboard',
+            AdminPermission::Pos->value => 'admin.pos.index',
             AdminPermission::Kitchen->value => 'admin.kitchen.index',
             AdminPermission::Orders->value => 'admin.orders.index',
             AdminPermission::Tables->value => 'admin.tables.index',

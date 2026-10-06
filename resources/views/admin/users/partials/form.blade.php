@@ -4,6 +4,7 @@
     $user = $user ?? null;
     $selectedPermissions = old('admin_permissions', $user?->admin_permissions ?? []);
     $isSuperAdmin = old('is_super_admin', $user ? $user->admin_permissions === null : true);
+    $posStaffPreset = AdminPermission::posStaffPreset();
 @endphp
 
 <div>
@@ -42,7 +43,20 @@
 </div>
 @error('is_active')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
 
-<div class="rounded-lg border border-neutral-200 p-4" x-data="{ fullAccess: @json((bool) $isSuperAdmin) }">
+<div
+    class="rounded-lg border border-neutral-200 p-4"
+    x-data="{
+        fullAccess: @json((bool) $isSuperAdmin),
+        posStaffPreset: @js($posStaffPreset),
+        applyPosStaffPreset() {
+            this.fullAccess = false;
+            const boxes = this.$root.querySelectorAll('input[type=checkbox][name^=admin_permissions]');
+            boxes.forEach((box) => {
+                box.checked = this.posStaffPreset.includes(box.value);
+            });
+        }
+    }"
+>
     <div class="flex items-center gap-2">
         <input type="hidden" name="is_super_admin" value="0">
         <input
@@ -59,7 +73,19 @@
     <p class="mt-1 text-xs text-brand-muted">Super admins can access every area of the dashboard.</p>
 
     <div class="mt-4 space-y-3" x-show="!fullAccess" x-cloak>
-        <p class="text-sm font-medium">Permissions</p>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm font-medium">Permissions</p>
+            <button
+                type="button"
+                class="btn-outline px-3 py-1.5 text-xs"
+                @click="applyPosStaffPreset()"
+            >
+                Use POS staff preset
+            </button>
+        </div>
+        <p class="text-xs text-brand-muted">
+            POS staff preset selects Products, Orders, Point of Sale, and Reports only.
+        </p>
         @foreach ($permissions as $permission)
             <label class="flex items-start gap-3 rounded-lg border border-neutral-100 p-3">
                 <input

@@ -43,11 +43,13 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['api.auth', 'api.admin'])->group(function () {
         Route::middleware('api.admin.permission:dashboard')->get('dashboard/summary', [DashboardController::class, 'summary']);
 
-        Route::middleware('api.admin.permission:orders')->group(function () {
+        Route::middleware('api.admin.permission:pos')->group(function () {
             Route::get('pos/bootstrap', [ApiPosController::class, 'bootstrap']);
             Route::post('pos/orders', [ApiPosController::class, 'storeOrder']);
             Route::get('pos/orders/{order}', [ApiPosController::class, 'showOrder']);
+        });
 
+        Route::middleware('api.admin.permission:orders')->group(function () {
             Route::get('orders', [ApiOrderController::class, 'index']);
             Route::get('orders/{order}', [ApiOrderController::class, 'show']);
             Route::patch('orders/{order}/status', [ApiOrderController::class, 'updateStatus']);
