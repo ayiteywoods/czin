@@ -50,8 +50,12 @@ class User extends Authenticatable
         }
 
         $value = $permission instanceof AdminPermission ? $permission->value : $permission;
+        $assigned = array_map(
+            static fn ($item) => is_string($item) ? trim($item) : $item,
+            $this->admin_permissions,
+        );
 
-        return in_array($value, $this->admin_permissions, true);
+        return in_array($value, $assigned, true);
     }
 
     /**

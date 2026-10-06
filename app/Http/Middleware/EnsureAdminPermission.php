@@ -25,12 +25,20 @@ class EnsureAdminPermission
             ->filter()
             ->all();
 
+        if ($required === []) {
+            abort(403, 'You do not have permission to access this area.');
+        }
+
         foreach ($required as $permission) {
             if ($user->hasAdminPermission($permission)) {
                 return $next($request);
             }
         }
 
-        abort(403, 'You do not have permission to access this area.');
+        $needed = collect($required)
+            ->map(fn (AdminPermission $permission) => $permission->label())
+            ->implode(' or ');
+
+        abort(403, "You do not have permission to access this area. Required: {$needed}.");
     }
 }
