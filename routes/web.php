@@ -4,11 +4,11 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Account\DashboardController as AccountDashboardController;
 use App\Http\Controllers\Account\OrderController as AccountOrderController;
 use App\Http\Controllers\Account\ProfileController as AccountProfileController;
+use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DeliveryController as AdminDeliveryController;
 use App\Http\Controllers\Admin\DiningTableController as AdminDiningTableController;
 use App\Http\Controllers\Admin\DetailController as AdminDetailController;
@@ -124,9 +124,8 @@ Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth', 'admin'])
     ->group(function () {
-        Route::middleware('admin.permission:dashboard')->group(function () {
-            Route::get('/', AdminDashboardController::class)->name('dashboard');
-        });
+        // /admin is the admin landing page: dashboard if allowed, otherwise first permitted area.
+        Route::get('/', AdminHomeController::class)->name('dashboard');
 
         Route::get('search', AdminSearchController::class)->name('search');
 

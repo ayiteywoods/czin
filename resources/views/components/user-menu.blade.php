@@ -46,7 +46,7 @@
             <a href="{{ route('account.profile.edit') }}" class="dropdown-item">Profile Settings</a>
 
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('admin.dashboard') }}" class="dropdown-item">Admin Dashboard</a>
+                <a href="{{ auth()->user()->defaultAdminRoute() }}" class="dropdown-item">Admin</a>
             @endif
 
             <form method="POST" action="{{ route('logout') }}">

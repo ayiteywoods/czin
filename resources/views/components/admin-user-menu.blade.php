@@ -40,7 +40,7 @@
         <a href="{{ route('home') }}" class="dropdown-item">View Storefront</a>
         <a href="{{ route('account.dashboard') }}" class="dropdown-item">My Account</a>
         <a href="{{ route('account.profile.edit') }}" class="dropdown-item">Profile Settings</a>
-        <a href="{{ route('admin.dashboard') }}" class="dropdown-item">Admin Dashboard</a>
+        <a href="{{ auth()->user()->defaultAdminRoute() }}" class="dropdown-item">Admin</a>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf

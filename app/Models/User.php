@@ -110,6 +110,11 @@ class User extends Authenticatable
             return true;
         }
 
+        // Exact /admin landing is allowed for any admin with at least one area.
+        if ($path === '/admin' || $path === '/admin/') {
+            return $this->defaultAdminRoute() !== route('home');
+        }
+
         $map = [
             '/admin/pos' => [AdminPermission::Pos, AdminPermission::Orders],
             '/admin/pos-report' => [AdminPermission::Pos, AdminPermission::Orders],
