@@ -78,14 +78,15 @@ class AdminApiTest extends TestCase
             ->assertJsonStructure(['data' => ['menu', 'tables', 'settings']]);
     }
 
-    public function test_admin_with_orders_permission_cannot_access_pos_bootstrap(): void
+    public function test_admin_with_orders_permission_can_access_pos_bootstrap(): void
     {
         $admin = $this->adminUser([AdminPermission::Orders->value]);
         $token = $admin->createToken('test')->plainTextToken;
 
         $this->withToken($token)
             ->getJson('/api/v1/pos/bootstrap')
-            ->assertForbidden();
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['menu', 'tables', 'settings']]);
     }
 
     public function test_admin_with_kitchen_permission_can_view_board(): void

@@ -41,9 +41,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(
-            $user->isAdmin() ? $user->defaultAdminRoute() : route('home')
-        );
+        if (! $user->isAdmin()) {
+            return redirect()->intended(route('home'));
+        }
+
+        $default = $user->defaultAdminRoute();
+        $intended = $request->session()->pull('url.intended');
+
+        if (is_string($intended) && $user->canAccessAdminUrl($intended)) {
+            return redirect()->to($intended);
+        }
+
+        return redirect()->to($default);
     }
 
     public function destroy(Request $request): RedirectResponse

@@ -53,16 +53,22 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.storefront', StorefrontComposer::class);
 
-        Blade::if('adminCan', function (string $permission): bool {
+        Blade::if('adminCan', function (string ...$permissions): bool {
             $user = auth()->user();
 
             if (! $user) {
                 return false;
             }
 
-            $enum = AdminPermission::tryFrom($permission);
+            foreach ($permissions as $permission) {
+                $enum = AdminPermission::tryFrom($permission);
 
-            return $enum ? $user->hasAdminPermission($enum) : false;
+                if ($enum && $user->hasAdminPermission($enum)) {
+                    return true;
+                }
+            }
+
+            return false;
         });
 
         Order::observe(OrderObserver::class);

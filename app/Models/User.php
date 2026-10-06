@@ -94,6 +94,77 @@ class User extends Authenticatable
         return route('home');
     }
 
+    /**
+     * Whether this admin may open an admin URL (used to avoid login 403s from a stale intended URL).
+     */
+    public function canAccessAdminUrl(?string $url): bool
+    {
+        if (! $this->isAdmin() || ! $this->is_active || ! filled($url)) {
+            return false;
+        }
+
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+        $path = '/'.ltrim($path, '/');
+
+        if (! str_starts_with($path, '/admin')) {
+            return true;
+        }
+
+        $map = [
+            '/admin/pos' => [AdminPermission::Pos, AdminPermission::Orders],
+            '/admin/pos-report' => [AdminPermission::Pos, AdminPermission::Orders],
+            '/admin/kitchen' => [AdminPermission::Kitchen],
+            '/admin/orders' => [AdminPermission::Orders],
+            '/admin/coupons' => [AdminPermission::Orders],
+            '/admin/promotions' => [AdminPermission::Orders],
+            '/admin/delivery' => [AdminPermission::Orders],
+            '/admin/notifications' => [AdminPermission::Orders],
+            '/admin/details/orders' => [AdminPermission::Orders],
+            '/admin/products' => [AdminPermission::Products],
+            '/admin/inventory' => [AdminPermission::Products],
+            '/admin/modifiers' => [AdminPermission::Products],
+            '/admin/recipes' => [AdminPermission::Products],
+            '/admin/categories' => [AdminPermission::Categories],
+            '/admin/details/categories' => [AdminPermission::Categories],
+            '/admin/tables' => [AdminPermission::Tables],
+            '/admin/reservations' => [AdminPermission::Tables],
+            '/admin/customers' => [AdminPermission::Customers],
+            '/admin/loyalty' => [AdminPermission::Customers],
+            '/admin/details/customers' => [AdminPermission::Customers],
+            '/admin/users' => [AdminPermission::Users],
+            '/admin/locations' => [AdminPermission::Users],
+            '/admin/staff-shifts' => [AdminPermission::Users],
+            '/admin/homepage-sections' => [AdminPermission::Content],
+            '/admin/testimonials' => [AdminPermission::Content],
+            '/admin/pages' => [AdminPermission::Content],
+            '/admin/email-templates' => [AdminPermission::Content],
+            '/admin/store-settings' => [AdminPermission::Content],
+            '/admin/shipping-regions' => [AdminPermission::Content],
+            '/admin/maintenance-mode' => [AdminPermission::Content],
+            '/admin/reports' => [AdminPermission::Reports],
+            '/admin/analytics' => [AdminPermission::Reports],
+            '/admin/dashboard' => [AdminPermission::Dashboard],
+        ];
+
+        // Longer prefixes first so /admin/pos-report wins over /admin/pos.
+        uksort($map, fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+
+        foreach ($map as $prefix => $permissions) {
+            if ($path === $prefix || str_starts_with($path, $prefix.'/')) {
+                foreach ($permissions as $permission) {
+                    if ($this->hasAdminPermission($permission)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        // Unknown admin paths: only super admins.
+        return $this->isSuperAdmin();
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
