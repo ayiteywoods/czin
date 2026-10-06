@@ -41,7 +41,7 @@ class OrderController extends Controller
             $fulfillmentTypeFilter = '';
         }
 
-        $query = Order::query()->with('user');
+        $query = Order::query()->with(['user', 'payment']);
 
         if ($request->filled('payment_status')) {
             $paymentStatus = $request->string('payment_status')->toString();

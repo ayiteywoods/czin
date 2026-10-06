@@ -142,7 +142,7 @@
             </tr>
             @if ((float) $order->discount_amount > 0)
                 <tr>
-                    <td class="label">Discount@if ($order->coupon_code) ({{ $order->coupon_code }})@endif</td>
+                    <td class="label">Discount{{ $order->coupon_code ? ' ('.$order->coupon_code.')' : '' }}</td>
                     <td class="amount">- {{ $currency }} {{ number_format($order->discount_amount, 2) }}</td>
                 </tr>
             @endif

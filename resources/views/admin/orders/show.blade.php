@@ -141,6 +141,10 @@
                         <dt class="text-brand-muted">Payment</dt>
                         <dd class="font-medium">{{ $order->payment_status->label() }}</dd>
                     </div>
+                    <div class="flex justify-between">
+                        <dt class="text-brand-muted">Method</dt>
+                        <dd class="font-medium">{{ $order->receiptPaymentMethodLabel() }}</dd>
+                    </div>
                     @if ($order->paid_at)
                         <div class="flex justify-between">
                             <dt class="text-brand-muted">Paid at</dt>

@@ -309,17 +309,35 @@ class Order extends Model
             return match ($this->payment_method) {
                 'cash' => 'Cash',
                 'card' => 'Card',
-                'momo' => 'Mobile Money',
-                'paystack' => 'Paystack',
-                default => ucfirst(str_replace('_', ' ', $this->payment_method)),
+                'momo', 'mobile_money' => 'Mobile Money',
+                'paystack' => $this->paymentChannelLabel() ?? 'Paystack',
+                default => $this->paymentChannelLabel()
+                    ?? ucfirst(str_replace('_', ' ', $this->payment_method)),
             };
         }
 
-        if ($this->payment?->paystackChannel()) {
-            return ucfirst(str_replace('_', ' ', $this->payment->paystackChannel()));
+        return $this->paymentChannelLabel() ?? $this->paymentMethodLabel();
+    }
+
+    public function paymentChannelLabel(): ?string
+    {
+        $channel = $this->payment?->paystackChannel()
+            ?: $this->payment?->channel;
+
+        if (! filled($channel)) {
+            return null;
         }
 
-        return $this->paymentMethodLabel();
+        return match (strtolower((string) $channel)) {
+            'cash' => 'Cash',
+            'card' => 'Card',
+            'momo', 'mobile_money' => 'Mobile Money',
+            'bank', 'bank_transfer' => 'Bank transfer',
+            'ussd' => 'USSD',
+            'qr' => 'QR',
+            'paystack' => 'Paystack',
+            default => ucfirst(str_replace('_', ' ', (string) $channel)),
+        };
     }
 
     public function invoicePaymentMethodLabel(): string

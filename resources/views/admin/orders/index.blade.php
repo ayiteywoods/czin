@@ -189,6 +189,7 @@
                     <x-admin-sort-th column="customer" label="Customer" class="admin-cell-primary" />
                     <x-admin-sort-th column="total" label="Total" />
                     <x-admin-sort-th column="payment_status" label="Payment" class="admin-col-md" />
+                    <th class="admin-table-cell admin-col-md font-medium">Method</th>
                     <x-admin-sort-th column="status" label="Status" />
                     <x-admin-sort-th column="created_at" label="Date & time" class="admin-col-md" />
                     <th class="admin-table-cell admin-col-actions text-right font-medium">Actions</th>
@@ -203,6 +204,9 @@
                         <td class="admin-table-cell whitespace-nowrap">GHS {{ number_format($order->total, 2) }}</td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">
                             <x-admin-status-badge :status="$order->payment_status" />
+                        </td>
+                        <td class="admin-table-cell admin-col-md whitespace-nowrap">
+                            {{ $order->receiptPaymentMethodLabel() }}
                         </td>
                         <td class="admin-table-cell whitespace-nowrap">{{ $order->status->label() }}</td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">
@@ -222,7 +226,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="admin-table-cell py-8 text-center text-brand-muted">No orders found.</td>
+                        <td colspan="10" class="admin-table-cell py-8 text-center text-brand-muted">No orders found.</td>
                     </tr>
                 @endforelse
             </tbody>

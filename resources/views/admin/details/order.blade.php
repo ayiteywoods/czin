@@ -16,6 +16,10 @@
         <dd class="mt-1">{{ $order->payment_status->label() }}</dd>
     </div>
     <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Payment method</dt>
+        <dd class="mt-1 font-medium">{{ $order->receiptPaymentMethodLabel() }}</dd>
+    </div>
+    <div>
         <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Placed</dt>
         <dd class="mt-1">{{ $order->created_at->format('M j, Y g:i A') }}</dd>
     </div>
