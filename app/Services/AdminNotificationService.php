@@ -102,6 +102,27 @@ class AdminNotificationService
                 );
             });
 
+        Order::query()
+            ->where('payment_status', PaymentStatus::Paid)
+            ->where('status', OrderStatus::ReadyForDelivery)
+            ->latest('updated_at')
+            ->limit(10)
+            ->get()
+            ->each(function (Order $order) use ($activeKeys) {
+                $key = "ready:order:{$order->id}";
+                $activeKeys->push($key);
+
+                AdminNotification::query()->updateOrCreate(
+                    ['reference_key' => $key],
+                    [
+                        'type' => 'ready',
+                        'title' => 'Meal ready to serve',
+                        'message' => "Order {$order->order_number} is ready for {$order->kitchenFulfillmentLabel()}.",
+                        'url' => route('admin.pos.index'),
+                    ]
+                );
+            });
+
         Product::query()
             ->where('status', ProductStatus::Active)
             ->where('quantity', '<', 10)

@@ -157,6 +157,8 @@ Route::prefix('admin')
         Route::middleware('admin.permission:pos,orders')->group(function () {
             Route::get('pos', [AdminPosController::class, 'index'])->name('pos.index');
             Route::post('pos/orders', [AdminPosController::class, 'store'])->name('pos.store');
+            Route::get('pos/ready-orders', [AdminPosController::class, 'readyOrders'])->name('pos.ready-orders');
+            Route::post('pos/orders/{order}/served', [AdminPosController::class, 'markServed'])->name('pos.mark-served');
             Route::get('pos-report', [AdminPosReportController::class, 'index'])->name('pos-report.index');
         });
 

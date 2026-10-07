@@ -618,6 +618,29 @@
         @apply flex w-full items-center justify-between rounded-lg border border-neutral-200 px-4 py-3 text-left text-sm transition hover:border-brand-red hover:bg-brand-light;
     }
 
+    .admin-pos-ready-banner {
+        @apply mb-4 rounded-lg border border-brand-red bg-brand-red/10 px-4 py-3 text-sm font-medium text-brand-red;
+        animation: kitchen-banner-pulse 0.8s ease-in-out 3;
+    }
+
+    .admin-pos-ready-badge {
+        @apply inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-red px-2 text-xs font-bold text-white;
+        animation: kitchen-banner-pulse 1s ease-in-out infinite;
+    }
+
+    .admin-pos-ready-card {
+        @apply flex flex-wrap items-start justify-between gap-3 rounded-xl border border-neutral-200 bg-brand-light p-3 sm:flex-nowrap;
+    }
+
+    .admin-pos-ready-card-new {
+        @apply border-amber-300 bg-amber-50;
+        animation: kitchen-card-flash 1s ease-in-out 3;
+    }
+
+    .admin-pos-ready-pill {
+        @apply inline-flex rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-brand-black ring-1 ring-neutral-200;
+    }
+
     .admin-kitchen-board {
         @apply grid gap-4 xl:grid-cols-3;
     }

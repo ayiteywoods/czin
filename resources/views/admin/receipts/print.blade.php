@@ -114,6 +114,9 @@
             @if (filled($order->billing_phone))
                 <div>{{ $order->billing_phone }}</div>
             @endif
+            @if ($order->createdBy)
+                <div>Cashier: {{ $order->createdBy->name }}</div>
+            @endif
         </div>
 
         <div class="divider"></div>

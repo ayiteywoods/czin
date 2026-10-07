@@ -21,6 +21,8 @@
             currencySymbol: @js($currencySymbol),
             taxRate: @js((float) config('shop.tax_rate')),
             storeUrl: @js(route('admin.pos.store')),
+            readyPollUrl: @js($readyPollUrl),
+            initialReadyOrders: @js($initialReadyOrders),
             csrf: @js(csrf_token()),
         })"
     >
@@ -34,6 +36,90 @@
                 </ul>
             </div>
         @endif
+
+        <div
+            x-show="readyAlertBanner"
+            x-cloak
+            class="admin-pos-ready-banner"
+            x-text="readyAlertBanner"
+        ></div>
+
+        <div class="admin-pos-ready-toolbar card mb-4 p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <p class="text-sm font-semibold">Kitchen ready queue</p>
+                        <p class="text-xs text-brand-muted">
+                            <span x-text="readyOrders.length"></span> meal(s) waiting · updates every few seconds
+                        </p>
+                    </div>
+                    <span
+                        class="admin-pos-ready-badge"
+                        x-show="readyOrders.length > 0"
+                        x-cloak
+                        x-text="readyOrders.length"
+                    ></span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        class="admin-kitchen-toggle"
+                        :class="{ 'admin-kitchen-toggle-active': soundEnabled }"
+                        @click="toggleSound()"
+                    >
+                        <span x-text="soundEnabled ? 'Sound on' : 'Sound off'"></span>
+                    </button>
+                    <button type="button" class="admin-kitchen-toggle" @click="testReadyAlert()">
+                        Test alert
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4 space-y-3" x-show="readyOrders.length > 0" x-cloak>
+                <template x-for="order in readyOrders" :key="order.id">
+                    <div class="admin-pos-ready-card" :class="{ 'admin-pos-ready-card-new': isNewReady(order.id) }">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="font-semibold" x-text="'#' + order.order_number"></p>
+                                <span class="admin-pos-ready-pill" x-text="order.fulfillment_label"></span>
+                                <span class="text-xs text-brand-muted" x-text="'Ready ' + (order.ready_for || '')"></span>
+                            </div>
+                            <p class="mt-1 text-sm text-brand-muted" x-show="order.table">
+                                Table <span x-text="order.table?.code"></span> · <span x-text="order.table?.name"></span>
+                            </p>
+                            <p class="mt-1 text-sm" x-show="order.customer_name && order.customer_name !== 'Walk-in Customer'">
+                                <span x-text="order.customer_name"></span>
+                            </p>
+                            <ul class="mt-2 space-y-0.5 text-sm">
+                                <template x-for="(item, idx) in order.items" :key="idx">
+                                    <li>
+                                        <span class="font-medium" x-text="item.quantity + '× '"></span>
+                                        <span x-text="item.name"></span>
+                                        <span class="text-brand-muted" x-show="item.options" x-text="' (' + item.options + ')'"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                        <div class="flex shrink-0 flex-col gap-2">
+                            <button
+                                type="button"
+                                class="btn-primary px-3 py-2 text-sm"
+                                :disabled="servingOrderId === order.id"
+                                @click="markServed(order)"
+                            >
+                                <span x-show="servingOrderId !== order.id">Mark served</span>
+                                <span x-show="servingOrderId === order.id" x-cloak>Saving...</span>
+                            </button>
+                            <a :href="order.show_url" class="text-center text-xs font-medium text-brand-red hover:underline">View order</a>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <p class="mt-3 text-sm text-brand-muted" x-show="readyOrders.length === 0">
+                No meals waiting. When kitchen marks an order ready, it will show here with sound and flash.
+            </p>
+        </div>
 
         <div class="admin-pos-layout">
             {{-- Menu panel --}}
@@ -282,6 +368,7 @@
                 currencySymbol: config.currencySymbol,
                 taxRate: config.taxRate,
                 storeUrl: config.storeUrl,
+                readyPollUrl: config.readyPollUrl,
                 csrf: config.csrf,
                 search: '',
                 selectedCategory: null,
@@ -296,6 +383,249 @@
                 variantPicker: {
                     open: false,
                     product: null,
+                },
+                readyOrders: config.initialReadyOrders || [],
+                knownReadyIds: new Set(),
+                newReadyIds: new Set(),
+                soundEnabled: true,
+                readyAlertBanner: '',
+                servingOrderId: null,
+                readyPolling: false,
+                readyPollTimer: null,
+                readyInitialized: false,
+
+                init() {
+                    this.loadReadyPreferences();
+                    (this.readyOrders || []).forEach((order) => this.knownReadyIds.add(order.id));
+                    this.readyInitialized = true;
+                    this.readyPollTimer = setInterval(() => this.pollReadyOrders(), 5000);
+                },
+
+                destroy() {
+                    if (this.readyPollTimer) {
+                        clearInterval(this.readyPollTimer);
+                    }
+                },
+
+                loadReadyPreferences() {
+                    this.soundEnabled = localStorage.getItem('pos-ready-sound-enabled') !== 'false';
+                },
+
+                toggleSound() {
+                    this.soundEnabled = !this.soundEnabled;
+                    localStorage.setItem('pos-ready-sound-enabled', this.soundEnabled ? 'true' : 'false');
+                    if (this.soundEnabled) {
+                        this.maybeRequestDesktopNotifications();
+                    }
+                },
+
+                testReadyAlert() {
+                    this.maybeRequestDesktopNotifications();
+                    this.playReadySound();
+                    this.flashScreen();
+                    this.readyAlertBanner = 'Test alert — sound and flash are working.';
+                    setTimeout(() => {
+                        this.readyAlertBanner = '';
+                    }, 4000);
+                },
+
+                isNewReady(orderId) {
+                    return this.newReadyIds.has(orderId);
+                },
+
+                handleNewReadyOrders(orders) {
+                    if (!orders?.length) {
+                        return;
+                    }
+
+                    const labels = orders.map((order) => `#${order.order_number}`).join(', ');
+                    this.readyAlertBanner = orders.length === 1
+                        ? `Meal ready: ${labels}`
+                        : `${orders.length} meals ready: ${labels}`;
+
+                    if (this.soundEnabled) {
+                        this.playReadySound();
+                    }
+
+                    this.flashScreen();
+                    this.pulseDocumentTitle(this.readyAlertBanner);
+
+                    if (typeof document !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                        try {
+                            new Notification('Meal ready to serve', {
+                                body: this.readyAlertBanner,
+                                tag: 'pos-ready-orders',
+                            });
+                        } catch (error) {
+                            // Ignore notification failures.
+                        }
+                    }
+
+                    setTimeout(() => {
+                        this.readyAlertBanner = '';
+                    }, 8000);
+
+                    setTimeout(() => {
+                        orders.forEach((order) => this.newReadyIds.delete(order.id));
+                    }, 20000);
+                },
+
+                pulseDocumentTitle(message) {
+                    if (typeof document === 'undefined' || document.hasFocus()) {
+                        return;
+                    }
+
+                    const original = document.title;
+                    let ticks = 0;
+
+                    if (this._titlePulseTimer) {
+                        clearInterval(this._titlePulseTimer);
+                        document.title = this._originalTitle || original;
+                    }
+
+                    this._originalTitle = original;
+                    this._titlePulseTimer = setInterval(() => {
+                        document.title = ticks % 2 === 0 ? `READY: ${message}` : original;
+                        ticks += 1;
+
+                        if (ticks >= 12 || document.hasFocus()) {
+                            clearInterval(this._titlePulseTimer);
+                            this._titlePulseTimer = null;
+                            document.title = original;
+                        }
+                    }, 900);
+                },
+
+                playReadySound() {
+                    try {
+                        const context = new (window.AudioContext || window.webkitAudioContext)();
+                        [0, 0.2, 0.4].forEach((delay, index) => {
+                            const oscillator = context.createOscillator();
+                            const gain = context.createGain();
+                            oscillator.type = 'square';
+                            oscillator.frequency.value = index === 1 ? 980 : 760;
+                            gain.gain.value = 0.09;
+                            oscillator.connect(gain);
+                            gain.connect(context.destination);
+                            oscillator.start(context.currentTime + delay);
+                            oscillator.stop(context.currentTime + delay + 0.16);
+                        });
+                    } catch (error) {
+                        // Ignore browsers that block audio without interaction.
+                    }
+                },
+
+                flashScreen() {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'admin-kitchen-flash-overlay';
+                    document.body.appendChild(overlay);
+                    setTimeout(() => overlay.remove(), 500);
+                },
+
+                detectNewReadyOrders(orders) {
+                    const incomingIds = orders.map((order) => order.id);
+                    const fresh = orders.filter((order) => !this.knownReadyIds.has(order.id));
+
+                    incomingIds.forEach((id) => this.knownReadyIds.add(id));
+
+                    // Drop ids that are no longer ready so re-ready can alert again later.
+                    [...this.knownReadyIds].forEach((id) => {
+                        if (!incomingIds.includes(id)) {
+                            this.knownReadyIds.delete(id);
+                            this.newReadyIds.delete(id);
+                        }
+                    });
+
+                    if (!this.readyInitialized || fresh.length === 0) {
+                        return [];
+                    }
+
+                    fresh.forEach((order) => this.newReadyIds.add(order.id));
+
+                    return fresh;
+                },
+
+                async pollReadyOrders() {
+                    if (!this.readyPollUrl || this.readyPolling) {
+                        return;
+                    }
+
+                    this.readyPolling = true;
+
+                    try {
+                        const response = await fetch(this.readyPollUrl, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to refresh ready orders.');
+                        }
+
+                        const data = await response.json();
+                        const orders = data.orders || [];
+                        const fresh = this.detectNewReadyOrders(orders);
+
+                        this.readyOrders = orders;
+
+                        if (fresh.length > 0) {
+                            this.handleNewReadyOrders(fresh);
+                        }
+                    } catch (error) {
+                        // Keep POS usable if polling fails briefly.
+                    } finally {
+                        this.readyPolling = false;
+                    }
+                },
+
+                async markServed(order) {
+                    if (!order?.served_url || this.servingOrderId === order.id) {
+                        return;
+                    }
+
+                    this.servingOrderId = order.id;
+
+                    try {
+                        const response = await fetch(order.served_url, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': this.csrf,
+                            },
+                            body: JSON.stringify({}),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to mark order served.');
+                        }
+
+                        const data = await response.json();
+                        const orders = data.orders || [];
+
+                        this.detectNewReadyOrders(orders);
+                        this.readyOrders = orders;
+                        this.newReadyIds.delete(order.id);
+                        this.knownReadyIds.delete(order.id);
+                    } catch (error) {
+                        this.readyAlertBanner = 'Could not mark order as served. Try again.';
+                        setTimeout(() => {
+                            this.readyAlertBanner = '';
+                        }, 5000);
+                    } finally {
+                        this.servingOrderId = null;
+                    }
+                },
+
+                maybeRequestDesktopNotifications() {
+                    if (!('Notification' in window) || Notification.permission !== 'default') {
+                        return;
+                    }
+
+                    Notification.requestPermission().catch(() => {});
                 },
 
                 get filteredProducts() {

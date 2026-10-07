@@ -10,9 +10,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PosOrderRequest;
 use App\Models\Category;
 use App\Models\DiningTable;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\PosOrderService;
+use App\Services\PosReadyOrderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PosController extends Controller
@@ -71,6 +75,8 @@ class PosController extends Controller
                 $status->value => $status->label(),
             ]),
             'currencySymbol' => config('shop.currency_symbol'),
+            'readyPollUrl' => route('admin.pos.ready-orders'),
+            'initialReadyOrders' => app(PosReadyOrderService::class)->readyPayload(),
         ]);
     }
 
@@ -81,5 +87,33 @@ class PosController extends Controller
         return redirect()
             ->route('admin.orders.show', ['order' => $order, 'print_receipt' => 1])
             ->with('success', "POS order {$order->order_number} created and marked as paid.");
+    }
+
+    public function readyOrders(PosReadyOrderService $readyOrders): JsonResponse
+    {
+        $orders = $readyOrders->readyPayload();
+
+        return response()->json([
+            'orders' => $orders,
+            'count' => count($orders),
+        ]);
+    }
+
+    public function markServed(
+        Request $request,
+        Order $order,
+        PosReadyOrderService $readyOrders,
+    ): JsonResponse|RedirectResponse {
+        $order = $readyOrders->markServed($order);
+        $message = "Order {$order->order_number} marked as served.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'orders' => $readyOrders->readyPayload(),
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

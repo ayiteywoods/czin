@@ -12,7 +12,7 @@ class ReceiptPayloadService
      */
     public function forOrder(Order $order): array
     {
-        $order->loadMissing(['items', 'diningTable', 'payment']);
+        $order->loadMissing(['items', 'diningTable', 'payment', 'createdBy']);
         $store = StoreSetting::current();
         $currency = (string) config('shop.currency_symbol', 'GHS');
 
@@ -37,6 +37,7 @@ class ReceiptPayloadService
                 'customer_name' => $order->billing_full_name,
                 'customer_phone' => $order->billing_phone,
                 'customer_comment' => $order->customer_comment,
+                'cashier_name' => $order->createdBy?->name,
                 'table' => $order->diningTable ? [
                     'code' => $order->diningTable->code,
                     'name' => $order->diningTable->name,

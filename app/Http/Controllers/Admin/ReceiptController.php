@@ -11,7 +11,7 @@ class ReceiptController extends Controller
 {
     public function print(Order $order): View
     {
-        $order->load(['items', 'diningTable', 'payment']);
+        $order->load(['items', 'diningTable', 'payment', 'createdBy']);
 
         return view('admin.receipts.print', [
             'order' => $order,
