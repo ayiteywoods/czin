@@ -66,6 +66,16 @@ class PosController extends Controller
             ];
         })->values()->all();
 
+        $readyPollUrl = null;
+        $initialReadyOrders = [];
+
+        try {
+            $readyPollUrl = route('admin.pos.ready-orders');
+            $initialReadyOrders = app(PosReadyOrderService::class)->readyPayload();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return view('admin.pos.index', [
             'categories' => $categories,
             'menuPayload' => $menuPayload,
@@ -75,8 +85,8 @@ class PosController extends Controller
                 $status->value => $status->label(),
             ]),
             'currencySymbol' => config('shop.currency_symbol'),
-            'readyPollUrl' => route('admin.pos.ready-orders'),
-            'initialReadyOrders' => app(PosReadyOrderService::class)->readyPayload(),
+            'readyPollUrl' => $readyPollUrl,
+            'initialReadyOrders' => $initialReadyOrders,
         ]);
     }
 
