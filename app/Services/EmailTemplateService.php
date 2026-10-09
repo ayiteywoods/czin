@@ -152,13 +152,13 @@ Thank you for shopping with {{store_name}}. We received your order and it is wai
 Complete payment by **{{payment_due_at}}** to confirm your order. If payment is not received within {{payment_timeout_hours}} hours, the order will be cancelled and items returned to stock.
 MD,
             EmailTemplate::SLUG_PAYMENT_RECEIVED => <<<'MD'
-# Good things are heading your way!
+# Payment confirmed — thank you!
 
 Hi {{customer_name}},
 
-We have finished processing your order. Here's a reminder of what you've ordered.
+Your Paystack payment for order **{{order_number}}** was successful. Here's a reminder of what you've ordered.
 
-Your invoice is attached to this email as a PDF — you can open it directly from your inbox without clicking any links.
+Your payment invoice is attached to this email as a PDF — you can open it directly from your inbox.
 
 If you have questions, contact us at {{contact_email}} or {{contact_phone}}.
 MD,

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Enums\PaymentStatus;
 use App\Models\EmailTemplate;
 use App\Models\Order;
 use App\Services\EmailTemplateService;
@@ -43,8 +44,22 @@ class PaymentReceivedMail extends Mailable
      */
     public function attachments(): array
     {
+        $order = $this->order->loadMissing(['items', 'payment']);
+
+        // For real orders, attach invoice only after a successful Paystack payment.
+        // Unsaved preview orders used in admin email tests still get a sample PDF.
+        if (
+            $order->exists
+            && (
+                $order->payment_status !== PaymentStatus::Paid
+                || $order->payment?->provider !== 'paystack'
+                || $order->payment?->status !== PaymentStatus::Paid
+            )
+        ) {
+            return [];
+        }
+
         $invoices = app(InvoiceService::class);
-        $order = $this->order->loadMissing('items');
         $filename = $invoices->pdfFilename($order);
         $pdf = $invoices->pdfBinary($order);
 

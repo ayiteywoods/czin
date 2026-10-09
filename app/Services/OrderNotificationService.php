@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Mail\OrderStatusMail;
 use App\Mail\PaymentReceivedMail;
@@ -21,12 +22,21 @@ class OrderNotificationService
 
     public function orderCreated(Order $order): void
     {
-        // Customers are only emailed after payment is confirmed.
+        // No customer email on order create — invoice is sent only after Paystack success.
     }
 
     public function paymentReceived(Order $order): void
     {
-        $order->loadMissing('items');
+        $order->loadMissing(['items', 'payment']);
+
+        // Invoice email is only for successful online Paystack payments.
+        if (
+            $order->payment_status !== PaymentStatus::Paid
+            || $order->payment?->provider !== 'paystack'
+            || $order->payment?->status !== PaymentStatus::Paid
+        ) {
+            return;
+        }
 
         $email = $order->customerEmail();
 
