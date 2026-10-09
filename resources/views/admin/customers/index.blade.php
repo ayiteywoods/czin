@@ -4,6 +4,13 @@
 
 @section('content')
     <x-admin-table-panel :page-ids="$customers->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.customers.bulk-destroy')"
+                confirm="Delete the selected customers? Their order history will be kept."
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

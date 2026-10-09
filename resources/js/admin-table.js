@@ -13,15 +13,15 @@ window.adminTableSelection = function (pageIds = []) {
         get canExportInvoices() {
             return this.selected.length > 0;
         },
-        appendSelectedToForm(form) {
-            form.querySelectorAll('[data-bulk-order-id]').forEach((input) => input.remove());
+        appendSelectedToForm(form, inputName = 'ids[]') {
+            form.querySelectorAll('[data-bulk-selected-id]').forEach((input) => input.remove());
 
             this.selected.forEach((id) => {
                 const input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = 'order_ids[]';
+                input.name = inputName;
                 input.value = id;
-                input.setAttribute('data-bulk-order-id', '');
+                input.setAttribute('data-bulk-selected-id', '');
                 form.appendChild(input);
             });
         },

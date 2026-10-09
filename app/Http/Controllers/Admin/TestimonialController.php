@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TestimonialRequest;
 use App\Models\Testimonial;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class TestimonialController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $testimonials = AdminTable::paginate(
@@ -66,5 +69,10 @@ class TestimonialController extends Controller
         return redirect()
             ->route('admin.testimonials.index')
             ->with('success', 'Testimonial deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, Testimonial::class, 'testimonial');
     }
 }

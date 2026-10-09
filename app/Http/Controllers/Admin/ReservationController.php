@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ReservationRequest;
 use App\Models\DiningTable;
@@ -13,6 +14,8 @@ use Illuminate\View\View;
 
 class ReservationController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $reservations = AdminTable::paginate(
@@ -71,5 +74,10 @@ class ReservationController extends Controller
         return redirect()
             ->route('admin.reservations.index')
             ->with('success', 'Reservation deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, Reservation::class, 'reservation');
     }
 }

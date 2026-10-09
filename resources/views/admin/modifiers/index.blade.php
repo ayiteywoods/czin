@@ -8,6 +8,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$groups->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.modifiers.bulk-destroy')"
+                confirm="Delete the selected modifier groups?"
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

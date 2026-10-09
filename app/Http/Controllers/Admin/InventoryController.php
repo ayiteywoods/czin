@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\InventoryAdjustmentRequest;
 use App\Models\Product;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class InventoryController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $movements = AdminTable::paginate(
@@ -83,5 +86,10 @@ class InventoryController extends Controller
         return redirect()
             ->route('admin.inventory.index')
             ->with('success', 'Stock adjustment recorded.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, StockMovement::class, 'stock movement');
     }
 }

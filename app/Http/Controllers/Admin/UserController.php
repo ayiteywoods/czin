@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\AdminPermission;
 use App\Enums\UserRole;
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
 use App\Models\User;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $users = AdminTable::paginate(
@@ -128,6 +131,31 @@ class UserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'Admin user removed successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected(
+            $request,
+            User::class,
+            'admin user',
+            scope: fn ($query) => $query->where('role', UserRole::Admin),
+            beforeDelete: function (User $user) {
+                if ($user->id === auth()->id()) {
+                    return false;
+                }
+
+                if (User::query()->where('role', UserRole::Admin)->where('is_active', true)->count() <= 1 && $user->is_active) {
+                    return false;
+                }
+
+                if ($user->is_active && $this->isLastUserManager($user)) {
+                    return false;
+                }
+
+                return true;
+            },
+        );
     }
 
     /**

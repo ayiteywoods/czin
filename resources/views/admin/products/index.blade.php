@@ -33,6 +33,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$products->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.products.bulk-destroy')"
+                confirm="Delete the selected menu items? This cannot be undone."
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

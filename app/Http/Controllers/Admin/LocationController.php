@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LocationRequest;
 use App\Models\Location;
@@ -13,6 +14,8 @@ use Illuminate\View\View;
 
 class LocationController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $locations = AdminTable::paginate(
@@ -82,5 +85,10 @@ class LocationController extends Controller
         return redirect()
             ->route('admin.locations.index')
             ->with('success', 'Location deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, Location::class, 'location');
     }
 }

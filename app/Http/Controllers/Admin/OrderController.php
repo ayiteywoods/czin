@@ -6,6 +6,7 @@ use App\Enums\FulfillmentType;
 use App\Enums\OrderSource;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
@@ -21,6 +22,8 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $perPageOptions = [20, 50, 100];
@@ -228,5 +231,14 @@ class OrderController extends Controller
         return redirect()
             ->route('admin.orders.index')
             ->with('success', 'Order deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $response = $this->destroySelected($request, Order::class, 'order');
+
+        app(AdminNotificationService::class)->sync();
+
+        return $response;
     }
 }

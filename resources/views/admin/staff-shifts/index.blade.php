@@ -8,6 +8,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$shifts->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.staff-shifts.bulk-destroy')"
+                confirm="Delete the selected staff shifts?"
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

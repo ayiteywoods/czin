@@ -9,6 +9,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$movements->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.inventory.bulk-destroy')"
+                confirm="Delete the selected stock movement history records? This does not reverse stock levels."
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

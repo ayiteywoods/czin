@@ -149,7 +149,7 @@
                 method="POST"
                 action="{{ route('admin.orders.invoices.export') }}"
                 class="inline"
-                @submit.prevent="if (!canExportInvoices) return; appendSelectedToForm($el); $el.submit();"
+                @submit.prevent="if (!canExportInvoices) return; appendSelectedToForm($el, 'order_ids[]'); $el.submit();"
             >
                 @csrf
                 <button
@@ -167,7 +167,7 @@
                 action="{{ route('admin.orders.invoices.print') }}"
                 target="_blank"
                 class="inline"
-                @submit.prevent="if (!canExportInvoices) return; appendSelectedToForm($el); $el.submit();"
+                @submit.prevent="if (!canExportInvoices) return; appendSelectedToForm($el, 'order_ids[]'); $el.submit();"
             >
                 @csrf
                 <button
@@ -179,6 +179,12 @@
                     Print invoices
                 </button>
             </form>
+
+            <x-admin-bulk-delete
+                :action="route('admin.orders.bulk-destroy')"
+                confirm="Delete the selected orders? This cannot be undone."
+                label="Delete selected"
+            />
         </x-slot:bulkActions>
 
         <table class="admin-data-table">

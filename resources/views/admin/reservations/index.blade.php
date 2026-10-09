@@ -8,6 +8,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$reservations->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.reservations.bulk-destroy')"
+                confirm="Delete the selected reservations?"
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

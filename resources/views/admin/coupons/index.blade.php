@@ -8,6 +8,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$coupons->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.coupons.bulk-destroy')"
+                confirm="Delete the selected coupons?"
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

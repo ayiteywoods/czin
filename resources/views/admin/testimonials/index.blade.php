@@ -8,6 +8,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$testimonials->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.testimonials.bulk-destroy')"
+                confirm="Delete the selected testimonials?"
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

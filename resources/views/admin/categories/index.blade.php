@@ -11,6 +11,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$categories->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.categories.bulk-destroy')"
+                confirm="Delete the selected categories? Categories with subcategories will be skipped."
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

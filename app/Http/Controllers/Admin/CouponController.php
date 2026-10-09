@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CouponRequest;
 use App\Models\Coupon;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class CouponController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $coupons = AdminTable::paginate(
@@ -68,5 +71,10 @@ class CouponController extends Controller
         return redirect()
             ->route('admin.coupons.index')
             ->with('success', 'Coupon deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, Coupon::class, 'coupon');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StaffShiftRequest;
 use App\Models\Location;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class StaffShiftController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $shifts = AdminTable::paginate(
@@ -71,6 +74,11 @@ class StaffShiftController extends Controller
         return redirect()
             ->route('admin.staff-shifts.index')
             ->with('success', 'Staff shift deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, StaffShift::class, 'staff shift');
     }
 
     /**

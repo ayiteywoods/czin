@@ -8,6 +8,13 @@
     </div>
 
     <x-admin-table-panel :page-ids="$users->pluck('id')">
+        <x-slot:bulkActions>
+            <x-admin-bulk-delete
+                :action="route('admin.users.bulk-destroy')"
+                confirm="Delete the selected admin users? Your own account and protected admins will be skipped."
+                label="Delete selected"
+            />
+        </x-slot:bulkActions>
         <table class="admin-data-table">
             <thead>
                 <tr>

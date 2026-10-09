@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CustomerNotesRequest;
 use App\Http\Requests\Admin\CustomerTagRequest;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $customers = AdminTable::paginate(
@@ -86,5 +89,15 @@ class CustomerController extends Controller
         return redirect()
             ->route('admin.customers.index')
             ->with('success', $name.' was deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected(
+            $request,
+            User::class,
+            'customer',
+            scope: fn ($query) => $query->where('role', UserRole::Customer),
+        );
     }
 }

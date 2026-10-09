@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\DeletesBulkRecords;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ModifierGroupRequest;
 use App\Models\Modifier;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class ModifierGroupController extends Controller
 {
+    use DeletesBulkRecords;
+
     public function index(Request $request): View
     {
         $groups = AdminTable::paginate(
@@ -103,6 +106,11 @@ class ModifierGroupController extends Controller
         return redirect()
             ->route('admin.modifiers.index')
             ->with('success', 'Modifier group deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        return $this->destroySelected($request, ModifierGroup::class, 'modifier group');
     }
 
     /**

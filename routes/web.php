@@ -131,12 +131,15 @@ Route::prefix('admin')
 
         Route::middleware('admin.permission:products')->group(function () {
             Route::get('details/products/{product}', [AdminDetailController::class, 'product'])->name('details.products');
+            Route::delete('products/bulk', [AdminProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
             Route::resource('products', AdminProductController::class)->except(['show', 'update']);
             Route::match(['put', 'patch', 'post'], 'products/{product}', [AdminProductController::class, 'update'])->name('products.update');
             Route::patch('products/{product}/toggle-86', [AdminProductController::class, 'toggle86'])->name('products.toggle-86');
             Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
             Route::get('inventory/create', [AdminInventoryController::class, 'create'])->name('inventory.create');
             Route::post('inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
+            Route::delete('inventory/bulk', [AdminInventoryController::class, 'bulkDestroy'])->name('inventory.bulk-destroy');
+            Route::delete('modifiers/bulk', [AdminModifierGroupController::class, 'bulkDestroy'])->name('modifiers.bulk-destroy');
             Route::resource('modifiers', AdminModifierGroupController::class)
                 ->except(['show'])
                 ->parameters(['modifiers' => 'modifier_group']);
@@ -151,6 +154,7 @@ Route::prefix('admin')
             Route::put('categories/navbar', [AdminCategoryController::class, 'updateNavbar'])->name('categories.navbar.update');
             Route::get('categories/shop', [AdminCategoryController::class, 'shop'])->name('categories.shop');
             Route::put('categories/shop', [AdminCategoryController::class, 'updateShop'])->name('categories.shop.update');
+            Route::delete('categories/bulk', [AdminCategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
             Route::resource('categories', AdminCategoryController::class)->except(['show']);
         });
 
@@ -169,12 +173,15 @@ Route::prefix('admin')
             Route::get('orders/{order}/receipt', [AdminReceiptController::class, 'print'])->name('orders.receipt');
             Route::post('orders/invoices/export', [OrderInvoiceBulkController::class, 'export'])->name('orders.invoices.export');
             Route::post('orders/invoices/print', [OrderInvoiceBulkController::class, 'print'])->name('orders.invoices.print');
+            Route::delete('orders/bulk', [AdminOrderController::class, 'bulkDestroy'])->name('orders.bulk-destroy');
             Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
             Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
             Route::post('orders/{order}/sync-paystack', [AdminOrderController::class, 'syncPaystack'])->name('orders.sync-paystack');
             Route::delete('orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
+            Route::delete('coupons/bulk', [AdminCouponController::class, 'bulkDestroy'])->name('coupons.bulk-destroy');
             Route::resource('coupons', AdminCouponController::class)->except(['show']);
+            Route::delete('promotions/bulk', [AdminPromotionController::class, 'bulkDestroy'])->name('promotions.bulk-destroy');
             Route::resource('promotions', AdminPromotionController::class)->except(['show']);
             Route::get('delivery', [AdminDeliveryController::class, 'index'])->name('delivery.index');
             Route::patch('delivery/{delivery}/status', [AdminDeliveryController::class, 'updateStatus'])->name('delivery.update-status');
@@ -191,6 +198,7 @@ Route::prefix('admin')
             Route::patch('customers/{user}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.update-notes');
             Route::post('customers/{user}/tags', [AdminCustomerController::class, 'storeTag'])->name('customers.store-tag');
             Route::delete('customers/{user}/tags/{tag}', [AdminCustomerController::class, 'destroyTag'])->name('customers.destroy-tag');
+            Route::delete('customers/bulk', [AdminCustomerController::class, 'bulkDestroy'])->name('customers.bulk-destroy');
             Route::delete('customers/{user}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
             Route::get('loyalty', [AdminLoyaltyController::class, 'index'])->name('loyalty.index');
             Route::get('loyalty/{loyalty}', [AdminLoyaltyController::class, 'show'])->name('loyalty.show');
@@ -198,8 +206,11 @@ Route::prefix('admin')
         });
 
         Route::middleware('admin.permission:users')->group(function () {
+            Route::delete('users/bulk', [AdminUserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
             Route::resource('users', AdminUserController::class)->except(['show']);
+            Route::delete('locations/bulk', [AdminLocationController::class, 'bulkDestroy'])->name('locations.bulk-destroy');
             Route::resource('locations', AdminLocationController::class)->except(['show']);
+            Route::delete('staff-shifts/bulk', [AdminStaffShiftController::class, 'bulkDestroy'])->name('staff-shifts.bulk-destroy');
             Route::resource('staff-shifts', AdminStaffShiftController::class)->except(['show']);
         });
 
@@ -208,6 +219,7 @@ Route::prefix('admin')
             Route::get('homepage-sections', [AdminHomeSectionController::class, 'index'])->name('home-sections.index');
             Route::get('homepage-sections/{home_section}/edit', [AdminHomeSectionController::class, 'edit'])->name('home-sections.edit');
             Route::put('homepage-sections/{home_section}', [AdminHomeSectionController::class, 'update'])->name('home-sections.update');
+            Route::delete('testimonials/bulk', [AdminTestimonialController::class, 'bulkDestroy'])->name('testimonials.bulk-destroy');
             Route::resource('testimonials', AdminTestimonialController::class)->except(['show']);
             Route::get('pages', [AdminPageController::class, 'index'])->name('pages.index');
             Route::get('pages/{page}/edit', [AdminPageController::class, 'edit'])->name('pages.edit');
@@ -225,6 +237,7 @@ Route::prefix('admin')
         Route::middleware('admin.permission:tables')->group(function () {
             Route::patch('tables/{table}/status', [AdminDiningTableController::class, 'updateStatus'])->name('tables.update-status');
             Route::resource('tables', AdminDiningTableController::class)->except(['show']);
+            Route::delete('reservations/bulk', [AdminReservationController::class, 'bulkDestroy'])->name('reservations.bulk-destroy');
             Route::resource('reservations', AdminReservationController::class)->except(['show']);
         });
 
