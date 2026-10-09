@@ -27,10 +27,10 @@
 
         <header class="storefront-navbar border-b border-brand-red-dark bg-brand-red" @keydown.escape.window="searchOpen = false; userOpen = false; navOpen = false">
         <div class="storefront-navbar-inner">
-            <div class="flex min-w-0 items-center gap-2 justify-self-start">
+            <div class="flex min-w-0 items-center gap-1 justify-self-start sm:gap-2">
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-white transition hover:bg-white/15 sm:hidden"
+                    class="rounded-lg p-2 text-white transition hover:bg-white/15 lg:hidden"
                     @click="navOpen = !navOpen; userOpen = false; searchOpen = false"
                     :aria-expanded="navOpen"
                     aria-label="Toggle navigation menu"
@@ -42,10 +42,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
-                <x-logo href="{{ route('home') }}" size="header" variant="on-red" class="shrink-0 justify-start" />
+                <x-logo href="{{ route('home') }}" size="header" variant="on-red" :hide-text-on-mobile="true" class="min-w-0 justify-start" />
             </div>
 
-            <nav class="hidden items-center justify-center gap-x-6 justify-self-center sm:flex">
+            <nav class="storefront-navbar-links" aria-label="Primary">
                 <a href="{{ route('shop.index') }}" class="nav-link-on-red {{ request()->routeIs('shop.index') && ! request()->filled('category') ? 'nav-link-on-red-active' : '' }}">Menu</a>
                 @foreach ($navbarCategories ?? [] as $category)
                     <a
@@ -58,8 +58,8 @@
                 <a href="{{ route('about') }}" class="nav-link-on-red {{ request()->routeIs('about') ? 'nav-link-on-red-active' : '' }}">About</a>
             </nav>
 
-            <div class="flex shrink-0 items-center gap-0.5 justify-self-end sm:gap-2">
-                <x-currency-badge class="border-white/30 bg-white/15 text-white [&_span]:text-white" />
+            <div class="flex shrink-0 items-center gap-0.5 justify-self-end lg:gap-2">
+                <x-currency-badge class="hidden border-white/30 bg-white/15 text-white sm:flex [&_span]:text-white" />
 
                 {{-- Dark mode disabled for now
                 <x-theme-toggle />

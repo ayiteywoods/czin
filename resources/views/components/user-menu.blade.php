@@ -16,10 +16,10 @@
             <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
             </svg>
-            <span class="hidden max-w-[120px] truncate text-xs font-normal uppercase tracking-wide sm:inline">
+            <span class="hidden max-w-[120px] truncate text-xs font-normal uppercase tracking-wide lg:inline">
                 {{ auth()->user()->first_name ?? auth()->user()->name }}
             </span>
-            <svg class="hidden h-3 w-3 shrink-0 sm:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="hidden h-3 w-3 shrink-0 lg:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
             </svg>
         </button>
@@ -56,7 +56,7 @@
         </div>
     </div>
 @else
-    <div class="hidden items-center gap-2 sm:flex">
+    <div class="hidden items-center gap-2 lg:flex">
         <a href="{{ route('login') }}" class="nav-link-on-red" title="Log in to track your orders">Login</a>
         <a href="{{ route('register') }}" class="rounded-xl bg-brand-yellow px-4 py-2 text-xs font-bold uppercase tracking-wide text-brand-black transition hover:bg-brand-yellow-dark">Register</a>
     </div>

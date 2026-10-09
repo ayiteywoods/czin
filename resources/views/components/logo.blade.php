@@ -16,7 +16,7 @@
     };
 
     $textClass = match ($size) {
-        'header' => 'h-7 w-auto object-contain sm:h-8',
+        'header' => 'h-7 w-auto max-w-[7.5rem] object-contain object-left sm:h-8 lg:max-w-none',
         'admin' => 'h-5 w-auto object-contain',
         'auth' => 'h-7 w-auto object-contain sm:h-8',
         default => 'h-5 w-auto object-contain',
@@ -36,6 +36,6 @@
         src="{{ $wordmarkSrc }}"
         alt=""
         aria-hidden="true"
-        @class([$textClass, 'hidden sm:block' => $hideTextOnMobile])
+        @class([$textClass, 'hidden lg:block' => $hideTextOnMobile])
     >
 </a>
