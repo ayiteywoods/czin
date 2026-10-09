@@ -35,7 +35,7 @@
         </label>
     </div>
     <div class="sm:col-span-2">
-        <label class="block text-sm font-medium">Attach to products</label>
+        <label class="block text-sm font-medium">Attach to menu items</label>
         <select name="product_ids[]" multiple class="input-field min-h-32">
             @foreach ($products as $product)
                 <option value="{{ $product->id }}" @selected($selectedProducts->contains((string) $product->id))>{{ $product->name }}</option>

@@ -32,7 +32,7 @@
         </dd>
     </div>
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Products</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Menu items</dt>
         <dd class="mt-1">{{ $category->products_count }}</dd>
     </div>
     <div>

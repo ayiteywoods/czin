@@ -139,13 +139,13 @@
         <div>
             <x-admin-table-panel :page-ids="$topSelling->pluck('product_name')">
                 <div class="border-b border-neutral-200 px-4 py-4 sm:px-6">
-                    <h2 class="font-semibold">Top products</h2>
+                    <h2 class="font-semibold">Top dishes</h2>
                 </div>
                 <table class="admin-data-table">
                     <thead>
                         <tr>
                             <x-admin-table-leading-header />
-                            <x-admin-sort-th column="product_name" label="Product" class="admin-cell-primary" sort-key="product_sort" direction-key="product_direction" page-key="product_page" />
+                            <x-admin-sort-th column="product_name" label="Dish" class="admin-cell-primary" sort-key="product_sort" direction-key="product_direction" page-key="product_page" />
                             <x-admin-sort-th column="units_sold" label="Sold" sort-key="product_sort" direction-key="product_direction" page-key="product_page" />
                             <x-admin-sort-th column="revenue" label="Revenue" align="right" sort-key="product_sort" direction-key="product_direction" page-key="product_page" />
                         </tr>
@@ -160,7 +160,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="admin-table-cell py-8 text-center text-brand-muted">No product sales yet.</td>
+                                <td colspan="5" class="admin-table-cell py-8 text-center text-brand-muted">No dish sales yet.</td>
                             </tr>
                         @endforelse
                     </tbody>

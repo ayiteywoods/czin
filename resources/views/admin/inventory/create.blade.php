@@ -10,9 +10,9 @@
     <form method="POST" action="{{ route('admin.inventory.store') }}" class="card max-w-2xl space-y-4 p-6">
         @csrf
         <div>
-            <x-form-label :required="true">Product</x-form-label>
+            <x-form-label :required="true">Menu item</x-form-label>
             <select name="product_id" required class="input-field">
-                <option value="">Select product</option>
+                <option value="">Select menu item</option>
                 @foreach ($products as $product)
                     <option value="{{ $product->id }}" @selected((string) old('product_id') === (string) $product->id)>
                         {{ $product->name }} (stock: {{ $product->quantity }})

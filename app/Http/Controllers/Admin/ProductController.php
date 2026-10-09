@@ -70,7 +70,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('admin.products.index')
-            ->with('success', 'Product created successfully.');
+            ->with('success', 'Menu item created successfully.');
     }
 
     public function edit(Product $product): View
@@ -96,7 +96,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('admin.products.index')
-            ->with('success', 'Product updated successfully.');
+            ->with('success', 'Menu item updated successfully.');
     }
 
     public function destroy(Product $product): RedirectResponse
@@ -110,7 +110,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('admin.products.index')
-            ->with('success', 'Product deleted successfully.');
+            ->with('success', 'Menu item removed successfully.');
     }
 
     public function toggle86(Product $product): RedirectResponse

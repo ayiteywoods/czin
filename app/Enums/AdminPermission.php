@@ -20,8 +20,8 @@ enum AdminPermission: string
     {
         return match ($this) {
             self::Dashboard => 'Dashboard',
-            self::Products => 'Products',
-            self::Categories => 'Categories',
+            self::Products => 'Menu',
+            self::Categories => 'Menu categories',
             self::Orders => 'Orders',
             self::Pos => 'Point of Sale',
             self::Customers => 'Customers',
@@ -37,8 +37,8 @@ enum AdminPermission: string
     {
         return match ($this) {
             self::Dashboard => 'View dashboard overview and analytics',
-            self::Products => 'Create, edit, and remove products',
-            self::Categories => 'Manage product categories',
+            self::Products => 'Create, edit, and remove menu items, inventory, modifiers, and recipes',
+            self::Categories => 'Manage menu categories (mains, sides, drinks, and more)',
             self::Orders => 'View and update orders, coupons, promotions, and delivery',
             self::Pos => 'Use the Point of Sale terminal and POS end-of-day report',
             self::Customers => 'View and manage customer accounts',

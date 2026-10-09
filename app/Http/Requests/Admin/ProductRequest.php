@@ -109,12 +109,35 @@ class ProductRequest extends FormRequest
             ->all();
     }
 
+    public function attributes(): array
+    {
+        return [
+            'name' => 'dish name',
+            'sku' => 'item code',
+            'category_id' => 'menu category',
+            'discount_price' => 'special price',
+            'status' => 'menu status',
+            'publish_date' => 'available from date',
+            'publish_time' => 'available from time',
+            'variants' => 'portions and options',
+            'variants.*.size' => 'portion',
+            'variants.*.color' => 'option',
+            'variants.*.heel_length' => 'extra',
+            'variants.*.quantity' => 'quantity',
+            'variants.*.sku' => 'item code',
+            'images' => 'food photos',
+            'images.*' => 'food photo',
+        ];
+    }
+
     public function messages(): array
     {
         return [
             'images.*.required' => 'Each selected file must be a valid image upload.',
-            'images.*.extensions' => 'Product images must be JPG, PNG, GIF, WebP, or HEIC.',
-            'images.*.max' => 'Each product image must not be larger than 20 MB before compression.',
+            'images.*.extensions' => 'Food photos must be JPG, PNG, GIF, WebP, or HEIC.',
+            'images.*.max' => 'Each food photo must not be larger than 20 MB before compression.',
+            'variants.required' => 'Add at least one portion and option combination.',
+            'variants.min' => 'Add at least one portion and option combination.',
         ];
     }
 }

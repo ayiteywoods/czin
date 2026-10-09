@@ -13,7 +13,7 @@ class GrantPosStaffCommand extends Command
                             {email : Admin user email}
                             {--only-show : Show current permissions without changing them}';
 
-    protected $description = 'Grant Products, Orders, Point of Sale, and Reports to an admin user (POS staff preset).';
+    protected $description = 'Grant Menu, Orders, Point of Sale, and Reports to an admin user (POS staff preset).';
 
     public function handle(): int
     {

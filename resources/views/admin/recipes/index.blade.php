@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('heading', 'Recipes')
-@section('subheading', 'Ingredients by product')
+@section('subheading', 'Ingredients by menu item')
 
 @section('content')
     <form method="GET" action="{{ route('admin.recipes.index') }}" class="mb-6 flex gap-2">
-        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search products…" class="input-field max-w-sm">
+        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search menu items…" class="input-field max-w-sm">
         <button type="submit" class="btn-outline">Search</button>
     </form>
 
@@ -14,7 +14,7 @@
             <thead>
                 <tr>
                     <x-admin-table-leading-header />
-                    <th class="admin-table-cell admin-cell-primary font-medium">Product</th>
+                    <th class="admin-table-cell admin-cell-primary font-medium">Menu item</th>
                     <th class="admin-table-cell admin-col-md font-medium">Ingredients</th>
                     <th class="admin-table-cell admin-col-actions text-right font-medium">Actions</th>
                 </tr>
@@ -31,7 +31,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="admin-table-cell py-8 text-center text-brand-muted">No products found.</td>
+                        <td colspan="4" class="admin-table-cell py-8 text-center text-brand-muted">No menu items found.</td>
                     </tr>
                 @endforelse
             </tbody>

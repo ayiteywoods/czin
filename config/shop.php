@@ -82,8 +82,9 @@ return [
         'cream' => '#fffdd0',
     ],
 
-    // Optional third option (ProductVariant.heel_length) — unused for most menu items.
+    // Optional third option (ProductVariant.heel_length) — extras for menu items.
     'product_heel_lengths' => [],
+    'product_extras' => ['Extra meat', 'Extra sauce', 'No onion', 'No pepper', 'Side salad'],
 
     'delivery_info' => [
         'shipping_note' => 'Delivery fee calculated at checkout.',

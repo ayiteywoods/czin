@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
-@section('heading', 'Products')
+@section('heading', 'Menu')
+@section('subheading', 'Dishes and drinks available to order')
 
 @section('content')
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -28,7 +29,7 @@
             </select>
         </form>
 
-        <a href="{{ route('admin.products.create') }}" class="btn-primary w-full text-center sm:w-auto">Add product</a>
+        <a href="{{ route('admin.products.create') }}" class="btn-primary w-full text-center sm:w-auto">Add menu item</a>
     </div>
 
     <x-admin-table-panel :page-ids="$products->pluck('id')">
@@ -36,10 +37,10 @@
             <thead>
                 <tr>
                     <x-admin-table-leading-header />
-                    <x-admin-sort-th column="name" label="Product" class="admin-cell-primary" />
-                    <x-admin-sort-th column="sku" label="SKU" class="admin-col-md" />
+                    <x-admin-sort-th column="name" label="Dish" class="admin-cell-primary" />
+                    <x-admin-sort-th column="sku" label="Item code" class="admin-col-md" />
                     <x-admin-sort-th column="price" label="Price" />
-                    <x-admin-sort-th column="quantity" label="Stock" />
+                    <x-admin-sort-th column="quantity" label="Portions" />
                     <x-admin-sort-th column="status" label="Status" class="admin-col-md" />
                     <th class="admin-table-cell admin-col-actions text-right font-medium">Actions</th>
                 </tr>
@@ -77,7 +78,7 @@
                                     :view-detail-url="route('admin.details.products', $product)"
                                     :edit-url="route('admin.products.edit', $product)"
                                     :delete-url="route('admin.products.destroy', $product)"
-                                    delete-confirm="Delete this product permanently?"
+                                    delete-confirm="Remove this menu item permanently?"
                                 />
                                 <form method="POST" action="{{ route('admin.products.toggle-86', $product) }}">
                                     @csrf
@@ -91,7 +92,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="admin-table-cell py-8 text-center text-brand-muted">No products yet.</td>
+                        <td colspan="8" class="admin-table-cell py-8 text-center text-brand-muted">No menu items yet.</td>
                     </tr>
                 @endforelse
             </tbody>

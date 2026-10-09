@@ -52,13 +52,13 @@
         @endadminCan
 
         @adminCan('products')
-            <x-admin-sidebar-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')" title="Products">
+            <x-admin-sidebar-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')" title="Menu">
                 <x-slot:icon>
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5a1.125 1.125 0 00-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
                     </svg>
                 </x-slot:icon>
-                Products
+                Menu
             </x-admin-sidebar-link>
             <x-admin-sidebar-link :href="route('admin.inventory.index')" :active="request()->routeIs('admin.inventory.*')" title="Inventory">
                 <x-slot:icon>
@@ -87,14 +87,14 @@
         @endadminCan
 
         @adminCan('categories')
-            <x-admin-sidebar-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*')" title="Categories">
+            <x-admin-sidebar-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*')" title="Menu categories">
                 <x-slot:icon>
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.832.699 2.531 0l4.318-4.318c.699-.699.699-1.832 0-2.531L11.25 3.659A2.25 2.25 0 009.568 3z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
                     </svg>
                 </x-slot:icon>
-                Categories
+                Menu categories
             </x-admin-sidebar-link>
         @endadminCan
 

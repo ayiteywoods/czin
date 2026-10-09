@@ -12,8 +12,8 @@ enum ProductStatus: string
     {
         return match ($this) {
             self::Draft => 'Draft',
-            self::Active => 'Active',
-            self::Inactive => 'Inactive',
+            self::Active => 'On menu',
+            self::Inactive => 'Off menu',
         };
     }
 }

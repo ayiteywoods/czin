@@ -30,7 +30,7 @@
     <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <a href="{{ route('admin.products.create') }}" class="admin-quick-action">
             <svg class="h-5 w-5 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            <span>Add product</span>
+            <span>Add menu item</span>
         </a>
         @adminCan('kitchen')
             <a href="{{ route('admin.kitchen.index') }}" class="admin-quick-action">
@@ -166,7 +166,7 @@
                 @if ($attention['low_stock'] > 0)
                     <a href="{{ route('admin.products.index', ['sort' => 'quantity', 'direction' => 'asc']) }}" class="admin-attention-item">
                         <p class="text-2xl font-semibold text-brand-red">{{ $attention['low_stock'] }}</p>
-                        <p class="mt-1 text-sm font-medium">Low stock products</p>
+                        <p class="mt-1 text-sm font-medium">Low portion stock</p>
                     </a>
                 @endif
                 @if ($attention['failed_payments'] > 0)
@@ -421,7 +421,7 @@
                 @empty
                     <div class="px-4 py-8 text-center sm:px-6">
                         <p class="text-sm text-brand-muted">No orders yet.</p>
-                        <a href="{{ route('admin.products.create') }}" class="mt-3 inline-block text-sm font-medium text-brand-red hover:underline">Add your first product</a>
+                        <a href="{{ route('admin.products.create') }}" class="mt-3 inline-block text-sm font-medium text-brand-red hover:underline">Add your first menu item</a>
                     </div>
                 @endforelse
             </div>
@@ -429,7 +429,7 @@
         </div>
 
         <div class="card overflow-hidden">
-            <x-admin-section-header title="Top selling products" :href="route('admin.reports.index')" />
+            <x-admin-section-header title="Top selling dishes" :href="route('admin.reports.index')" />
             <div class="divide-y divide-neutral-100">
                 @forelse ($topSelling as $product)
                     <div class="flex items-center justify-between gap-4 px-4 py-4 text-sm sm:px-6">

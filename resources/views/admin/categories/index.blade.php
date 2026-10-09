@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
-@section('heading', 'Categories')
+@section('heading', 'Menu categories')
+@section('subheading', 'Groups for dishes and drinks on the menu')
 
 @section('content')
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
@@ -16,7 +17,7 @@
                     <x-admin-table-leading-header />
                     <x-admin-sort-th column="name" label="Name" class="admin-cell-primary" />
                     <th class="admin-table-cell font-medium">Type</th>
-                    <x-admin-sort-th column="products_count" label="Products" />
+                    <x-admin-sort-th column="products_count" label="Menu items" />
                     <th class="admin-table-cell font-medium">Navbar</th>
                     <x-admin-sort-th column="status" label="Status" class="admin-col-md" />
                     <th class="admin-table-cell admin-col-actions text-right font-medium">Actions</th>
@@ -60,7 +61,7 @@
                                 :edit-url="route('admin.categories.edit', $category)"
                                 :delete-url="route('admin.categories.destroy', $category)"
                                 :delete-confirm="$category->products_count > 0
-                                    ? 'This category has '.$category->products_count.' product(s). Deleting it will remove them too. Continue?'
+                                    ? 'This category has '.$category->products_count.' menu item(s). Deleting it will remove them too. Continue?'
                                     : 'Delete this category permanently?'"
                             />
                         </td>

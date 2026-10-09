@@ -280,7 +280,7 @@
                         value="{{ old('low_stock_threshold', $settings->low_stock_threshold ?? 10) }}"
                         class="input-field"
                     >
-                    <p class="mt-1 text-xs text-brand-muted">Products below this quantity appear as low stock on the dashboard.</p>
+                    <p class="mt-1 text-xs text-brand-muted">Menu items below this quantity appear as low stock on the dashboard.</p>
                     @error('low_stock_threshold')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 

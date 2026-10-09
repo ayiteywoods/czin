@@ -1,22 +1,22 @@
 <dl class="grid gap-4 sm:grid-cols-2">
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Name</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Dish name</dt>
         <dd class="mt-1 font-medium">{{ $product->name }}</dd>
     </div>
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">SKU</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Item code</dt>
         <dd class="mt-1">{{ $product->sku }}</dd>
     </div>
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Category</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Menu category</dt>
         <dd class="mt-1">{{ $product->category->name }}</dd>
     </div>
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Status</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Menu status</dt>
         <dd class="mt-1">{{ $product->status->label() }}</dd>
     </div>
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Storefront publish</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Available from</dt>
         <dd class="mt-1">
             @if ($product->storefrontPublishLabel())
                 {{ $product->storefrontPublishLabel() }}
@@ -37,11 +37,11 @@
         <dd class="mt-1 font-medium text-brand-red">{{ config('shop.currency_symbol') }} {{ number_format($product->sellingPrice(), 2) }}</dd>
     </div>
     <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Stock</dt>
+        <dt class="text-xs font-medium uppercase tracking-wide text-brand-muted">Portions available</dt>
         <dd class="mt-1">
             {{ $product->quantity }}
             @if ($product->isLowStock())
-                <span class="text-brand-red">(Low stock)</span>
+                <span class="text-brand-red">(Low)</span>
             @endif
         </dd>
     </div>
@@ -60,7 +60,7 @@
 
 @if ($product->images->isNotEmpty())
     <div class="mt-6">
-        <p class="text-xs font-medium uppercase tracking-wide text-brand-muted">Images</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-brand-muted">Food photos</p>
         <div class="mt-3 flex flex-wrap gap-3">
             @foreach ($product->images as $image)
                 <img src="{{ asset('storage/'.$image->path) }}" alt="{{ $product->name }}" class="h-24 w-24 border border-neutral-200 object-cover">

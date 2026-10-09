@@ -22,7 +22,7 @@
           @if ($products->isNotEmpty())
               <div class="card overflow-hidden">
                   <div class="border-b border-neutral-200 px-4 py-3 sm:px-6">
-                      <h2 class="font-semibold">Products</h2>
+                      <h2 class="font-semibold">Menu items</h2>
                   </div>
                   <ul class="divide-y divide-neutral-100">
                       @foreach ($products as $product)

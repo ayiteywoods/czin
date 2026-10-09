@@ -84,7 +84,7 @@
             </button>
         </div>
         <p class="text-xs text-brand-muted">
-            POS staff preset selects Products, Orders, Point of Sale, and Reports only.
+            POS staff preset selects Menu, Orders, Point of Sale, and Reports only.
         </p>
         @foreach ($permissions as $permission)
             <label class="flex items-start gap-3 rounded-lg border border-neutral-100 p-3">

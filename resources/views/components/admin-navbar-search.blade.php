@@ -19,7 +19,7 @@
             type="search"
             name="q"
             value="{{ $value }}"
-            placeholder="Search products, orders, customers..."
+            placeholder="Search menu, orders, customers..."
             class="admin-navbar-search-input"
             autocomplete="off"
         >

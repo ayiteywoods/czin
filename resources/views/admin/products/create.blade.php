@@ -1,11 +1,12 @@
 @extends('layouts.admin')
 
-@section('heading', 'Add product')
+@section('heading', 'Add menu item')
+@section('subheading', 'Add a dish or drink to the restaurant menu')
 
 @section('content')
     <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" class="max-w-3xl space-y-4 card p-6">
         @csrf
         @include('admin.products.partials.form', ['categoryTree' => $categoryTree])
-        <button type="submit" class="btn-primary">Save product</button>
+        <button type="submit" class="btn-primary">Save menu item</button>
     </form>
 @endsection
