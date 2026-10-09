@@ -40,17 +40,6 @@
     </div>
 
     <div>
-        <label class="block text-sm font-medium">Portions available</label>
-        <input
-            type="number"
-            value="{{ old('quantity', $product?->quantity ?? 0) }}"
-            readonly
-            class="input-field bg-neutral-50"
-        >
-        <p class="mt-1 text-xs text-brand-muted">Calculated automatically from the portion and option rows below.</p>
-    </div>
-
-    <div>
         <x-form-label :required="true">Menu status</x-form-label>
         <select name="status" class="input-field">
             @foreach (\App\Enums\ProductStatus::cases() as $status)
@@ -128,14 +117,14 @@
         'size' => '',
         'color' => '',
         'heel_length' => '',
-        'quantity' => 0,
+        'quantity' => 999,
         'sku' => '',
         'is_active' => true,
     ]])))">
         <div class="flex items-center justify-between gap-3">
             <div>
                 <label class="block text-sm font-medium">Portions & options<span class="text-brand-red" aria-hidden="true"> *</span></label>
-                <p class="mt-1 text-xs text-brand-muted">Add the choices guests can order — portion size, spice/style, and optional extras. Names appear on the menu as you type them.</p>
+                <p class="mt-1 text-xs text-brand-muted">Add the choices guests can order — portion size, spice/style, and optional extras. Prep count is optional for cook-to-order dishes (defaults to plenty). Use <span class="font-medium">86</span> later if you sell out.</p>
             </div>
             <button type="button" class="btn-outline px-3 py-2 text-xs" @click="addRow()">Add option</button>
         </div>
@@ -147,7 +136,7 @@
                         <th class="px-2 py-2">Portion <span class="text-brand-red">*</span></th>
                         <th class="px-2 py-2">Option <span class="text-brand-red">*</span></th>
                         <th class="px-2 py-2">Extra <span class="normal-case text-brand-muted">(optional)</span></th>
-                        <th class="px-2 py-2">Qty <span class="text-brand-red">*</span></th>
+                        <th class="px-2 py-2">Prep count <span class="normal-case text-brand-muted">(optional)</span></th>
                         <th class="px-2 py-2">Item code</th>
                         <th class="px-2 py-2">On menu</th>
                         <th class="px-2 py-2"></th>
@@ -176,7 +165,7 @@
                                 <input type="text" :name="`variants[${index}][heel_length]`" x-model="row.heel_length" list="product-extras" placeholder="e.g. Extra meat" class="input-field min-w-[6rem]">
                             </td>
                             <td class="px-2 py-2">
-                                <input type="number" :name="`variants[${index}][quantity]`" x-model="row.quantity" min="0" required class="input-field w-20">
+                                <input type="number" :name="`variants[${index}][quantity]`" x-model="row.quantity" min="0" placeholder="999" class="input-field w-24">
                             </td>
                             <td class="px-2 py-2">
                                 <input type="text" :name="`variants[${index}][sku]`" x-model="row.sku" placeholder="Auto" class="input-field min-w-[8rem]">
@@ -224,7 +213,7 @@
                         size: '',
                         color: '',
                         heel_length: '',
-                        quantity: 0,
+                        quantity: 999,
                         sku: '',
                         is_active: true,
                     }],
@@ -233,7 +222,7 @@
                             size: '',
                             color: '',
                             heel_length: '',
-                            quantity: 0,
+                            quantity: 999,
                             sku: '',
                             is_active: true,
                         });

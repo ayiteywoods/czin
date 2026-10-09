@@ -54,11 +54,17 @@ class ProductRequest extends FormRequest
             'variants.*.size' => ['required', 'string', 'max:50'],
             'variants.*.color' => ['required', 'string', 'max:50'],
             'variants.*.heel_length' => ['nullable', 'string', 'max:50'],
-            'variants.*.quantity' => ['required', 'integer', 'min:0'],
+            // Optional for restaurants that cook to order. Empty values default to cook-to-order stock.
+            'variants.*.quantity' => ['nullable', 'integer', 'min:0'],
             'variants.*.sku' => ['nullable', 'string', 'max:100'],
             'variants.*.is_active' => ['nullable', 'boolean'],
         ];
     }
+
+    /**
+     * Default portion count when staff leave quantity blank (cook-to-order menus).
+     */
+    public const DEFAULT_COOK_TO_ORDER_QTY = 999;
 
     protected function prepareForValidation(): void
     {
@@ -76,6 +82,22 @@ class ProductRequest extends FormRequest
         } else {
             $this->merge(['published_at' => null]);
         }
+
+        $variants = collect(Arr::wrap($this->input('variants', [])))
+            ->map(function ($variant) {
+                if (! is_array($variant)) {
+                    return $variant;
+                }
+
+                if (! array_key_exists('quantity', $variant) || $variant['quantity'] === '' || $variant['quantity'] === null) {
+                    $variant['quantity'] = self::DEFAULT_COOK_TO_ORDER_QTY;
+                }
+
+                return $variant;
+            })
+            ->all();
+
+        $this->merge(['variants' => $variants]);
 
         if (! $this->hasFile('images')) {
             $this->request->remove('images');
@@ -123,7 +145,7 @@ class ProductRequest extends FormRequest
             'variants.*.size' => 'portion',
             'variants.*.color' => 'option',
             'variants.*.heel_length' => 'extra',
-            'variants.*.quantity' => 'quantity',
+            'variants.*.quantity' => 'prep count',
             'variants.*.sku' => 'item code',
             'images' => 'food photos',
             'images.*' => 'food photo',
