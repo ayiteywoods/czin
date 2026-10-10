@@ -45,7 +45,8 @@ class Promotion extends Model
      */
     public function targetCategoryIds(): array
     {
-        $ids = collect($this->category_ids ?? [])
+        $raw = $this->attributes['category_ids'] ?? null;
+        $ids = collect($this->decodeIdList($raw))
             ->map(fn ($id) => (int) $id)
             ->filter(fn (int $id) => $id > 0)
             ->values();
@@ -62,7 +63,8 @@ class Promotion extends Model
      */
     public function targetProductIds(): array
     {
-        $ids = collect($this->product_ids ?? [])
+        $raw = $this->attributes['product_ids'] ?? null;
+        $ids = collect($this->decodeIdList($raw))
             ->map(fn ($id) => (int) $id)
             ->filter(fn (int $id) => $id > 0)
             ->values();
@@ -72,6 +74,24 @@ class Promotion extends Model
         }
 
         return $ids->unique()->values()->all();
+    }
+
+    /**
+     * @return list<int|string>
+     */
+    private function decodeIdList(mixed $raw): array
+    {
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (! is_string($raw) || $raw === '') {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 
     public function appliesToLabel(): string

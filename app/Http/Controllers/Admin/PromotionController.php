@@ -9,9 +9,11 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Promotion;
 use App\Support\AdminTable;
+use App\Support\PromotionSchema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Throwable;
 
 class PromotionController extends Controller
 {
@@ -19,6 +21,8 @@ class PromotionController extends Controller
 
     public function index(Request $request): View
     {
+        PromotionSchema::ensureMultiTargetColumns();
+
         $promotions = AdminTable::paginate(
             Promotion::query()->with(['category', 'product']),
             $request,
@@ -40,12 +44,28 @@ class PromotionController extends Controller
 
     public function create(): View
     {
+        PromotionSchema::ensureMultiTargetColumns();
+
         return view('admin.promotions.create', $this->formData());
     }
 
     public function store(PromotionRequest $request): RedirectResponse
     {
-        Promotion::query()->create($this->payload($request));
+        if (! PromotionSchema::ensureMultiTargetColumns()) {
+            return back()
+                ->withInput()
+                ->with('error', 'Could not prepare promotion fields. On the server run: php artisan migrate --force');
+        }
+
+        try {
+            Promotion::query()->create($this->payload($request));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Could not save promotion. Run php artisan migrate --force on the server, then try again.');
+        }
 
         return redirect()
             ->route('admin.promotions.index')
@@ -54,6 +74,9 @@ class PromotionController extends Controller
 
     public function edit(Promotion $promotion): View
     {
+        PromotionSchema::ensureMultiTargetColumns();
+        $promotion->refresh();
+
         return view('admin.promotions.edit', array_merge(
             ['promotion' => $promotion],
             $this->formData(),
@@ -62,7 +85,21 @@ class PromotionController extends Controller
 
     public function update(PromotionRequest $request, Promotion $promotion): RedirectResponse
     {
-        $promotion->update($this->payload($request));
+        if (! PromotionSchema::ensureMultiTargetColumns()) {
+            return back()
+                ->withInput()
+                ->with('error', 'Could not prepare promotion fields. On the server run: php artisan migrate --force');
+        }
+
+        try {
+            $promotion->update($this->payload($request));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Could not save promotion. Run php artisan migrate --force on the server, then try again.');
+        }
 
         return redirect()
             ->route('admin.promotions.index')

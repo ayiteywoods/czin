@@ -1,6 +1,8 @@
 @php
     use App\Enums\PromotionType;
     $promotion = $promotion ?? null;
+    $selectedCategoryIds = collect(old('category_ids', $promotion?->targetCategoryIds() ?? []))->map(fn ($id) => (string) $id)->all();
+    $selectedProductIds = collect(old('product_ids', $promotion?->targetProductIds() ?? []))->map(fn ($id) => (string) $id)->all();
 @endphp
 
 <div class="grid gap-4 sm:grid-cols-2">
@@ -33,33 +35,53 @@
         <input type="datetime-local" name="ends_at" value="{{ old('ends_at', $promotion?->ends_at?->format('Y-m-d\TH:i')) }}" class="input-field">
         @error('ends_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
-    @php
-        $selectedCategoryIds = collect(old('category_ids', $promotion?->targetCategoryIds() ?? []))->map(fn ($id) => (string) $id)->all();
-        $selectedProductIds = collect(old('product_ids', $promotion?->targetProductIds() ?? []))->map(fn ($id) => (string) $id)->all();
-    @endphp
 
-    <div class="sm:col-span-2">
-        <label class="block text-sm font-medium">Categories</label>
-        <select name="category_ids[]" multiple size="6" class="input-field min-h-[9rem]">
+    <div class="sm:col-span-2 space-y-3 rounded-xl border border-neutral-200 p-4">
+        <div>
+            <label class="block text-sm font-medium">Categories</label>
+            <p class="mt-1 text-xs text-brand-muted">Tick one or more categories. Applies to all items in each selected category (and subcategories).</p>
+        </div>
+        <div class="grid gap-2 sm:grid-cols-2">
             @foreach ($categories as $category)
-                <option value="{{ $category->id }}" @selected(in_array((string) $category->id, $selectedCategoryIds, true))>{{ $category->name }}</option>
+                <label class="flex items-center gap-3 rounded-lg border border-neutral-100 px-3 py-2">
+                    <input
+                        type="checkbox"
+                        name="category_ids[]"
+                        value="{{ $category->id }}"
+                        class="h-4 w-4 rounded border-neutral-300 text-brand-red"
+                        @checked(in_array((string) $category->id, $selectedCategoryIds, true))
+                    >
+                    <span class="text-sm">{{ $category->name }}</span>
+                </label>
             @endforeach
-        </select>
-        <p class="mt-1 text-xs text-brand-muted">Hold Ctrl/Cmd to select multiple. Applies to all items in each selected category (and their subcategories).</p>
+        </div>
         @error('category_ids')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         @error('category_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
-    <div class="sm:col-span-2">
-        <label class="block text-sm font-medium">Products</label>
-        <select name="product_ids[]" multiple size="8" class="input-field min-h-[11rem]">
+
+    <div class="sm:col-span-2 space-y-3 rounded-xl border border-neutral-200 p-4">
+        <div>
+            <label class="block text-sm font-medium">Products</label>
+            <p class="mt-1 text-xs text-brand-muted">Optional. Tick specific products to include. You can combine these with categories.</p>
+        </div>
+        <div class="max-h-64 space-y-2 overflow-y-auto pr-1">
             @foreach ($products as $product)
-                <option value="{{ $product->id }}" @selected(in_array((string) $product->id, $selectedProductIds, true))>{{ $product->name }}</option>
+                <label class="flex items-center gap-3 rounded-lg border border-neutral-100 px-3 py-2">
+                    <input
+                        type="checkbox"
+                        name="product_ids[]"
+                        value="{{ $product->id }}"
+                        class="h-4 w-4 rounded border-neutral-300 text-brand-red"
+                        @checked(in_array((string) $product->id, $selectedProductIds, true))
+                    >
+                    <span class="text-sm">{{ $product->name }}</span>
+                </label>
             @endforeach
-        </select>
-        <p class="mt-1 text-xs text-brand-muted">Hold Ctrl/Cmd to select multiple. You can combine categories and products — any match gets the promotion.</p>
+        </div>
         @error('product_ids')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         @error('product_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
+
     <div>
         <label class="block text-sm font-medium">Start time</label>
         <input type="time" name="start_time" value="{{ old('start_time', $promotion?->start_time ? \Illuminate\Support\Str::of($promotion->start_time)->substr(0, 5) : '') }}" class="input-field">
