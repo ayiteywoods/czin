@@ -11,7 +11,8 @@ return new class extends Migration
     {
         if (! Schema::hasColumn('home_sections', 'carousel_paths')) {
             Schema::table('home_sections', function (Blueprint $table) {
-                $table->json('carousel_paths')->nullable();
+                // longText is more compatible than json on some shared MySQL hosts.
+                $table->longText('carousel_paths')->nullable();
             });
         }
 

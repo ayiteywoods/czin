@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\HomeSectionRequest;
 use App\Models\HomeSection;
+use App\Support\HomeSectionSchema;
 use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Throwable;
@@ -27,6 +27,11 @@ class HomeSectionController extends Controller
 
     public function edit(HomeSection $homeSection): View
     {
+        if ($homeSection->key === HomeSection::KEY_HERO) {
+            HomeSectionSchema::ensureCarouselPathsColumn();
+            $homeSection->refresh();
+        }
+
         return view('admin.home-sections.edit', ['section' => $homeSection]);
     }
 
@@ -44,10 +49,10 @@ class HomeSectionController extends Controller
             }
 
             if ($homeSection->key === HomeSection::KEY_HERO) {
-                if (! Schema::hasColumn('home_sections', 'carousel_paths')) {
+                if (! HomeSectionSchema::ensureCarouselPathsColumn()) {
                     return back()
                         ->withInput()
-                        ->with('error', 'Hero carousel needs a database update. On the server run: php artisan migrate --force');
+                        ->with('error', 'Could not create the carousel_paths database column. In phpMyAdmin run: ALTER TABLE home_sections ADD COLUMN carousel_paths LONGTEXT NULL;');
                 }
 
                 $carouselPaths = $this->syncHeroCarousel(
