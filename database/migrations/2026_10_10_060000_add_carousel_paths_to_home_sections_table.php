@@ -9,21 +9,27 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('home_sections', function (Blueprint $table) {
-            $table->json('carousel_paths')->nullable()->after('image_path');
-        });
+        if (! Schema::hasColumn('home_sections', 'carousel_paths')) {
+            Schema::table('home_sections', function (Blueprint $table) {
+                $table->json('carousel_paths')->nullable();
+            });
+        }
 
-        $defaults = json_encode([
+        $defaults = [
             'images/brand/food-hero-1.jpg',
             'images/brand/food-hero-2.jpg',
             'images/brand/food-hero-3.jpg',
             'images/brand/food-hero-4.jpg',
-        ]);
+        ];
 
         DB::table('home_sections')
             ->where('key', 'hero')
-            ->whereNull('carousel_paths')
-            ->update(['carousel_paths' => $defaults]);
+            ->where(function ($query) {
+                $query->whereNull('carousel_paths')
+                    ->orWhere('carousel_paths', '')
+                    ->orWhere('carousel_paths', '[]');
+            })
+            ->update(['carousel_paths' => json_encode($defaults)]);
     }
 
     public function down(): void
