@@ -28,8 +28,16 @@
     <ul class="admin-kitchen-items">
         @foreach ($order['items'] as $item)
             <li class="admin-kitchen-item">
+                @if (! empty($item['image_url']))
+                    <img
+                        src="{{ $item['image_url'] }}"
+                        alt="{{ $item['name'] }}"
+                        class="admin-kitchen-item-image"
+                        loading="lazy"
+                    >
+                @endif
                 <span class="admin-kitchen-item-qty">{{ $item['quantity'] }}×</span>
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
                     <p class="admin-kitchen-item-name">{{ $item['name'] }}</p>
                     @if (! empty($item['options']))
                         <p class="admin-kitchen-item-options">

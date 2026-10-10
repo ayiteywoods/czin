@@ -34,6 +34,7 @@ class KitchenBoardPresenter
                 'name' => $item->product_name,
                 'options' => $item->variant_options,
                 'quantity' => $item->quantity,
+                'image_url' => $item->product?->storefrontImageUrl(),
             ])->values()->all(),
             'next_action' => $action ? [
                 'status' => $action['status']->value,

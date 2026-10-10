@@ -40,7 +40,7 @@ class KitchenController extends Controller
 
     public function advanceStatus(Order $order, KitchenOrderService $kitchen, KitchenBoardPresenter $presenter): JsonResponse
     {
-        $order = $kitchen->advanceStatus($order)->load(['items', 'diningTable']);
+        $order = $kitchen->advanceStatus($order)->load(['items.product.images', 'items.product.category', 'diningTable']);
 
         $orders = $kitchen->activeOrders();
         $columns = ['new' => [], 'preparing' => [], 'ready' => []];

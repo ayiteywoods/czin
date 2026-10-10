@@ -393,10 +393,15 @@
                                 .join(', ')
                             : '';
 
+                        const imageHtml = item.image_url
+                            ? `<img src="${this.escapeHtml(item.image_url)}" alt="${this.escapeHtml(item.name)}" class="admin-kitchen-item-image" loading="lazy">`
+                            : '';
+
                         return `
                             <li class="admin-kitchen-item">
+                                ${imageHtml}
                                 <span class="admin-kitchen-item-qty">${item.quantity}×</span>
-                                <div class="min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <p class="admin-kitchen-item-name">${this.escapeHtml(item.name)}</p>
                                     ${options ? `<p class="admin-kitchen-item-options">${this.escapeHtml(options)}</p>` : ''}
                                 </div>

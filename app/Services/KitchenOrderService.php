@@ -20,7 +20,7 @@ class KitchenOrderService
     {
         return Order::query()
             ->kitchenActive()
-            ->with(['items', 'diningTable'])
+            ->with(['items.product.images', 'items.product.category', 'diningTable'])
             ->orderBy('created_at')
             ->get();
     }
@@ -94,7 +94,7 @@ class KitchenOrderService
 
         app(AdminNotificationService::class)->sync();
 
-        return $order->fresh(['items', 'diningTable']);
+        return $order->fresh(['items.product.images', 'items.product.category', 'diningTable']);
     }
 
     /**
@@ -125,6 +125,7 @@ class KitchenOrderService
                 'name' => $item->product_name,
                 'options' => $item->variant_options,
                 'quantity' => $item->quantity,
+                'image_url' => $item->product?->storefrontImageUrl(),
             ])->values()->all(),
             'next_action' => $action ? [
                 'status' => $action['status']->value,
