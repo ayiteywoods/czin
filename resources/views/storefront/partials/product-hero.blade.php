@@ -10,7 +10,7 @@
     $stats = [
         [
             'value' => config('shop.currency_symbol').' '.number_format($product->sellingPrice(), 0),
-            'label' => $product->discount_price ? 'Sale price' : 'Price',
+            'label' => $product->compareAtPrice() ? 'Sale price' : 'Price',
             'icon' => 'cart',
             'tone' => 'red',
         ],

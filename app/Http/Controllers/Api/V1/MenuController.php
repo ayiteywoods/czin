@@ -68,6 +68,8 @@ class MenuController extends Controller
                 'price' => (float) $product->price,
                 'discount_price' => $product->discount_price !== null ? (float) $product->discount_price : null,
                 'selling_price' => $product->sellingPrice(),
+                'compare_at_price' => $product->compareAtPrice(),
+                'promotion' => app(\App\Services\PromotionService::class)->promotionPayload($product),
                 'variants' => $product->variants
                     ->filter(fn ($variant) => $variant->availableQuantity() > 0)
                     ->map(fn ($variant) => [

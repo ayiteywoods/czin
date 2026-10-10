@@ -137,7 +137,22 @@ class Product extends Model
 
     public function sellingPrice(): float
     {
-        return (float) ($this->discount_price ?? $this->price);
+        return app(\App\Services\PromotionService::class)->sellingPriceFor($this);
+    }
+
+    public function compareAtPrice(): ?float
+    {
+        return app(\App\Services\PromotionService::class)->compareAtPriceFor($this);
+    }
+
+    public function promotionBadge(): ?string
+    {
+        return app(\App\Services\PromotionService::class)->promotionBadge($this);
+    }
+
+    public function activePromotion(): ?\App\Models\Promotion
+    {
+        return app(\App\Services\PromotionService::class)->bestPromotionFor($this);
     }
 
     public function isActive(): bool

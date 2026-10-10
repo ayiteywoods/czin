@@ -6,8 +6,8 @@
     <a href="{{ route('shop.show', $product) }}" class="block">
         @if (! $inStock)
             <span class="sold-out-badge">Sold Out</span>
-        @elseif ($product->discount_price)
-            <span class="sale-badge">Sale</span>
+        @elseif ($product->promotionBadge())
+            <span class="sale-badge">{{ $product->promotionBadge() }}</span>
         @endif
 
         <div class="product-card-image aspect-square overflow-hidden bg-neutral-100">
@@ -31,8 +31,8 @@
                 <span class="font-semibold text-brand-red">
                     {{ config('shop.currency_symbol') }} {{ number_format($product->sellingPrice(), 2) }}
                 </span>
-                @if ($product->discount_price)
-                    <span class="text-sm text-brand-muted line-through">{{ config('shop.currency_symbol') }} {{ number_format($product->price, 2) }}</span>
+                @if ($product->compareAtPrice())
+                    <span class="text-sm text-brand-muted line-through">{{ config('shop.currency_symbol') }} {{ number_format($product->compareAtPrice(), 2) }}</span>
                 @endif
             </a>
         </div>

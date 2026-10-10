@@ -534,11 +534,15 @@
     }
 
     .admin-pos-product-image-wrap {
-        @apply h-24 w-24 shrink-0 overflow-hidden bg-neutral-100;
+        @apply relative h-24 w-24 shrink-0 overflow-hidden bg-neutral-100;
     }
 
     .admin-pos-product-image {
         @apply h-full w-full object-cover;
+    }
+
+    .admin-pos-product-promo {
+        @apply absolute left-2 top-2 rounded bg-brand-yellow px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-black;
     }
 
     .admin-pos-product-body {
@@ -555,6 +559,10 @@
 
     .admin-pos-product-price {
         @apply mt-2 text-sm font-semibold text-brand-red;
+    }
+
+    .admin-pos-product-compare {
+        @apply ml-2 text-xs font-normal text-brand-muted line-through;
     }
 
     .admin-pos-cart {

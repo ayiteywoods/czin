@@ -174,6 +174,11 @@
                         >
                             <div class="admin-pos-product-image-wrap">
                                 <img :src="product.image" :alt="product.name" class="admin-pos-product-image" loading="lazy">
+                                <span
+                                    class="admin-pos-product-promo"
+                                    x-show="product.promotion"
+                                    x-text="product.promotion?.badge || 'Promo'"
+                                ></span>
                             </div>
                             <div class="admin-pos-product-body">
                                 <p class="admin-pos-product-category" x-text="product.category || 'Menu'"></p>
@@ -181,6 +186,11 @@
                                 <p class="admin-pos-product-price">
                                     <span x-text="currencySymbol"></span>
                                     <span x-text="formatMoney(product.price)"></span>
+                                    <span
+                                        class="admin-pos-product-compare"
+                                        x-show="product.compare_at_price"
+                                        x-text="currencySymbol + ' ' + formatMoney(product.compare_at_price)"
+                                    ></span>
                                 </p>
                             </div>
                         </button>

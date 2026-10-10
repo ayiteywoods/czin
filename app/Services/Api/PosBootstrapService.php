@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\DiningTable;
 use App\Models\Product;
 use App\Models\StoreSetting;
+use App\Services\PromotionService;
 
 class PosBootstrapService
 {
@@ -59,20 +60,26 @@ class PosBootstrapService
                 'name' => $category->name,
                 'slug' => $category->slug,
             ])->values()->all(),
-            'products' => $products->map(fn (Product $product) => [
-                'id' => $product->id,
-                'name' => $product->name,
-                'category_id' => $product->category_id,
-                'category' => $product->category?->name,
-                'image_url' => $product->storefrontImageUrl(),
-                'price' => $product->sellingPrice(),
-                'variants' => $product->variants->map(fn ($variant) => [
-                    'id' => $variant->id,
-                    'label' => $variant->displayLabel(),
-                    'price' => $variant->sellingPrice(),
-                    'stock' => $variant->availableQuantity(),
-                ])->values()->all(),
-            ])->values()->all(),
+            'products' => $products->map(function (Product $product) {
+                $promotions = app(PromotionService::class);
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category_id' => $product->category_id,
+                    'category' => $product->category?->name,
+                    'image_url' => $product->storefrontImageUrl(),
+                    'price' => $product->sellingPrice(),
+                    'compare_at_price' => $product->compareAtPrice(),
+                    'promotion' => $promotions->promotionPayload($product),
+                    'variants' => $product->variants->map(fn ($variant) => [
+                        'id' => $variant->id,
+                        'label' => $variant->displayLabel(),
+                        'price' => $variant->sellingPrice(),
+                        'stock' => $variant->availableQuantity(),
+                    ])->values()->all(),
+                ];
+            })->values()->all(),
             'tables' => $tables->map(fn (DiningTable $table) => [
                 'id' => $table->id,
                 'code' => $table->code,

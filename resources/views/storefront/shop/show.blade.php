@@ -12,8 +12,8 @@
             </div>
 
             <div class="product-detail-purchase card p-6 sm:p-8" data-storefront-reveal style="--reveal-delay: 120ms">
-                @if ($product->discount_price)
-                    <span class="inline-block rounded-xl bg-brand-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-black">Special</span>
+                @if ($product->promotionBadge())
+                    <span class="inline-block rounded-xl bg-brand-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-black">{{ $product->promotionBadge() }}</span>
                 @endif
 
                 <div class="mt-2 flex items-start justify-between gap-4">
@@ -28,10 +28,13 @@
 
                 <div class="mt-4 flex items-center gap-3">
                     <span class="text-3xl font-semibold text-brand-red">{{ config('shop.currency_symbol') }} {{ number_format($product->sellingPrice(), 2) }}</span>
-                    @if ($product->discount_price)
-                        <span class="text-lg text-brand-muted line-through">{{ config('shop.currency_symbol') }} {{ number_format($product->price, 2) }}</span>
+                    @if ($product->compareAtPrice())
+                        <span class="text-lg text-brand-muted line-through">{{ config('shop.currency_symbol') }} {{ number_format($product->compareAtPrice(), 2) }}</span>
                     @endif
                 </div>
+                @if ($product->activePromotion())
+                    <p class="mt-2 text-sm text-brand-muted">{{ $product->activePromotion()->name }}</p>
+                @endif
 
                 <p class="mt-6 leading-relaxed text-neutral-600">{{ $product->description }}</p>
 

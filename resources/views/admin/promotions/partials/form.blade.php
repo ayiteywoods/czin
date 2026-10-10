@@ -36,20 +36,22 @@
     <div>
         <label class="block text-sm font-medium">Category</label>
         <select name="category_id" class="input-field">
-            <option value="">— Any —</option>
+            <option value="">— Any category —</option>
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}" @selected((string) old('category_id', $promotion?->category_id) === (string) $category->id)>{{ $category->name }}</option>
             @endforeach
         </select>
+        <p class="mt-1 text-xs text-brand-muted">Applies to all products in this category (including subcategories). Leave blank for store-wide, or pick a product below instead.</p>
     </div>
     <div>
         <label class="block text-sm font-medium">Product</label>
         <select name="product_id" class="input-field">
-            <option value="">— Any —</option>
+            <option value="">— Any product —</option>
             @foreach ($products as $product)
                 <option value="{{ $product->id }}" @selected((string) old('product_id', $promotion?->product_id) === (string) $product->id)>{{ $product->name }}</option>
             @endforeach
         </select>
+        <p class="mt-1 text-xs text-brand-muted">If a product is selected, the promotion applies only to that item (category is ignored).</p>
     </div>
     <div>
         <label class="block text-sm font-medium">Start time</label>

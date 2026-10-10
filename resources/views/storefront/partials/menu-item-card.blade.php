@@ -37,9 +37,9 @@
                 <p class="font-semibold text-brand-red">
                     {{ config('shop.currency_symbol') }}{{ number_format($product->sellingPrice(), 2) }}
                 </p>
-                @if ($product->discount_price)
+                @if ($product->compareAtPrice())
                     <p class="text-xs text-brand-muted line-through">
-                        {{ config('shop.currency_symbol') }}{{ number_format($product->price, 2) }}
+                        {{ config('shop.currency_symbol') }}{{ number_format($product->compareAtPrice(), 2) }}
                     </p>
                 @endif
             </div>
@@ -48,8 +48,8 @@
         <div class="menu-item-card-actions">
             @if (! $inStock)
                 <span class="text-xs font-semibold uppercase tracking-wide text-brand-muted">Unavailable</span>
-            @elseif ($product->discount_price)
-                <span class="inline-flex bg-brand-yellow px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-black">Special</span>
+            @elseif ($product->promotionBadge())
+                <span class="inline-flex bg-brand-yellow px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-black">{{ $product->promotionBadge() }}</span>
             @else
                 <span class="hidden text-xs uppercase tracking-wide text-brand-muted sm:inline">Made to order</span>
             @endif

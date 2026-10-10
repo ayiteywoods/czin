@@ -49,7 +49,9 @@ class PosController extends Controller
             ->orderBy('code')
             ->get(['id', 'code', 'name', 'area', 'capacity', 'status']);
 
-        $menuPayload = $products->map(function (Product $product) {
+        $promotions = app(\App\Services\PromotionService::class);
+
+        $menuPayload = $products->map(function (Product $product) use ($promotions) {
             return [
                 'id' => $product->id,
                 'name' => $product->name,
@@ -57,6 +59,8 @@ class PosController extends Controller
                 'category' => $product->category?->name,
                 'image' => $product->storefrontImageUrl(),
                 'price' => $product->sellingPrice(),
+                'compare_at_price' => $product->compareAtPrice(),
+                'promotion' => $promotions->promotionPayload($product),
                 'variants' => $product->variants->map(fn ($variant) => [
                     'id' => $variant->id,
                     'label' => $variant->displayLabel(),
