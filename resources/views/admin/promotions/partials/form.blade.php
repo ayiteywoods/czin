@@ -1,8 +1,12 @@
 @php
     use App\Enums\PromotionType;
     $promotion = $promotion ?? null;
-    $selectedCategoryIds = collect(old('category_ids', $promotion?->targetCategoryIds() ?? []))->map(fn ($id) => (string) $id)->all();
-    $selectedProductIds = collect(old('product_ids', $promotion?->targetProductIds() ?? []))->map(fn ($id) => (string) $id)->all();
+    $selectedCategoryIds = collect(old('category_ids', $promotion?->targetCategoryIds() ?? []))->map(fn ($id) => (int) $id)->values()->all();
+    $selectedProductIds = collect(old('product_ids', $promotion?->targetProductIds() ?? []))->map(fn ($id) => (int) $id)->values()->all();
+    $productOptions = $products->map(fn ($product) => [
+        'id' => (int) $product->id,
+        'name' => $product->name,
+    ])->values()->all();
 @endphp
 
 <div class="grid gap-4 sm:grid-cols-2">
@@ -36,22 +40,42 @@
         @error('ends_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
 
-    <div class="sm:col-span-2 space-y-3 rounded-xl border border-neutral-200 p-4">
+    <div
+        class="sm:col-span-2 space-y-3"
+        x-data="{
+            selected: @js($selectedCategoryIds),
+            toggle(id) {
+                id = Number(id);
+                if (this.selected.includes(id)) {
+                    this.selected = this.selected.filter((value) => value !== id);
+                } else {
+                    this.selected.push(id);
+                }
+            },
+            isSelected(id) {
+                return this.selected.includes(Number(id));
+            }
+        }"
+    >
         <div>
             <label class="block text-sm font-medium">Categories</label>
-            <p class="mt-1 text-xs text-brand-muted">Tick one or more categories. Applies to all items in each selected category (and subcategories).</p>
+            <p class="mt-1 text-xs text-brand-muted">Select one or more. Applies to all items in each category (and subcategories).</p>
         </div>
-        <div class="grid gap-2 sm:grid-cols-2">
+        <div class="flex flex-wrap gap-2">
             @foreach ($categories as $category)
-                <label class="flex items-center gap-3 rounded-lg border border-neutral-100 px-3 py-2">
+                <label
+                    class="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition"
+                    :class="isSelected({{ $category->id }}) ? 'border-brand-red bg-red-50 text-brand-black' : 'border-neutral-200 bg-white text-brand-muted'"
+                >
                     <input
                         type="checkbox"
                         name="category_ids[]"
                         value="{{ $category->id }}"
                         class="h-4 w-4 rounded border-neutral-300 text-brand-red"
-                        @checked(in_array((string) $category->id, $selectedCategoryIds, true))
+                        :checked="isSelected({{ $category->id }})"
+                        @change="toggle({{ $category->id }})"
                     >
-                    <span class="text-sm">{{ $category->name }}</span>
+                    {{ $category->name }}
                 </label>
             @endforeach
         </div>
@@ -59,25 +83,63 @@
         @error('category_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
 
-    <div class="sm:col-span-2 space-y-3 rounded-xl border border-neutral-200 p-4">
+    <div
+        class="sm:col-span-2 space-y-3"
+        x-data="{
+            options: @js($productOptions),
+            selected: @js($selectedProductIds),
+            pick: '',
+            add() {
+                const id = Number(this.pick);
+                if (! id || this.selected.includes(id)) {
+                    this.pick = '';
+                    return;
+                }
+                this.selected.push(id);
+                this.pick = '';
+            },
+            remove(id) {
+                this.selected = this.selected.filter((value) => value !== Number(id));
+            },
+            label(id) {
+                return this.options.find((option) => option.id === Number(id))?.name || ('Product #' + id);
+            },
+            available() {
+                return this.options.filter((option) => ! this.selected.includes(option.id));
+            }
+        }"
+    >
         <div>
             <label class="block text-sm font-medium">Products</label>
-            <p class="mt-1 text-xs text-brand-muted">Optional. Tick specific products to include. You can combine these with categories.</p>
+            <p class="mt-1 text-xs text-brand-muted">Optional. Add specific products from the dropdown (same style as before). You can add more than one.</p>
         </div>
-        <div class="max-h-64 space-y-2 overflow-y-auto pr-1">
-            @foreach ($products as $product)
-                <label class="flex items-center gap-3 rounded-lg border border-neutral-100 px-3 py-2">
-                    <input
-                        type="checkbox"
-                        name="product_ids[]"
-                        value="{{ $product->id }}"
-                        class="h-4 w-4 rounded border-neutral-300 text-brand-red"
-                        @checked(in_array((string) $product->id, $selectedProductIds, true))
-                    >
-                    <span class="text-sm">{{ $product->name }}</span>
-                </label>
-            @endforeach
+
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <select class="input-field" x-model="pick">
+                <option value="">— Select a product to add —</option>
+                <template x-for="option in available()" :key="option.id">
+                    <option :value="option.id" x-text="option.name"></option>
+                </template>
+            </select>
+            <button type="button" class="btn-outline px-4 py-2 sm:shrink-0" @click="add()" :disabled="!pick">
+                Add product
+            </button>
         </div>
+
+        <template x-if="selected.length">
+            <div class="flex flex-wrap gap-2">
+                <template x-for="id in selected" :key="id">
+                    <span class="inline-flex max-w-full items-center gap-2 rounded-lg border border-neutral-200 bg-brand-light px-3 py-1.5 text-sm">
+                        <input type="hidden" name="product_ids[]" :value="id">
+                        <span class="truncate" x-text="label(id)"></span>
+                        <button type="button" class="text-brand-muted hover:text-brand-red" @click="remove(id)" aria-label="Remove product">×</button>
+                    </span>
+                </template>
+            </div>
+        </template>
+
+        <p class="text-xs text-brand-muted" x-show="selected.length === 0">No specific products added — category selection alone is enough if you only want category-wide promos.</p>
+
         @error('product_ids')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         @error('product_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
