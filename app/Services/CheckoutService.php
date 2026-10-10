@@ -42,7 +42,7 @@ class CheckoutService
         }
 
         $taxableSubtotal = max(0, $subtotal - $discount);
-        $tax = round($taxableSubtotal * (float) config('shop.tax_rate'), 2);
+        $tax = round($taxableSubtotal * \App\Support\ShopTax::rate(), 2);
         $total = round($taxableSubtotal + $deliveryFee + $tax, 2);
 
         return [

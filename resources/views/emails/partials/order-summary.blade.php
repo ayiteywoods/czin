@@ -15,7 +15,7 @@
 @endif
 
 @if ((float) $order->tax > 0)
-**Tax:** {{ config('shop.currency_symbol') }}{{ number_format($order->tax, 2) }}
+**{{ \App\Support\ShopTax::orderLabel() }}:** {{ config('shop.currency_symbol') }}{{ number_format($order->tax, 2) }}
 @endif
 
 **Total:** {{ config('shop.currency_symbol') }}{{ number_format($order->total, 2) }}

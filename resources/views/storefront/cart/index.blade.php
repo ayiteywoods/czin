@@ -137,7 +137,7 @@
                         </div>
                         @if ($totals['tax'] > 0)
                             <div class="flex items-center justify-between">
-                                <span class="text-brand-muted">Tax</span>
+                                <span class="text-brand-muted">{{ \App\Support\ShopTax::label() }}</span>
                                 <span>{{ config('shop.currency_symbol') }} {{ number_format($totals['tax'], 2) }}</span>
                             </div>
                         @endif

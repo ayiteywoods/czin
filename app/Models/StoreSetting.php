@@ -45,6 +45,9 @@ class StoreSetting extends Model
         'upsell_category_slugs',
         'business_hours',
         'online_ordering_enabled',
+        'tax_enabled',
+        'tax_rate',
+        'tax_label',
         'maintenance_mode',
         'maintenance_message',
     ];
@@ -59,7 +62,34 @@ class StoreSetting extends Model
             'upsell_category_slugs' => 'array',
             'business_hours' => 'array',
             'online_ordering_enabled' => 'boolean',
+            'tax_enabled' => 'boolean',
+            'tax_rate' => 'float',
         ];
+    }
+
+    public function taxEnabled(): bool
+    {
+        return (bool) ($this->tax_enabled ?? false);
+    }
+
+    public function taxRate(): float
+    {
+        return max(0, (float) ($this->tax_rate ?? 0));
+    }
+
+    public function taxLabel(): string
+    {
+        $label = trim((string) ($this->tax_label ?? ''));
+
+        return $label !== '' ? $label : 'Tax';
+    }
+
+    /**
+     * Percentage form value (e.g. 15 for 15%).
+     */
+    public function taxRatePercent(): float
+    {
+        return round($this->taxRate() * 100, 4);
     }
 
     public static function current(): self

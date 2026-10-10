@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('heading', 'Store settings')
-@section('subheading', 'Contact details, brand logos, footer copy, product delivery info, about page, and contact page')
+@section('subheading', 'Contact details, tax setup, brand logos, footer copy, product delivery info, about page, and contact page')
 
 @section('content')
     <form
@@ -208,6 +208,61 @@
                         <input id="social_whatsapp" type="text" name="social_whatsapp" value="{{ old('social_whatsapp', $settings->social_whatsapp) }}" class="input-field" placeholder="233530668945">
                         <p class="mt-1 text-xs text-brand-muted">Enter phone number with country code (no +). Example: 233530668945</p>
                         @error('social_whatsapp')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="card space-y-4 p-6">
+                <div>
+                    <h2 class="font-semibold">Tax setup</h2>
+                    <p class="mt-1 text-sm text-brand-muted">Applies to online checkout, POS, receipts, and invoices. Leave disabled if prices already include tax.</p>
+                </div>
+
+                <label class="flex items-start gap-3">
+                    <input type="hidden" name="tax_enabled" value="0">
+                    <input
+                        type="checkbox"
+                        name="tax_enabled"
+                        value="1"
+                        class="mt-1 rounded border-neutral-300"
+                        @checked(old('tax_enabled', $settings->taxEnabled()))
+                    >
+                    <span>
+                        <span class="block text-sm font-medium">Charge tax on orders</span>
+                        <span class="block text-xs text-brand-muted">When enabled, tax is calculated on the taxable subtotal and shown on POS receipts and invoices.</span>
+                    </span>
+                </label>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="tax_label" class="block text-sm font-medium">Tax label</label>
+                        <input
+                            id="tax_label"
+                            type="text"
+                            name="tax_label"
+                            value="{{ old('tax_label', $settings->taxLabel()) }}"
+                            class="input-field"
+                            placeholder="VAT"
+                        >
+                        <p class="mt-1 text-xs text-brand-muted">Shown on receipts and invoices (e.g. Tax, VAT, NHIL).</p>
+                        @error('tax_label')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="tax_rate_percent" class="block text-sm font-medium">Tax rate (%)</label>
+                        <input
+                            id="tax_rate_percent"
+                            type="number"
+                            name="tax_rate_percent"
+                            value="{{ old('tax_rate_percent', $settings->taxRatePercent()) }}"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            class="input-field"
+                            placeholder="15"
+                        >
+                        <p class="mt-1 text-xs text-brand-muted">Example: enter 15 for 15% VAT.</p>
+                        @error('tax_rate_percent')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        @error('tax_rate')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                 </div>
             </div>

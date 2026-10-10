@@ -73,13 +73,18 @@ class StoreSettingController extends Controller
         $data['kitchen_sms_enabled'] = $request->boolean('kitchen_sms_enabled');
         $data['kitchen_whatsapp_enabled'] = $request->boolean('kitchen_whatsapp_enabled');
         $data['online_ordering_enabled'] = $request->boolean('online_ordering_enabled');
+        $data['tax_enabled'] = $request->boolean('tax_enabled');
+        $data['tax_rate'] = (float) $request->input('tax_rate', 0);
+        $data['tax_label'] = filled($request->input('tax_label'))
+            ? trim((string) $request->input('tax_label'))
+            : 'Tax';
         $data['low_stock_threshold'] = $request->filled('low_stock_threshold')
             ? $request->integer('low_stock_threshold')
             : 10;
         $data['upsell_category_slugs'] = $request->input('upsell_category_slugs', []);
         $data['business_hours'] = $request->input('business_hours');
 
-        unset($data['business_hours_note']);
+        unset($data['business_hours_note'], $data['tax_rate_percent']);
 
         foreach (self::IMAGE_UPLOADS as $input => $meta) {
             if (! $request->hasFile($input)) {

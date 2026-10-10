@@ -46,6 +46,17 @@ class StoreSettingService
             'shop.maintenance_message' => $settings->maintenanceMessage(),
             'shop.online_ordering_enabled' => $settings->isOnlineOrderingEnabled(),
         ]);
+
+        if (Schema::hasColumn('store_settings', 'tax_enabled')) {
+            $enabled = $settings->taxEnabled();
+            $rate = $settings->taxRate();
+
+            config([
+                'shop.tax_enabled' => $enabled,
+                'shop.tax_rate' => $enabled ? $rate : 0.0,
+                'shop.tax_label' => $settings->taxLabel(),
+            ]);
+        }
     }
 
     public function current(): StoreSetting
@@ -66,6 +77,9 @@ class StoreSettingService
             'delivery_info_accra' => $settings->delivery_info_accra ?: data_get(config('shop.delivery_info.items'), '0.text'),
             'footer_tagline' => $settings->footerTagline(),
             'footer_subline' => $settings->footerSubline(),
+            'tax_enabled' => $settings->tax_enabled ?? config('shop.tax_enabled', false),
+            'tax_rate' => $settings->tax_rate ?? config('shop.tax_rate', 0),
+            'tax_label' => $settings->tax_label ?: config('shop.tax_label', 'Tax'),
         ]);
 
         return $settings;

@@ -56,6 +56,7 @@ class ReceiptPayloadService
                 'discount' => (float) $order->discount_amount,
                 'delivery' => (float) $order->delivery_fee + (float) $order->shipping_fee,
                 'tax' => (float) $order->tax,
+                'tax_label' => \App\Support\ShopTax::orderLabel(),
                 'total' => (float) $order->total,
                 'currency' => $currency,
             ],

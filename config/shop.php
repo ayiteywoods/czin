@@ -19,7 +19,11 @@ return [
 
     'free_delivery_threshold' => (float) env('SHOP_FREE_DELIVERY_THRESHOLD', 500),
 
+    'tax_enabled' => filter_var(env('SHOP_TAX_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+
     'tax_rate' => (float) env('SHOP_TAX_RATE', 0),
+
+    'tax_label' => env('SHOP_TAX_LABEL', 'Tax'),
 
     'default_country' => env('SHOP_DEFAULT_COUNTRY', 'Ghana'),
 

@@ -19,7 +19,8 @@
                 'status_label' => $table->status->label(),
             ])->values()->all()),
             currencySymbol: @js($currencySymbol),
-            taxRate: @js((float) config('shop.tax_rate')),
+            taxRate: @js(\App\Support\ShopTax::rate()),
+            taxLabel: @js(\App\Support\ShopTax::label()),
             storeUrl: @js(route('admin.pos.store')),
             readyPollUrl: @js($readyPollUrl),
             initialReadyOrders: @js($initialReadyOrders),
@@ -288,7 +289,7 @@
                         <span><span x-text="currencySymbol"></span> <span x-text="formatMoney(subtotal)"></span></span>
                     </div>
                     <div class="flex justify-between text-sm" x-show="tax > 0">
-                        <span class="text-brand-muted">Tax</span>
+                        <span class="text-brand-muted" x-text="taxLabel || 'Tax'"></span>
                         <span><span x-text="currencySymbol"></span> <span x-text="formatMoney(tax)"></span></span>
                     </div>
                     <div class="flex justify-between border-t border-neutral-200 pt-3 text-base font-semibold">
@@ -367,6 +368,7 @@
                 tables: config.tables,
                 currencySymbol: config.currencySymbol,
                 taxRate: config.taxRate,
+                taxLabel: config.taxLabel || 'Tax',
                 storeUrl: config.storeUrl,
                 readyPollUrl: config.readyPollUrl,
                 csrf: config.csrf,

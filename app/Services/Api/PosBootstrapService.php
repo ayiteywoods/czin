@@ -50,7 +50,8 @@ class PosBootstrapService
             'store' => [
                 'name' => $settings->store_name ?: config('shop.store_name'),
                 'currency_symbol' => config('shop.currency_symbol'),
-                'tax_rate' => (float) config('shop.tax_rate'),
+                'tax_rate' => \App\Support\ShopTax::rate(),
+                'tax_label' => \App\Support\ShopTax::label(),
                 'contact_phone' => $settings->contact_phone,
             ],
             'categories' => $categories->map(fn (Category $category) => [

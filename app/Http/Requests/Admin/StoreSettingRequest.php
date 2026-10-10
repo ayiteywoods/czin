@@ -36,6 +36,20 @@ class StoreSettingRequest extends FormRequest
         } elseif ($this->has('business_hours_note') && ! filled($this->input('business_hours_note'))) {
             $this->merge(['business_hours' => null]);
         }
+
+        $this->merge([
+            'tax_enabled' => $this->boolean('tax_enabled'),
+        ]);
+
+        if ($this->has('tax_rate_percent')) {
+            $percent = is_numeric($this->input('tax_rate_percent'))
+                ? (float) $this->input('tax_rate_percent')
+                : 0.0;
+
+            $this->merge([
+                'tax_rate' => round(max(0, $percent) / 100, 4),
+            ]);
+        }
     }
 
     public function rules(): array
@@ -82,6 +96,10 @@ class StoreSettingRequest extends FormRequest
             'business_hours.note' => ['nullable', 'string', 'max:500'],
             'business_hours_note' => ['nullable', 'string', 'max:500'],
             'online_ordering_enabled' => ['sometimes', 'boolean'],
+            'tax_enabled' => ['sometimes', 'boolean'],
+            'tax_rate_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:1'],
+            'tax_label' => ['nullable', 'string', 'max:50'],
         ];
     }
 }
