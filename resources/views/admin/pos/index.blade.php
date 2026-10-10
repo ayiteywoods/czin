@@ -288,11 +288,10 @@
                         <span class="text-brand-muted">Subtotal</span>
                         <span><span x-text="currencySymbol"></span> <span x-text="formatMoney(subtotal)"></span></span>
                     </div>
-                    <div class="flex justify-between text-sm" x-show="taxRate > 0">
+                    <div class="flex justify-between text-sm">
                         <span class="text-brand-muted" x-text="taxLabel || 'Tax'"></span>
                         <span><span x-text="currencySymbol"></span> <span x-text="formatMoney(tax)"></span></span>
                     </div>
-                    <p class="text-xs text-brand-muted" x-show="taxRate <= 0">No tax configured — set it in Store settings.</p>
                     <div class="flex justify-between border-t border-neutral-200 pt-3 text-base font-semibold">
                         <span>Total</span>
                         <span class="text-brand-red"><span x-text="currencySymbol"></span> <span x-text="formatMoney(total)"></span></span>

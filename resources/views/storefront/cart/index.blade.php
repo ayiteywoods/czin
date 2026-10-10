@@ -135,12 +135,10 @@
                             <span class="text-brand-muted">Delivery Fee</span>
                             <span class="text-brand-muted">Calculated at checkout</span>
                         </div>
-                        @if ($totals['tax'] > 0)
-                            <div class="flex items-center justify-between">
-                                <span class="text-brand-muted">{{ \App\Support\ShopTax::label() }}</span>
-                                <span>{{ config('shop.currency_symbol') }} {{ number_format($totals['tax'], 2) }}</span>
-                            </div>
-                        @endif
+                        <div class="flex items-center justify-between">
+                            <span class="text-brand-muted">{{ \App\Support\ShopTax::label() }}</span>
+                            <span>{{ config('shop.currency_symbol') }} {{ number_format((float) $totals['tax'], 2) }}</span>
+                        </div>
                         <div class="flex items-center justify-between border-t border-neutral-200 pt-3 text-base">
                             <span class="font-medium">Total</span>
                             <span class="font-semibold text-brand-red">{{ config('shop.currency_symbol') }} {{ number_format($totals['subtotal'] + $totals['tax'], 2) }}</span>

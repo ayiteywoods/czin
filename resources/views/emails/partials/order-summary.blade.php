@@ -14,9 +14,7 @@
 **Delivery:** {{ $order->shipping_region_name }} — pay rider on delivery
 @endif
 
-@if ((float) $order->tax > 0)
-**{{ \App\Support\ShopTax::orderLabel($order) }}:** {{ config('shop.currency_symbol') }}{{ number_format($order->tax, 2) }}
-@endif
+**{{ \App\Support\ShopTax::orderLabel($order) }}:** {{ config('shop.currency_symbol') }}{{ number_format((float) $order->tax, 2) }}
 
 **Total:** {{ config('shop.currency_symbol') }}{{ number_format($order->total, 2) }}
 

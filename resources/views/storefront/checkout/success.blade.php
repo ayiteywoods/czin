@@ -72,12 +72,10 @@
                     <span class="text-brand-muted">Delivery</span>
                     <span>{{ config('shop.currency_symbol') }} {{ number_format($order->delivery_fee, 2) }}</span>
                 </div>
-                @if ($order->tax > 0)
-                    <div class="flex justify-between">
-                        <span class="text-brand-muted">{{ \App\Support\ShopTax::orderLabel($order) }}</span>
-                        <span>{{ config('shop.currency_symbol') }} {{ number_format($order->tax, 2) }}</span>
-                    </div>
-                @endif
+                <div class="flex justify-between">
+                    <span class="text-brand-muted">{{ \App\Support\ShopTax::orderLabel($order) }}</span>
+                    <span>{{ config('shop.currency_symbol') }} {{ number_format((float) $order->tax, 2) }}</span>
+                </div>
                 <div class="flex justify-between border-t border-neutral-200 pt-3 text-base font-semibold">
                     <span>Total</span>
                     <span class="text-brand-red">{{ config('shop.currency_symbol') }} {{ number_format($order->total, 2) }}</span>

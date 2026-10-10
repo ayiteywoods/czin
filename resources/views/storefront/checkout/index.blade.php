@@ -450,12 +450,10 @@
                                     <span x-text="deliveryLabel"></span>
                             </span>
                         </div>
-                        @if ($totals['tax'] > 0)
-                            <div class="flex items-center justify-between">
-                                <span class="text-brand-muted">{{ \App\Support\ShopTax::label() }}</span>
-                                <span>{{ config('shop.currency_symbol') }} {{ number_format($totals['tax'], 2) }}</span>
-                            </div>
-                        @endif
+                        <div class="flex items-center justify-between">
+                            <span class="text-brand-muted">{{ \App\Support\ShopTax::label() }}</span>
+                            <span>{{ config('shop.currency_symbol') }} {{ number_format((float) $totals['tax'], 2) }}</span>
+                        </div>
                         <div class="flex items-center justify-between border-t border-neutral-200 pt-3 text-base">
                             <span class="font-medium">Grand Total</span>
                             <span class="font-semibold text-brand-red">

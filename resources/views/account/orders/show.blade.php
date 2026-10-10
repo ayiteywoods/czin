@@ -91,12 +91,10 @@
                         <dt class="text-brand-muted shrink-0">Delivery fee</dt>
                         <dd class="text-right">{{ $order->deliveryFeeLabel() }}</dd>
                     </div>
-                    @if ($order->tax > 0)
-                        <div class="flex justify-between">
-                            <dt class="text-brand-muted">{{ \App\Support\ShopTax::orderLabel($order) }}</dt>
-                            <dd>{{ config('shop.currency_symbol') }} {{ number_format($order->tax, 2) }}</dd>
-                        </div>
-                    @endif
+                    <div class="flex justify-between">
+                        <dt class="text-brand-muted">{{ \App\Support\ShopTax::orderLabel($order) }}</dt>
+                        <dd>{{ config('shop.currency_symbol') }} {{ number_format((float) $order->tax, 2) }}</dd>
+                    </div>
                     <div class="flex justify-between border-t border-neutral-200 pt-3 font-semibold">
                         <dt>Total</dt>
                         <dd class="text-brand-red">

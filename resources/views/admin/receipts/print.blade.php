@@ -155,12 +155,10 @@
                     <td class="amount">{{ $currency }} {{ number_format((float) $order->delivery_fee + (float) $order->shipping_fee, 2) }}</td>
                 </tr>
             @endif
-            @if ((float) $order->tax > 0)
-                <tr>
-                    <td class="label">{{ \App\Support\ShopTax::orderLabel($order) }}</td>
-                    <td class="amount">{{ $currency }} {{ number_format($order->tax, 2) }}</td>
-                </tr>
-            @endif
+            <tr>
+                <td class="label">{{ \App\Support\ShopTax::orderLabel($order) }}</td>
+                <td class="amount">{{ $currency }} {{ number_format((float) $order->tax, 2) }}</td>
+            </tr>
             <tr class="grand">
                 <td>TOTAL</td>
                 <td class="amount">{{ $currency }} {{ number_format($order->total, 2) }}</td>

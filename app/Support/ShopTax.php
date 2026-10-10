@@ -59,23 +59,22 @@ class ShopTax
     }
 
     /**
-     * Label for a stored order tax line.
+     * Label for a stored order tax line (always shown, even when tax is 0).
      */
     public static function orderLabel(?Order $order = null): string
     {
         $label = self::baseLabel();
 
-        if (! $order || (float) $order->tax <= 0) {
-            return $label;
+        if ($order && (float) $order->tax > 0) {
+            $taxable = max(0, (float) $order->subtotal - (float) $order->discount_amount);
+
+            if ($taxable > 0) {
+                return self::formatLabel($label, (float) $order->tax / $taxable);
+            }
         }
 
-        $taxable = max(0, (float) $order->subtotal - (float) $order->discount_amount);
-
-        if ($taxable <= 0) {
-            return $label;
-        }
-
-        return self::formatLabel($label, (float) $order->tax / $taxable);
+        // Show configured rate (including 0%) when no tax was charged on the order.
+        return self::formatLabel($label, self::rate());
     }
 
     public static function amountFor(float $taxableSubtotal): float
@@ -127,11 +126,11 @@ class ShopTax
 
     private static function formatLabel(string $label, float $rate): string
     {
-        if ($rate <= 0) {
-            return $label;
-        }
+        $percent = rtrim(rtrim(number_format(max(0, $rate) * 100, 2, '.', ''), '0'), '.');
 
-        $percent = rtrim(rtrim(number_format($rate * 100, 2, '.', ''), '0'), '.');
+        if ($percent === '') {
+            $percent = '0';
+        }
 
         return $label.' ('.$percent.'%)';
     }

@@ -113,12 +113,10 @@
                     <td style="padding:6px 24px 6px 0;text-align:right;vertical-align:top;">Shipping</td>
                     <td style="padding:6px 0;text-align:right;line-height:1.5;max-width:280px;">{{ $order->invoiceShippingLabel() }}</td>
                 </tr>
-                @if ((float) $order->tax > 0)
-                    <tr>
-                        <td style="padding:6px 24px 6px 0;text-align:right;">{{ \App\Support\ShopTax::orderLabel($order) }}</td>
-                        <td style="padding:6px 0;text-align:right;white-space:nowrap;">{{ $currency }}{{ number_format($order->tax, 2) }}</td>
-                    </tr>
-                @endif
+                <tr>
+                    <td style="padding:6px 24px 6px 0;text-align:right;">{{ \App\Support\ShopTax::orderLabel($order) }}</td>
+                    <td style="padding:6px 0;text-align:right;white-space:nowrap;">{{ $currency }}{{ number_format((float) $order->tax, 2) }}</td>
+                </tr>
                 <tr>
                     <td colspan="2" style="padding-top:10px;">
                         <div style="border-top:1px solid #111111;margin-bottom:10px;"></div>
