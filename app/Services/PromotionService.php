@@ -142,18 +142,38 @@ class PromotionService
 
     private function matchesProduct(Promotion $promotion, Product $product): bool
     {
-        if ($promotion->product_id) {
-            return (int) $promotion->product_id === (int) $product->id;
+        $productId = $this->positiveId($promotion->product_id);
+        $categoryId = $this->positiveId($promotion->category_id);
+
+        // Product target wins: only that exact menu item.
+        if ($productId !== null) {
+            return $productId === (int) $product->id;
         }
 
-        if ($promotion->category_id) {
-            $categoryIds = $this->expandCategoryIds((int) $promotion->category_id);
+        // Category target: only products in that category (and its subcategories).
+        if ($categoryId !== null) {
+            $productCategoryId = $this->positiveId($product->category_id);
 
-            return in_array((int) $product->category_id, $categoryIds, true);
+            if ($productCategoryId === null) {
+                return false;
+            }
+
+            return in_array($productCategoryId, $this->expandCategoryIds($categoryId), true);
         }
 
-        // No product/category target → store-wide.
-        return true;
+        // Neither category nor product selected — do not apply to the whole menu by accident.
+        return false;
+    }
+
+    private function positiveId(mixed $value): ?int
+    {
+        if ($value === null || $value === '' || $value === false) {
+            return null;
+        }
+
+        $id = (int) $value;
+
+        return $id > 0 ? $id : null;
     }
 
     /**

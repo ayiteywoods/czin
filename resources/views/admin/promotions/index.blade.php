@@ -22,6 +22,7 @@
                     <x-admin-sort-th column="name" label="Name" class="admin-cell-primary" />
                     <x-admin-sort-th column="type" label="Type" class="admin-col-md" />
                     <x-admin-sort-th column="value" label="Value" class="admin-col-md" />
+                    <th class="admin-table-cell admin-col-lg font-medium">Applies to</th>
                     <x-admin-sort-th column="starts_at" label="Starts" class="admin-col-md" />
                     <x-admin-sort-th column="is_active" label="Status" class="admin-col-md" />
                     <th class="admin-table-cell admin-col-actions text-right font-medium">Actions</th>
@@ -34,6 +35,7 @@
                         <td class="admin-table-cell admin-cell-primary font-medium">{{ $promotion->name }}</td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">{{ $promotion->type->label() }}</td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">{{ $promotion->value }}</td>
+                        <td class="admin-table-cell admin-col-lg">{{ $promotion->appliesToLabel() }}</td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">{{ $promotion->starts_at?->format('M j, Y') ?? '—' }}</td>
                         <td class="admin-table-cell admin-col-md whitespace-nowrap">{{ $promotion->is_active ? 'Active' : 'Inactive' }}</td>
                         <td class="admin-table-cell admin-col-actions">
@@ -49,7 +51,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="admin-table-cell py-8 text-center text-brand-muted">No promotions yet.</td>
+                        <td colspan="8" class="admin-table-cell py-8 text-center text-brand-muted">No promotions yet.</td>
                     </tr>
                 @endforelse
             </tbody>

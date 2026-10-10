@@ -31,7 +31,26 @@ class Promotion extends Model
             'ends_at' => 'datetime',
             'is_active' => 'boolean',
             'days_of_week' => 'array',
+            'category_id' => 'integer',
+            'product_id' => 'integer',
         ];
+    }
+
+    public function appliesToLabel(): string
+    {
+        if ($this->product_id) {
+            return $this->product?->name
+                ? 'Product: '.$this->product->name
+                : 'Product #'.$this->product_id;
+        }
+
+        if ($this->category_id) {
+            return $this->category?->name
+                ? 'Category: '.$this->category->name
+                : 'Category #'.$this->category_id;
+        }
+
+        return 'Not targeted';
     }
 
     public function category(): BelongsTo

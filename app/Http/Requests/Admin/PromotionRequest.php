@@ -38,6 +38,20 @@ class PromotionRequest extends FormRequest
     {
         $this->merge([
             'is_active' => $this->boolean('is_active'),
+            'category_id' => $this->filled('category_id') ? $this->input('category_id') : null,
+            'product_id' => $this->filled('product_id') ? $this->input('product_id') : null,
         ]);
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if (! $this->filled('category_id') && ! $this->filled('product_id')) {
+                $validator->errors()->add(
+                    'category_id',
+                    'Select a category or a product. Leave both blank is not allowed — promotions must target something.',
+                );
+            }
+        });
     }
 }
