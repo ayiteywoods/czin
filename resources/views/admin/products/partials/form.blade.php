@@ -90,17 +90,44 @@
         @error('description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
 
-    <div class="sm:col-span-2">
+    <div
+        class="sm:col-span-2"
+        x-data="productImagePreview()"
+    >
         <label class="block text-sm font-medium">Food photos</label>
-        <input type="file" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.bmp,.avif,.heic,.heif" multiple class="mt-1 w-full text-sm">
+        <input
+            type="file"
+            name="images[]"
+            accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.bmp,.avif,.heic,.heif"
+            multiple
+            class="mt-1 w-full text-sm"
+            @change="preview($event)"
+        >
         <p class="mt-1 text-xs text-brand-muted">Upload JPG, PNG, GIF, WebP, AVIF, or HEIC. Large images are automatically compressed to {{ \App\Support\ImageUpload::targetLabel(4096) }} each.</p>
+
+        <div class="mt-4 flex flex-wrap gap-3" x-show="previews.length > 0" x-cloak>
+            <template x-for="(preview, index) in previews" :key="index">
+                <div class="relative">
+                    <img :src="preview.url" :alt="preview.name" class="h-24 w-24 rounded-lg border border-neutral-200 object-cover">
+                    <p class="mt-1 max-w-24 truncate text-[10px] text-brand-muted" x-text="preview.name"></p>
+                </div>
+            </template>
+        </div>
+
         @if ($product?->images?->isNotEmpty())
-            <div class="mt-4 flex flex-wrap gap-3">
-                @foreach ($product->images as $image)
-                    <img src="{{ asset('storage/'.$image->path) }}" alt="" class="h-20 w-20 rounded-lg object-cover">
-                @endforeach
+            <div class="mt-4" x-show="previews.length === 0">
+                <p class="mb-2 text-xs font-medium uppercase tracking-wide text-brand-muted">Current photos</p>
+                <div class="flex flex-wrap gap-3">
+                    @foreach ($product->images as $image)
+                        <img src="{{ asset('storage/'.$image->path) }}" alt="" class="h-20 w-20 rounded-lg object-cover">
+                    @endforeach
+                </div>
             </div>
+            <p class="mt-2 text-xs text-brand-muted" x-show="previews.length > 0" x-cloak>
+                New photos above will be added to the existing ones when you save.
+            </p>
         @endif
+
         @error('images')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         @error('images.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
@@ -114,8 +141,8 @@
         'sku' => $variant->sku,
         'is_active' => $variant->is_active,
     ])->values()->all() ?? [[
-        'size' => '',
-        'color' => '',
+        'size' => 'Regular',
+        'color' => 'Standard',
         'heel_length' => '',
         'quantity' => 999,
         'sku' => '',
@@ -123,8 +150,8 @@
     ]])))">
         <div class="flex items-center justify-between gap-3">
             <div>
-                <label class="block text-sm font-medium">Portions & options<span class="text-brand-red" aria-hidden="true"> *</span></label>
-                <p class="mt-1 text-xs text-brand-muted">Add the choices guests can order — portion size, spice/style, and optional extras. Prep count is optional for cook-to-order dishes (defaults to plenty). Use <span class="font-medium">86</span> later if you sell out.</p>
+                <label class="block text-sm font-medium">Portions & options <span class="font-normal text-brand-muted">(optional)</span></label>
+                <p class="mt-1 text-xs text-brand-muted">Leave as Regular / Standard for a simple dish. Only fill these if guests choose portion size, spice, or extras. Empty fields default automatically.</p>
             </div>
             <button type="button" class="btn-outline px-3 py-2 text-xs" @click="addRow()">Add option</button>
         </div>
@@ -133,8 +160,8 @@
             <table class="min-w-full text-sm">
                 <thead class="border-b border-neutral-200 text-left text-xs uppercase tracking-wide text-brand-muted">
                     <tr>
-                        <th class="px-2 py-2">Portion <span class="text-brand-red">*</span></th>
-                        <th class="px-2 py-2">Option <span class="text-brand-red">*</span></th>
+                        <th class="px-2 py-2">Portion</th>
+                        <th class="px-2 py-2">Option</th>
                         <th class="px-2 py-2">Extra <span class="normal-case text-brand-muted">(optional)</span></th>
                         <th class="px-2 py-2">Prep count <span class="normal-case text-brand-muted">(optional)</span></th>
                         <th class="px-2 py-2">Item code</th>
@@ -147,7 +174,7 @@
                         <tr class="border-b border-neutral-100">
                             <td class="px-2 py-2">
                                 <input type="hidden" :name="`variants[${index}][id]`" :value="row.id || ''">
-                                <input type="text" :name="`variants[${index}][size]`" x-model="row.size" list="product-sizes" required placeholder="e.g. Regular" class="input-field min-w-[5rem]">
+                                <input type="text" :name="`variants[${index}][size]`" x-model="row.size" list="product-sizes" placeholder="Regular" class="input-field min-w-[5rem]">
                             </td>
                             <td class="px-2 py-2">
                                 <input
@@ -156,8 +183,7 @@
                                     x-model="row.color"
                                     list="product-options"
                                     autocomplete="off"
-                                    placeholder="e.g. Spicy"
-                                    required
+                                    placeholder="Standard"
                                     class="input-field min-w-[6rem]"
                                 >
                             </td>
@@ -208,10 +234,25 @@
     @push('scripts')
         <script>
             document.addEventListener('alpine:init', () => {
+                Alpine.data('productImagePreview', () => ({
+                    previews: [],
+                    preview(event) {
+                        this.previews.forEach((item) => URL.revokeObjectURL(item.url));
+                        this.previews = [];
+
+                        const files = Array.from(event.target.files || []);
+
+                        this.previews = files.map((file) => ({
+                            name: file.name,
+                            url: URL.createObjectURL(file),
+                        }));
+                    },
+                }));
+
                 Alpine.data('productVariantForm', (initialRows = []) => ({
                     rows: initialRows.length ? initialRows : [{
-                        size: '',
-                        color: '',
+                        size: 'Regular',
+                        color: 'Standard',
                         heel_length: '',
                         quantity: 999,
                         sku: '',
@@ -219,8 +260,8 @@
                     }],
                     addRow() {
                         this.rows.push({
-                            size: '',
-                            color: '',
+                            size: 'Regular',
+                            color: 'Standard',
                             heel_length: '',
                             quantity: 999,
                             sku: '',

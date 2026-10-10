@@ -49,10 +49,10 @@ class ProductRequest extends FormRequest
                 'required',
                 ImageUpload::typesRule(),
             ],
-            'variants' => ['required', 'array', 'min:1'],
+            'variants' => ['nullable', 'array'],
             'variants.*.id' => ['nullable', 'integer', 'exists:product_variants,id'],
-            'variants.*.size' => ['required', 'string', 'max:50'],
-            'variants.*.color' => ['required', 'string', 'max:50'],
+            'variants.*.size' => ['nullable', 'string', 'max:50'],
+            'variants.*.color' => ['nullable', 'string', 'max:50'],
             'variants.*.heel_length' => ['nullable', 'string', 'max:50'],
             // Optional for restaurants that cook to order. Empty values default to cook-to-order stock.
             'variants.*.quantity' => ['nullable', 'integer', 'min:0'],
@@ -65,6 +65,10 @@ class ProductRequest extends FormRequest
      * Default portion count when staff leave quantity blank (cook-to-order menus).
      */
     public const DEFAULT_COOK_TO_ORDER_QTY = 999;
+
+    public const DEFAULT_PORTION = 'Regular';
+
+    public const DEFAULT_OPTION = 'Standard';
 
     protected function prepareForValidation(): void
     {
@@ -84,10 +88,15 @@ class ProductRequest extends FormRequest
         }
 
         $variants = collect(Arr::wrap($this->input('variants', [])))
+            ->filter(fn ($variant) => is_array($variant))
             ->map(function ($variant) {
-                if (! is_array($variant)) {
-                    return $variant;
-                }
+                $variant['size'] = filled($variant['size'] ?? null)
+                    ? trim((string) $variant['size'])
+                    : self::DEFAULT_PORTION;
+
+                $variant['color'] = filled($variant['color'] ?? null)
+                    ? trim((string) $variant['color'])
+                    : self::DEFAULT_OPTION;
 
                 if (! array_key_exists('quantity', $variant) || $variant['quantity'] === '' || $variant['quantity'] === null) {
                     $variant['quantity'] = self::DEFAULT_COOK_TO_ORDER_QTY;
@@ -95,7 +104,19 @@ class ProductRequest extends FormRequest
 
                 return $variant;
             })
+            ->values()
             ->all();
+
+        if ($variants === []) {
+            $variants = [[
+                'size' => self::DEFAULT_PORTION,
+                'color' => self::DEFAULT_OPTION,
+                'heel_length' => null,
+                'quantity' => self::DEFAULT_COOK_TO_ORDER_QTY,
+                'sku' => null,
+                'is_active' => true,
+            ]];
+        }
 
         $this->merge(['variants' => $variants]);
 
@@ -158,8 +179,6 @@ class ProductRequest extends FormRequest
             'images.*.required' => 'Each selected file must be a valid image upload.',
             'images.*.extensions' => 'Food photos must be JPG, PNG, GIF, WebP, or HEIC.',
             'images.*.max' => 'Each food photo must not be larger than 20 MB before compression.',
-            'variants.required' => 'Add at least one portion and option combination.',
-            'variants.min' => 'Add at least one portion and option combination.',
         ];
     }
 }
