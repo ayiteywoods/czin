@@ -74,7 +74,14 @@ class StoreSetting extends Model
 
     public function taxRate(): float
     {
-        return max(0, (float) ($this->tax_rate ?? 0));
+        $rate = max(0, (float) ($this->tax_rate ?? 0));
+
+        // Accept either 0.15 or 15 as "15%".
+        if ($rate > 1) {
+            $rate = $rate / 100;
+        }
+
+        return min(1, $rate);
     }
 
     public function taxLabel(): string

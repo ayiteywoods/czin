@@ -84,7 +84,12 @@ class StoreSettingController extends Controller
         $data['kitchen_whatsapp_enabled'] = $request->boolean('kitchen_whatsapp_enabled');
         $data['online_ordering_enabled'] = $request->boolean('online_ordering_enabled');
         $data['tax_enabled'] = $request->boolean('tax_enabled');
-        $data['tax_rate'] = (float) $request->input('tax_rate', 0);
+        $rawRate = (float) $request->input('tax_rate', 0);
+        // Persist as a fraction (0.15). If a percent snuck through, normalize it.
+        if ($rawRate > 1) {
+            $rawRate = $rawRate / 100;
+        }
+        $data['tax_rate'] = round(max(0, min(1, $rawRate)), 4);
         $data['tax_label'] = filled($request->input('tax_label'))
             ? trim((string) $request->input('tax_label'))
             : 'Tax';

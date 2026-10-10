@@ -4,7 +4,6 @@ namespace App\Support;
 
 use App\Models\Order;
 use App\Models\StoreSetting;
-use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class ShopTax
@@ -15,42 +14,32 @@ class ShopTax
     }
 
     /**
-     * Effective tax rate as a fraction (0.15 = 15%). Always prefers live store settings.
+     * Effective tax rate as a fraction (0.15 = 15%).
+     * Reads live store settings — does not rely on Schema::hasColumn (unreliable on some hosts).
      */
     public static function rate(): float
     {
-        try {
-            if (Schema::hasColumn('store_settings', 'tax_enabled')) {
-                $settings = StoreSetting::query()->first();
+        [$enabled, $rate] = self::settingsState();
 
-                if ($settings && $settings->taxEnabled()) {
-                    return $settings->taxRate();
-                }
-
-                if ($settings) {
-                    return 0.0;
-                }
-            }
-        } catch (Throwable) {
-            // Fall through to config / env.
+        if ($enabled) {
+            return $rate;
         }
 
         if (! config('shop.tax_enabled', false)) {
             return 0.0;
         }
 
-        return max(0, (float) config('shop.tax_rate', 0));
+        return self::normalizeRate((float) config('shop.tax_rate', 0));
     }
 
     public static function baseLabel(): string
     {
         try {
-            if (Schema::hasColumn('store_settings', 'tax_label')) {
-                $settings = StoreSetting::query()->first();
+            $settings = StoreSetting::query()->first();
+            $attrs = $settings?->getAttributes() ?? [];
 
-                if ($settings) {
-                    return $settings->taxLabel();
-                }
+            if ($settings && array_key_exists('tax_label', $attrs)) {
+                return $settings->taxLabel();
             }
         } catch (Throwable) {
             //
@@ -70,7 +59,7 @@ class ShopTax
     }
 
     /**
-     * Label for a stored order tax line (uses the rate that was charged when possible).
+     * Label for a stored order tax line.
      */
     public static function orderLabel(?Order $order = null): string
     {
@@ -86,9 +75,54 @@ class ShopTax
             return $label;
         }
 
-        $rate = (float) $order->tax / $taxable;
+        return self::formatLabel($label, (float) $order->tax / $taxable);
+    }
 
-        return self::formatLabel($label, $rate);
+    public static function amountFor(float $taxableSubtotal): float
+    {
+        return round(max(0, $taxableSubtotal) * self::rate(), 2);
+    }
+
+    /**
+     * @return array{0: bool, 1: float}
+     */
+    private static function settingsState(): array
+    {
+        try {
+            $settings = StoreSetting::query()->first();
+
+            if (! $settings) {
+                return [false, 0.0];
+            }
+
+            $attrs = $settings->getAttributes();
+
+            // Columns not present on this database yet.
+            if (! array_key_exists('tax_enabled', $attrs) && ! array_key_exists('tax_rate', $attrs)) {
+                return [false, 0.0];
+            }
+
+            $enabled = (bool) (int) ($attrs['tax_enabled'] ?? 0);
+            $rate = self::normalizeRate((float) ($attrs['tax_rate'] ?? 0));
+
+            return [$enabled, $rate];
+        } catch (Throwable) {
+            return [false, 0.0];
+        }
+    }
+
+    /**
+     * Accept either 0.15 or 15 as "15%".
+     */
+    private static function normalizeRate(float $rate): float
+    {
+        $rate = max(0, $rate);
+
+        if ($rate > 1) {
+            $rate = $rate / 100;
+        }
+
+        return min(1, $rate);
     }
 
     private static function formatLabel(string $label, float $rate): string

@@ -47,12 +47,14 @@ class StoreSettingService
             'shop.online_ordering_enabled' => $settings->isOnlineOrderingEnabled(),
         ]);
 
-        if (Schema::hasColumn('store_settings', 'tax_enabled')) {
+        $attrs = $settings->getAttributes();
+
+        if (array_key_exists('tax_enabled', $attrs) || array_key_exists('tax_rate', $attrs)) {
             $enabled = $settings->taxEnabled();
             $rate = $settings->taxRate();
 
             config([
-                'shop.tax_enabled' => $enabled,
+                'shop.tax_enabled' => $enabled && $rate > 0,
                 'shop.tax_rate' => $enabled ? $rate : 0.0,
                 'shop.tax_label' => $settings->taxLabel(),
             ]);

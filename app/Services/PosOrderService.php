@@ -60,7 +60,7 @@ class PosOrderService
 
         $resolvedItems = $this->resolveItems($items);
         $subtotal = (float) collect($resolvedItems)->sum(fn (array $item) => $item['unit_price'] * $item['quantity']);
-        $tax = round($subtotal * \App\Support\ShopTax::rate(), 2);
+        $tax = \App\Support\ShopTax::amountFor($subtotal);
         $total = round($subtotal + $tax, 2);
         $billing = $this->billingDefaults($data);
 
