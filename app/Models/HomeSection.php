@@ -79,10 +79,48 @@ class HomeSection extends Model
     /**
      * @return list<string>
      */
+    /**
+     * @return list<array{index: int, path: string, url: string|null, is_default: bool}>
+     */
+    public function adminCarouselSlides(): array
+    {
+        $paths = $this->normalizedCarouselPaths();
+
+        if ($paths === []) {
+            $paths = self::defaultHeroCarouselPaths();
+        }
+
+        return collect($paths)
+            ->values()
+            ->map(fn (string $path, int $index) => [
+                'index' => $index,
+                'path' => $path,
+                'url' => $this->resolvePathUrl($path),
+                'is_default' => str_starts_with($path, 'images/brand/'),
+            ])
+            ->all();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function normalizedCarouselPaths(): array
+    {
+        $paths = $this->carousel_paths;
+
+        if (! is_array($paths)) {
+            return [];
+        }
+
+        return collect($paths)
+            ->filter(fn ($path) => is_string($path) && $path !== '')
+            ->values()
+            ->all();
+    }
+
     public function carouselUrls(): array
     {
-        $urls = collect($this->carousel_paths ?? [])
-            ->filter()
+        $urls = collect($this->normalizedCarouselPaths())
             ->map(fn (string $path) => $this->resolvePathUrl($path))
             ->filter()
             ->values();
