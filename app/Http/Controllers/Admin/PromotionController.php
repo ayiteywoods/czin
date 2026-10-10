@@ -45,7 +45,7 @@ class PromotionController extends Controller
 
     public function store(PromotionRequest $request): RedirectResponse
     {
-        Promotion::query()->create($request->validated());
+        Promotion::query()->create($this->payload($request));
 
         return redirect()
             ->route('admin.promotions.index')
@@ -62,11 +62,25 @@ class PromotionController extends Controller
 
     public function update(PromotionRequest $request, Promotion $promotion): RedirectResponse
     {
-        $promotion->update($request->validated());
+        $promotion->update($this->payload($request));
 
         return redirect()
             ->route('admin.promotions.index')
             ->with('success', 'Promotion updated successfully.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(PromotionRequest $request): array
+    {
+        $data = $request->validated();
+        $targets = Promotion::normalizeTargets(
+            $data['category_ids'] ?? [],
+            $data['product_ids'] ?? [],
+        );
+
+        return array_merge($data, $targets);
     }
 
     public function destroy(Promotion $promotion): RedirectResponse

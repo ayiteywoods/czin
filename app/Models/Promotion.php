@@ -16,6 +16,8 @@ class Promotion extends Model
         'ends_at',
         'category_id',
         'product_id',
+        'category_ids',
+        'product_ids',
         'is_active',
         'days_of_week',
         'start_time',
@@ -33,24 +35,75 @@ class Promotion extends Model
             'days_of_week' => 'array',
             'category_id' => 'integer',
             'product_id' => 'integer',
+            'category_ids' => 'array',
+            'product_ids' => 'array',
         ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function targetCategoryIds(): array
+    {
+        $ids = collect($this->category_ids ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->values();
+
+        if ($ids->isEmpty() && $this->category_id) {
+            $ids->push((int) $this->category_id);
+        }
+
+        return $ids->unique()->values()->all();
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function targetProductIds(): array
+    {
+        $ids = collect($this->product_ids ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->values();
+
+        if ($ids->isEmpty() && $this->product_id) {
+            $ids->push((int) $this->product_id);
+        }
+
+        return $ids->unique()->values()->all();
     }
 
     public function appliesToLabel(): string
     {
-        if ($this->product_id) {
-            return $this->product?->name
-                ? 'Product: '.$this->product->name
-                : 'Product #'.$this->product_id;
+        $parts = [];
+
+        $categoryIds = $this->targetCategoryIds();
+        $productIds = $this->targetProductIds();
+
+        if ($categoryIds !== []) {
+            $names = Category::query()
+                ->whereIn('id', $categoryIds)
+                ->orderBy('name')
+                ->pluck('name');
+
+            $parts[] = $names->isNotEmpty()
+                ? 'Categories: '.$names->implode(', ')
+                : 'Categories: #'.implode(', #', $categoryIds);
         }
 
-        if ($this->category_id) {
-            return $this->category?->name
-                ? 'Category: '.$this->category->name
-                : 'Category #'.$this->category_id;
+        if ($productIds !== []) {
+            $names = Product::query()
+                ->whereIn('id', $productIds)
+                ->orderBy('name')
+                ->pluck('name');
+
+            $parts[] = $names->isNotEmpty()
+                ? 'Products: '.$names->implode(', ')
+                : 'Products: #'.implode(', #', $productIds);
         }
 
-        return 'Not targeted';
+        return $parts !== [] ? implode(' · ', $parts) : 'Not targeted';
     }
 
     public function category(): BelongsTo
@@ -61,5 +114,36 @@ class Promotion extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Keep legacy single FK columns in sync with the first selected target.
+     *
+     * @param  list<int|string>|null  $categoryIds
+     * @param  list<int|string>|null  $productIds
+     * @return array{category_ids: list<int>|null, product_ids: list<int>|null, category_id: int|null, product_id: int|null}
+     */
+    public static function normalizeTargets(?array $categoryIds, ?array $productIds): array
+    {
+        $categories = collect($categoryIds ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        $products = collect($productIds ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        return [
+            'category_ids' => $categories === [] ? null : $categories,
+            'product_ids' => $products === [] ? null : $products,
+            'category_id' => $categories[0] ?? null,
+            'product_id' => $products[0] ?? null,
+        ];
     }
 }

@@ -142,26 +142,37 @@ class PromotionService
 
     private function matchesProduct(Promotion $promotion, Product $product): bool
     {
-        $productId = $this->positiveId($promotion->product_id);
-        $categoryId = $this->positiveId($promotion->category_id);
+        $productIds = $promotion->targetProductIds();
+        $categoryIds = $promotion->targetCategoryIds();
 
-        // Product target wins: only that exact menu item.
-        if ($productId !== null) {
-            return $productId === (int) $product->id;
+        if ($productIds === [] && $categoryIds === []) {
+            return false;
         }
 
-        // Category target: only products in that category (and its subcategories).
-        if ($categoryId !== null) {
+        // Explicit product targets.
+        if ($productIds !== [] && in_array((int) $product->id, $productIds, true)) {
+            return true;
+        }
+
+        // Category targets (including subcategories of each selected category).
+        if ($categoryIds !== []) {
             $productCategoryId = $this->positiveId($product->category_id);
 
             if ($productCategoryId === null) {
                 return false;
             }
 
-            return in_array($productCategoryId, $this->expandCategoryIds($categoryId), true);
+            $allowedCategoryIds = [];
+
+            foreach ($categoryIds as $categoryId) {
+                foreach ($this->expandCategoryIds($categoryId) as $expandedId) {
+                    $allowedCategoryIds[$expandedId] = true;
+                }
+            }
+
+            return isset($allowedCategoryIds[$productCategoryId]);
         }
 
-        // Neither category nor product selected — do not apply to the whole menu by accident.
         return false;
     }
 

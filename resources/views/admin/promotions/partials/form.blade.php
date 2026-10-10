@@ -33,27 +33,32 @@
         <input type="datetime-local" name="ends_at" value="{{ old('ends_at', $promotion?->ends_at?->format('Y-m-d\TH:i')) }}" class="input-field">
         @error('ends_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
-    <div>
-        <label class="block text-sm font-medium">Category</label>
-        <select name="category_id" class="input-field">
-            <option value="">— Select category —</option>
+    @php
+        $selectedCategoryIds = collect(old('category_ids', $promotion?->targetCategoryIds() ?? []))->map(fn ($id) => (string) $id)->all();
+        $selectedProductIds = collect(old('product_ids', $promotion?->targetProductIds() ?? []))->map(fn ($id) => (string) $id)->all();
+    @endphp
+
+    <div class="sm:col-span-2">
+        <label class="block text-sm font-medium">Categories</label>
+        <select name="category_ids[]" multiple size="6" class="input-field min-h-[9rem]">
             @foreach ($categories as $category)
-                <option value="{{ $category->id }}" @selected((string) old('category_id', $promotion?->category_id) === (string) $category->id)>{{ $category->name }}</option>
+                <option value="{{ $category->id }}" @selected(in_array((string) $category->id, $selectedCategoryIds, true))>{{ $category->name }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-brand-muted">Applies only to items in this category (and its subcategories).</p>
-        @error('category_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        <p class="mt-1 text-xs text-brand-muted">Hold Ctrl/Cmd to select multiple. Applies to all items in each selected category (and their subcategories).</p>
+        @error('category_ids')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        @error('category_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
-    <div>
-        <label class="block text-sm font-medium">Product</label>
-        <select name="product_id" class="input-field">
-            <option value="">— Or select one product —</option>
+    <div class="sm:col-span-2">
+        <label class="block text-sm font-medium">Products</label>
+        <select name="product_ids[]" multiple size="8" class="input-field min-h-[11rem]">
             @foreach ($products as $product)
-                <option value="{{ $product->id }}" @selected((string) old('product_id', $promotion?->product_id) === (string) $product->id)>{{ $product->name }}</option>
+                <option value="{{ $product->id }}" @selected(in_array((string) $product->id, $selectedProductIds, true))>{{ $product->name }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-brand-muted">Optional. If set, only this product gets the promo (category is ignored). You must choose a category or a product.</p>
-        @error('product_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        <p class="mt-1 text-xs text-brand-muted">Hold Ctrl/Cmd to select multiple. You can combine categories and products — any match gets the promotion.</p>
+        @error('product_ids')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        @error('product_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
     <div>
         <label class="block text-sm font-medium">Start time</label>
