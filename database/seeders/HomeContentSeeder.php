@@ -23,6 +23,7 @@ class HomeContentSeeder extends Seeder
                 'secondary_label' => 'Today’s Specials',
                 'secondary_url' => '/shop',
                 'image_path' => 'images/brand/food-hero-1.jpg',
+                'carousel_paths' => HomeSection::defaultHeroCarouselPaths(),
                 'sort_order' => 1,
             ],
             [

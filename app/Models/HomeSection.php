@@ -34,28 +34,79 @@ class HomeSection extends Model
         'secondary_label',
         'secondary_url',
         'image_path',
+        'carousel_paths',
         'is_active',
         'sort_order',
     ];
+
+    /** @return list<string> */
+    public static function defaultHeroCarouselPaths(): array
+    {
+        return [
+            'images/brand/food-hero-1.jpg',
+            'images/brand/food-hero-2.jpg',
+            'images/brand/food-hero-3.jpg',
+            'images/brand/food-hero-4.jpg',
+        ];
+    }
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'carousel_paths' => 'array',
         ];
+    }
+
+    public function resolvePathUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'images/') || str_starts_with($path, 'http')) {
+            return asset($path);
+        }
+
+        return Storage::disk('public')->url($path);
     }
 
     public function imageUrl(): ?string
     {
-        if (! $this->image_path) {
-            return null;
+        return $this->resolvePathUrl($this->image_path);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function carouselUrls(): array
+    {
+        $urls = collect($this->carousel_paths ?? [])
+            ->filter()
+            ->map(fn (string $path) => $this->resolvePathUrl($path))
+            ->filter()
+            ->values();
+
+        if ($urls->isEmpty() && $this->imageUrl()) {
+            $urls->push($this->imageUrl());
         }
 
-        if (str_starts_with($this->image_path, 'images/') || str_starts_with($this->image_path, 'http')) {
-            return asset($this->image_path);
+        if ($urls->isEmpty()) {
+            return collect(self::defaultHeroCarouselPaths())
+                ->map(fn (string $path) => $this->resolvePathUrl($path))
+                ->filter()
+                ->values()
+                ->all();
         }
 
-        return Storage::disk('public')->url($this->image_path);
+        return $urls->unique()->values()->all();
+    }
+
+    public function isStoredUploadPath(?string $path): bool
+    {
+        return $path
+            && ! str_starts_with($path, 'images/')
+            && ! str_starts_with($path, 'http');
     }
 
     public function resolvedUrl(?string $url): string

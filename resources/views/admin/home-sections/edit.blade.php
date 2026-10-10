@@ -65,14 +65,62 @@
         @endif
 
         @if ($section->key === \App\Models\HomeSection::KEY_HERO)
-            <div>
-                <label class="block text-sm font-medium">Hero image</label>
-                <input type="file" name="image" accept="image/*" class="mt-1 w-full text-sm">
-                @if ($section->imageUrl())
-                    <img src="{{ $section->imageUrl() }}" alt="Hero" class="mt-3 h-40 w-full max-w-md object-cover">
+            @php
+                $carouselPaths = array_values($section->carousel_paths ?? []);
+            @endphp
+
+            <div class="space-y-3 rounded-xl border border-neutral-200 p-4">
+                <div>
+                    <label class="block text-sm font-medium">Hero carousel images</label>
+                    <p class="mt-1 text-xs text-brand-muted">These photos rotate on the homepage hero. Upload new slides or remove ones you no longer want.</p>
+                </div>
+
+                @if ($carouselPaths !== [])
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        @foreach ($carouselPaths as $index => $path)
+                            <label class="relative block overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
+                                <img
+                                    src="{{ $section->resolvePathUrl($path) }}"
+                                    alt="Carousel slide {{ $index + 1 }}"
+                                    class="h-36 w-full object-cover"
+                                >
+                                <span class="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-black/65 px-3 py-2 text-xs text-white">
+                                    <input type="checkbox" name="remove_carousel[]" value="{{ $index }}" class="h-4 w-4 rounded border-neutral-300 text-brand-red">
+                                    Remove slide {{ $index + 1 }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-brand-muted">No custom slides yet — defaults will show until you upload images.</p>
                 @endif
-                <p class="mt-1 text-xs text-brand-muted">Large images are automatically compressed to {{ \App\Support\ImageUpload::targetLabel(4096) }}.</p>
-                @error('image')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+
+                <div x-data>
+                    <label class="block text-sm font-medium">Add carousel images</label>
+                    <input
+                        type="file"
+                        name="carousel[]"
+                        accept="image/*"
+                        multiple
+                        class="mt-1 w-full text-sm"
+                        @change="
+                            const preview = $refs.carouselPreview;
+                            preview.innerHTML = '';
+                            Array.from($event.target.files || []).forEach((file) => {
+                                if (!file.type.startsWith('image/')) return;
+                                const img = document.createElement('img');
+                                img.src = URL.createObjectURL(file);
+                                img.className = 'h-28 w-full rounded-lg object-cover';
+                                img.alt = file.name;
+                                preview.appendChild(img);
+                            });
+                        "
+                    >
+                    <div x-ref="carouselPreview" class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+                    <p class="mt-1 text-xs text-brand-muted">You can select multiple images at once. Large images are compressed to {{ \App\Support\ImageUpload::targetLabel(4096) }}.</p>
+                    @error('carousel')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('carousel.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
             </div>
         @endif
 

@@ -28,14 +28,48 @@ class HomeSectionController extends Controller
 
     public function update(HomeSectionRequest $request, HomeSection $homeSection): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', 'carousel', 'remove_carousel']);
 
         if ($request->hasFile('image')) {
-            if ($homeSection->image_path && ! str_starts_with($homeSection->image_path, 'images/')) {
+            if ($homeSection->isStoredUploadPath($homeSection->image_path)) {
                 Storage::disk('public')->delete($homeSection->image_path);
             }
 
             $data['image_path'] = ImageUpload::store($request->file('image'), 'home-sections', 4096, 2400);
+        }
+
+        if ($homeSection->key === HomeSection::KEY_HERO) {
+            $carouselPaths = array_values(array_filter($homeSection->carousel_paths ?? []));
+
+            foreach ($request->input('remove_carousel', []) as $index) {
+                $index = (int) $index;
+                if (! array_key_exists($index, $carouselPaths)) {
+                    continue;
+                }
+
+                $path = $carouselPaths[$index];
+                if ($homeSection->isStoredUploadPath($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+
+                unset($carouselPaths[$index]);
+            }
+
+            $carouselPaths = array_values($carouselPaths);
+
+            foreach ($request->file('carousel', []) as $file) {
+                if (! $file) {
+                    continue;
+                }
+
+                $carouselPaths[] = ImageUpload::store($file, 'home-sections/carousel', 4096, 2400);
+            }
+
+            $data['carousel_paths'] = $carouselPaths;
+
+            if (empty($data['image_path'] ?? $homeSection->image_path) && $carouselPaths !== []) {
+                $data['image_path'] = $carouselPaths[0];
+            }
         }
 
         $homeSection->update($data);

@@ -24,6 +24,10 @@ class HomeSectionRequest extends FormRequest
             'secondary_label' => ['nullable', 'string', 'max:255'],
             'secondary_url' => ['nullable', 'string', 'max:255'],
             'image' => ImageUpload::rules(4096),
+            'carousel' => ['nullable', 'array'],
+            'carousel.*' => ImageUpload::rules(4096),
+            'remove_carousel' => ['nullable', 'array'],
+            'remove_carousel.*' => ['integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

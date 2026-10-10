@@ -15,12 +15,7 @@
     {{-- Restaurant hero with animated image carousel --}}
     @if ($hero?->is_active)
         @php
-            $heroSlides = collect([
-                asset('images/brand/food-hero-1.jpg'),
-                asset('images/brand/food-hero-2.jpg'),
-                asset('images/brand/food-hero-3.jpg'),
-                asset('images/brand/food-hero-4.jpg'),
-            ])->unique()->values();
+            $heroSlides = collect($hero->carouselUrls());
         @endphp
 
         @php
