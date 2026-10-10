@@ -97,9 +97,23 @@ class StoreSettingRequest extends FormRequest
             'business_hours_note' => ['nullable', 'string', 'max:500'],
             'online_ordering_enabled' => ['sometimes', 'boolean'],
             'tax_enabled' => ['sometimes', 'boolean'],
-            'tax_rate_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'tax_rate_percent' => array_values(array_filter([
+                $this->boolean('tax_enabled') ? 'required' : 'nullable',
+                'numeric',
+                'min:0',
+                'max:100',
+                $this->boolean('tax_enabled') ? 'gt:0' : null,
+            ])),
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:1'],
             'tax_label' => ['nullable', 'string', 'max:50'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'tax_rate_percent.required' => 'Enter a tax rate greater than 0 when tax is enabled.',
+            'tax_rate_percent.gt' => 'Enter a tax rate greater than 0 when tax is enabled.',
         ];
     }
 }

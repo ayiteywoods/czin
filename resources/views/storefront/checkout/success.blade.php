@@ -74,7 +74,7 @@
                 </div>
                 @if ($order->tax > 0)
                     <div class="flex justify-between">
-                        <span class="text-brand-muted">{{ \App\Support\ShopTax::orderLabel() }}</span>
+                        <span class="text-brand-muted">{{ \App\Support\ShopTax::orderLabel($order) }}</span>
                         <span>{{ config('shop.currency_symbol') }} {{ number_format($order->tax, 2) }}</span>
                     </div>
                 @endif

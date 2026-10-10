@@ -157,7 +157,7 @@
             @endif
             @if ((float) $order->tax > 0)
                 <tr>
-                    <td class="label">{{ \App\Support\ShopTax::orderLabel() }}</td>
+                    <td class="label">{{ \App\Support\ShopTax::orderLabel($order) }}</td>
                     <td class="amount">{{ $currency }} {{ number_format($order->tax, 2) }}</td>
                 </tr>
             @endif
