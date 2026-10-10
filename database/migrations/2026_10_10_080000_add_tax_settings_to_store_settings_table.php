@@ -10,15 +10,15 @@ return new class extends Migration
     {
         Schema::table('store_settings', function (Blueprint $table) {
             if (! Schema::hasColumn('store_settings', 'tax_enabled')) {
-                $table->boolean('tax_enabled')->default(false)->after('online_ordering_enabled');
+                $table->boolean('tax_enabled')->default(false);
             }
 
             if (! Schema::hasColumn('store_settings', 'tax_rate')) {
-                $table->decimal('tax_rate', 8, 4)->default(0)->after('tax_enabled');
+                $table->decimal('tax_rate', 8, 4)->default(0);
             }
 
             if (! Schema::hasColumn('store_settings', 'tax_label')) {
-                $table->string('tax_label')->nullable()->after('tax_rate');
+                $table->string('tax_label')->nullable();
             }
         });
     }

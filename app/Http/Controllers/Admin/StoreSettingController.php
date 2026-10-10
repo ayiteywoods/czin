@@ -8,10 +8,12 @@ use App\Models\Page;
 use App\Models\StoreSetting;
 use App\Services\StoreSettingService;
 use App\Support\ImageUpload;
+use App\Support\StoreSettingSchema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class StoreSettingController extends Controller
 {
@@ -53,6 +55,8 @@ class StoreSettingController extends Controller
 
     public function edit(StoreSettingService $settings): View
     {
+        StoreSettingSchema::ensureTaxColumns();
+
         $settings = $settings->current();
         $aboutPage = Page::query()->where('slug', Page::SLUG_ABOUT)->first();
         $contactPage = Page::query()->where('slug', Page::SLUG_CONTACT)->first();
@@ -62,6 +66,12 @@ class StoreSettingController extends Controller
 
     public function update(StoreSettingRequest $request, StoreSettingService $settingsService): RedirectResponse
     {
+        if (! StoreSettingSchema::ensureTaxColumns()) {
+            return back()
+                ->withInput()
+                ->with('error', 'Could not create tax database columns. On the server run: php artisan migrate --force — or in phpMyAdmin: ALTER TABLE store_settings ADD COLUMN tax_enabled TINYINT(1) NOT NULL DEFAULT 0, ADD COLUMN tax_rate DECIMAL(8,4) NOT NULL DEFAULT 0, ADD COLUMN tax_label VARCHAR(255) NULL;');
+        }
+
         $settings = StoreSetting::current();
         $data = $request->safe()->except(array_keys(self::IMAGE_UPLOADS));
 
@@ -119,8 +129,16 @@ class StoreSettingController extends Controller
             $data['footer_logo_path'] = null;
         }
 
-        $settings->update($data);
-        $settingsService->applyToConfig();
+        try {
+            $settings->update($data);
+            $settingsService->applyToConfig();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Could not save store settings. On the server run: php artisan migrate --force && php artisan optimize:clear');
+        }
 
         return redirect()
             ->route('admin.store-settings.edit')
