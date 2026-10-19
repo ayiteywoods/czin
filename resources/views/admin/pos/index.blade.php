@@ -8,7 +8,11 @@
         class="admin-pos"
         x-data="adminPos({
             menu: @js($menuPayload),
-            categories: @js($categories->map(fn ($category) => ['id' => $category->id, 'name' => $category->name])->values()->all()),
+            categories: @js($categories->map(fn ($category) => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'parent_id' => $category->parent_id,
+            ])->values()->all()),
             tables: @js($tables->map(fn ($table) => [
                 'id' => $table->id,
                 'code' => $table->code,
@@ -640,11 +644,29 @@
                     Notification.requestPermission().catch(() => {});
                 },
 
+                productInCategory(productCategoryId, selectedCategoryId) {
+                    let current = Number(productCategoryId);
+                    const selected = Number(selectedCategoryId);
+                    let guard = 0;
+
+                    while (current && guard < 25) {
+                        if (current === selected) {
+                            return true;
+                        }
+
+                        const category = this.categories.find((item) => Number(item.id) === current);
+                        current = category?.parent_id ? Number(category.parent_id) : 0;
+                        guard++;
+                    }
+
+                    return false;
+                },
+
                 get filteredProducts() {
                     const query = this.search.trim().toLowerCase();
 
                     return this.menu.filter((product) => {
-                        if (this.selectedCategory !== null && product.category_id !== this.selectedCategory) {
+                        if (this.selectedCategory !== null && ! this.productInCategory(product.category_id, this.selectedCategory)) {
                             return false;
                         }
 

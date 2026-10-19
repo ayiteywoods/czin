@@ -27,7 +27,7 @@ class PosController extends Controller
             ->where('status', CategoryStatus::Active)
             ->orderBy('shop_sort_order')
             ->orderBy('name')
-            ->get(['id', 'name', 'slug']);
+            ->get(['id', 'name', 'slug', 'parent_id']);
 
         $products = Product::query()
             ->with([

@@ -18,21 +18,24 @@ class PromotionService
     /** @var array<int, list<int>> */
     private static array $sharedCategoryIds = [];
 
+    /** @var array<int, int|null>|null */
+    private static ?array $categoryParentMap = null;
+
     public function sellingPriceFor(Product $product): float
     {
-        $candidates = [(float) $product->price];
+        $base = (float) $product->price;
 
         if ($product->discount_price !== null) {
-            $candidates[] = (float) $product->discount_price;
+            $base = min($base, (float) $product->discount_price);
         }
 
         $promotion = $this->bestPromotionFor($product);
 
-        if ($promotion) {
-            $candidates[] = $this->applyPromotion((float) $product->price, $promotion);
+        if (! $promotion || $promotion->type === PromotionType::Bogo) {
+            return round(max(0, $base), 2);
         }
 
-        return round(max(0, min($candidates)), 2);
+        return $this->applyPromotion($base, $promotion);
     }
 
     public function compareAtPriceFor(Product $product): ?float
@@ -154,26 +157,77 @@ class PromotionService
             return true;
         }
 
-        // Category targets (including subcategories of each selected category).
+        // Category targets include that category and every nested subcategory.
         if ($categoryIds !== []) {
-            $productCategoryId = $this->positiveId($product->category_id);
-
-            if ($productCategoryId === null) {
-                return false;
-            }
-
-            $allowedCategoryIds = [];
-
-            foreach ($categoryIds as $categoryId) {
-                foreach ($this->expandCategoryIds($categoryId) as $expandedId) {
-                    $allowedCategoryIds[$expandedId] = true;
-                }
-            }
-
-            return isset($allowedCategoryIds[$productCategoryId]);
+            return $this->productIsInCategories($product, $categoryIds);
         }
 
         return false;
+    }
+
+    /**
+     * @param  list<int>  $categoryIds
+     */
+    private function productIsInCategories(Product $product, array $categoryIds): bool
+    {
+        $productCategoryId = $this->positiveId($product->category_id);
+
+        if ($productCategoryId === null) {
+            return false;
+        }
+
+        $selected = array_fill_keys(array_map('intval', $categoryIds), true);
+
+        foreach ($this->categoryLineage($productCategoryId) as $categoryId) {
+            if (isset($selected[$categoryId])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The product's category, then each parent up to the top.
+     *
+     * @return list<int>
+     */
+    private function categoryLineage(int $categoryId): array
+    {
+        if (isset(self::$sharedCategoryIds[$categoryId])) {
+            return self::$sharedCategoryIds[$categoryId];
+        }
+
+        $lineage = [];
+        $guard = 0;
+        $current = $categoryId;
+        $parents = $this->categoryParentMap();
+
+        while ($current > 0 && $guard < 25) {
+            $lineage[] = $current;
+            $parent = $parents[$current] ?? null;
+            $current = $parent ? (int) $parent : 0;
+            $guard++;
+        }
+
+        return self::$sharedCategoryIds[$categoryId] = $lineage;
+    }
+
+    /**
+     * @return array<int, int|null>
+     */
+    private function categoryParentMap(): array
+    {
+        if (self::$categoryParentMap !== null) {
+            return self::$categoryParentMap;
+        }
+
+        self::$categoryParentMap = Category::query()
+            ->pluck('parent_id', 'id')
+            ->map(fn ($parentId) => $parentId ? (int) $parentId : null)
+            ->all();
+
+        return self::$categoryParentMap;
     }
 
     private function positiveId(mixed $value): ?int
@@ -185,24 +239,6 @@ class PromotionService
         $id = (int) $value;
 
         return $id > 0 ? $id : null;
-    }
-
-    /**
-     * @return list<int>
-     */
-    private function expandCategoryIds(int $categoryId): array
-    {
-        if (isset(self::$sharedCategoryIds[$categoryId])) {
-            return self::$sharedCategoryIds[$categoryId];
-        }
-
-        $category = Category::query()->with('children:id,parent_id')->find($categoryId);
-
-        if (! $category) {
-            return self::$sharedCategoryIds[$categoryId] = [$categoryId];
-        }
-
-        return self::$sharedCategoryIds[$categoryId] = $category->filterableProductCategoryIds();
     }
 
     private function isCurrentlyScheduled(Promotion $promotion, Carbon $now): bool

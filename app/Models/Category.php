@@ -114,23 +114,19 @@ class Category extends Model
      */
     public function filterableProductCategoryIds(): array
     {
-        if ($this->relationLoaded('children') && $this->children->isNotEmpty()) {
-            return $this->children
-                ->pluck('id')
-                ->prepend($this->id)
-                ->map(fn ($id) => (int) $id)
-                ->all();
+        $ids = [(int) $this->id];
+
+        $children = $this->relationLoaded('children')
+            ? $this->children
+            : $this->children()->get(['id', 'parent_id']);
+
+        foreach ($children as $child) {
+            foreach ($child->filterableProductCategoryIds() as $id) {
+                $ids[] = (int) $id;
+            }
         }
 
-        if (! $this->relationLoaded('children') && $this->children()->exists()) {
-            return $this->children()
-                ->pluck('id')
-                ->prepend($this->id)
-                ->map(fn ($id) => (int) $id)
-                ->all();
-        }
-
-        return [(int) $this->id];
+        return array_values(array_unique($ids));
     }
 
     public function storefrontImageUrl(): ?string
