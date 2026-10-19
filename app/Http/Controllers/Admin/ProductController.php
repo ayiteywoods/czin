@@ -88,13 +88,14 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $variants = $data['variants'] ?? [];
-        unset($data['images'], $data['variants'], $data['publish_date'], $data['publish_time']);
+        unset($data['images'], $data['remove_images'], $data['variants'], $data['publish_date'], $data['publish_time']);
 
         $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
 
         $product->update($data);
 
         $this->syncVariants($product, $variants);
+        $this->removeImages($product, $request->input('remove_images', []));
         $this->storeImages($product, $request->uploadedImages());
 
         return redirect()
@@ -216,6 +217,38 @@ class ProductController extends Controller
         }
 
         return $sku;
+    }
+
+    /**
+     * @param  list<int|string>  $ids
+     */
+    private function removeImages(Product $product, array $ids): void
+    {
+        $ids = collect($ids)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->values()
+            ->all();
+
+        if ($ids === []) {
+            return;
+        }
+
+        $images = $product->images()->whereIn('id', $ids)->get();
+
+        foreach ($images as $image) {
+            if (! str_starts_with($image->path, 'images/') && ! str_starts_with($image->path, 'http')) {
+                Storage::disk('public')->delete($image->path);
+            }
+
+            $image->delete();
+        }
+
+        $remaining = $product->images()->orderBy('sort_order')->orderBy('id')->get();
+
+        if ($remaining->isNotEmpty() && ! $remaining->contains(fn (ProductImage $image) => $image->is_primary)) {
+            $remaining->first()->update(['is_primary' => true]);
+        }
     }
 
     /**

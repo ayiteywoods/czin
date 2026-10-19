@@ -96,6 +96,7 @@
     >
         <label class="block text-sm font-medium">Food photos</label>
         <input
+            x-ref="files"
             type="file"
             name="images[]"
             accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.bmp,.avif,.heic,.heif"
@@ -103,29 +104,44 @@
             class="mt-1 w-full text-sm"
             @change="preview($event)"
         >
-        <p class="mt-1 text-xs text-brand-muted">Upload JPG, PNG, GIF, WebP, AVIF, or HEIC. Large images are automatically compressed to {{ \App\Support\ImageUpload::targetLabel(4096) }} each.</p>
+        <p class="mt-1 text-xs text-brand-muted">Add more photos here. JPG, PNG, GIF, WebP, AVIF, or HEIC. Large images are compressed to {{ \App\Support\ImageUpload::targetLabel(4096) }} each. Saving keeps the current photos unless you tick Remove.</p>
 
-        <div class="mt-4 flex flex-wrap gap-3" x-show="previews.length > 0" x-cloak>
-            <template x-for="(preview, index) in previews" :key="index">
-                <div class="relative">
-                    <img :src="preview.url" :alt="preview.name" class="h-24 w-24 rounded-lg border border-neutral-200 object-cover">
-                    <p class="mt-1 max-w-24 truncate text-[10px] text-brand-muted" x-text="preview.name"></p>
-                </div>
-            </template>
+        <div class="mt-4" x-show="previews.length > 0" x-cloak>
+            <p class="mb-2 text-xs font-medium uppercase tracking-wide text-brand-muted">New photos</p>
+            <div class="flex flex-wrap gap-3">
+                <template x-for="(preview, index) in previews" :key="preview.url">
+                    <div class="w-24">
+                        <img :src="preview.url" :alt="preview.name" class="h-24 w-24 rounded-lg border border-neutral-200 object-cover">
+                        <button type="button" class="mt-1 text-xs font-medium text-brand-red" @click="removePreview(index)">Remove</button>
+                    </div>
+                </template>
+            </div>
         </div>
 
         @if ($product?->images?->isNotEmpty())
-            <div class="mt-4" x-show="previews.length === 0">
+            <div class="mt-4">
                 <p class="mb-2 text-xs font-medium uppercase tracking-wide text-brand-muted">Current photos</p>
                 <div class="flex flex-wrap gap-3">
                     @foreach ($product->images as $image)
-                        <img src="{{ asset('storage/'.$image->path) }}" alt="" class="h-20 w-20 rounded-lg object-cover">
+                        <div class="w-24">
+                            <img src="{{ $image->url() }}" alt="" class="h-24 w-24 rounded-lg border border-neutral-200 object-cover">
+                            @if ($image->is_primary)
+                                <p class="mt-1 text-[10px] font-medium uppercase tracking-wide text-brand-muted">Main photo</p>
+                            @endif
+                            <label class="mt-1 flex cursor-pointer items-center gap-1.5 text-xs text-brand-red">
+                                <input
+                                    type="checkbox"
+                                    name="remove_images[]"
+                                    value="{{ $image->id }}"
+                                    class="h-3.5 w-3.5 rounded border-neutral-300 text-brand-red"
+                                    @checked(in_array((int) $image->id, array_map('intval', (array) old('remove_images', [])), true))
+                                >
+                                Remove
+                            </label>
+                        </div>
                     @endforeach
                 </div>
             </div>
-            <p class="mt-2 text-xs text-brand-muted" x-show="previews.length > 0" x-cloak>
-                New photos above will be added to the existing ones when you save.
-            </p>
         @endif
 
         @error('images')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -237,11 +253,19 @@
                 Alpine.data('productImagePreview', () => ({
                     previews: [],
                     preview(event) {
+                        this.setFiles(Array.from(event.target.files || []));
+                    },
+                    removePreview(index) {
+                        const input = this.$refs.files;
+                        const files = Array.from(input.files || []).filter((_, fileIndex) => fileIndex !== index);
+                        const transfer = new DataTransfer();
+
+                        files.forEach((file) => transfer.items.add(file));
+                        input.files = transfer.files;
+                        this.setFiles(files);
+                    },
+                    setFiles(files) {
                         this.previews.forEach((item) => URL.revokeObjectURL(item.url));
-                        this.previews = [];
-
-                        const files = Array.from(event.target.files || []);
-
                         this.previews = files.map((file) => ({
                             name: file.name,
                             url: URL.createObjectURL(file),

@@ -44,6 +44,8 @@ class ProductRequest extends FormRequest
             'publish_date' => ['nullable', 'date'],
             'publish_time' => ['nullable', 'date_format:H:i'],
             'published_at' => ['nullable', 'date'],
+            'remove_images' => ['nullable', 'array'],
+            'remove_images.*' => ['integer'],
             'images' => ['nullable', 'array'],
             'images.*' => [
                 'required',
