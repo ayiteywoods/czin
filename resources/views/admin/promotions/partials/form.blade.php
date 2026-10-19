@@ -40,40 +40,20 @@
         @error('ends_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
 
-    <div
-        class="sm:col-span-2 space-y-3"
-        x-data="{
-            selected: @js($selectedCategoryIds),
-            toggle(id) {
-                id = Number(id);
-                if (this.selected.includes(id)) {
-                    this.selected = this.selected.filter((value) => value !== id);
-                } else {
-                    this.selected.push(id);
-                }
-            },
-            isSelected(id) {
-                return this.selected.includes(Number(id));
-            }
-        }"
-    >
+    <div class="sm:col-span-2 space-y-3">
         <div>
             <label class="block text-sm font-medium">Categories</label>
-            <p class="mt-1 text-xs text-brand-muted">Select one or more. Applies to all items in each category (and subcategories).</p>
+            <p class="mt-1 text-xs text-brand-muted">Tick a category to discount every item in it, including subcategories.</p>
         </div>
         <div class="flex flex-wrap gap-2">
             @foreach ($categories as $category)
-                <label
-                    class="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition"
-                    :class="isSelected({{ $category->id }}) ? 'border-brand-red bg-red-50 text-brand-black' : 'border-neutral-200 bg-white text-brand-muted'"
-                >
+                <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm">
                     <input
                         type="checkbox"
                         name="category_ids[]"
                         value="{{ $category->id }}"
                         class="h-4 w-4 rounded border-neutral-300 text-brand-red"
-                        :checked="isSelected({{ $category->id }})"
-                        @change="toggle({{ $category->id }})"
+                        @checked(in_array((int) $category->id, $selectedCategoryIds, true))
                     >
                     {{ $category->name }}
                 </label>

@@ -15,10 +15,10 @@ class PromotionService
     /** @var Collection<int, Promotion>|null */
     private static ?Collection $sharedActivePromotions = null;
 
-    /** @var array<int, list<int>> */
+    /** @var array<string, array<int, true>> */
     private static array $sharedCategoryIds = [];
 
-    /** @var array<int, int|null>|null */
+    /** @var array<int, array{name: string, parent_id: int|null}>|null */
     private static ?array $categoryParentMap = null;
 
     public function sellingPriceFor(Product $product): float
@@ -66,11 +66,7 @@ class PromotionService
         $promotion = $this->bestPromotionFor($product);
 
         if ($promotion) {
-            return match ($promotion->type) {
-                PromotionType::Percent => rtrim(rtrim(number_format((float) $promotion->value, 2, '.', ''), '0'), '.').'% off',
-                PromotionType::Fixed => 'Save '.config('shop.currency_symbol').' '.number_format((float) $promotion->value, 2),
-                PromotionType::Bogo => 'BOGO',
-            };
+            return 'Sale';
         }
 
         if ($product->discount_price !== null && (float) $product->discount_price < (float) $product->price) {
@@ -157,7 +153,8 @@ class PromotionService
             return true;
         }
 
-        // Category targets include that category and every nested subcategory.
+        // Category targets: every product in that category, its subcategories,
+        // and any other category with the same name.
         if ($categoryIds !== []) {
             return $this->productIsInCategories($product, $categoryIds);
         }
@@ -176,55 +173,90 @@ class PromotionService
             return false;
         }
 
-        $selected = array_fill_keys(array_map('intval', $categoryIds), true);
+        return isset($this->coveredCategoryIds($categoryIds)[$productCategoryId]);
+    }
 
-        foreach ($this->categoryLineage($productCategoryId) as $categoryId) {
-            if (isset($selected[$categoryId])) {
-                return true;
+    /**
+     * Selected categories, every nested subcategory, and categories with the same name.
+     *
+     * @param  list<int>  $categoryIds
+     * @return array<int, true>
+     */
+    private function coveredCategoryIds(array $categoryIds): array
+    {
+        $cacheKey = implode(',', $categoryIds);
+
+        if (isset(self::$sharedCategoryIds[$cacheKey])) {
+            return self::$sharedCategoryIds[$cacheKey];
+        }
+
+        $categories = $this->categoriesById();
+        $selected = [];
+
+        foreach ($categoryIds as $categoryId) {
+            $categoryId = (int) $categoryId;
+
+            if (isset($categories[$categoryId])) {
+                $selected[$categoryId] = true;
             }
         }
 
-        return false;
-    }
+        $names = [];
 
-    /**
-     * The product's category, then each parent up to the top.
-     *
-     * @return list<int>
-     */
-    private function categoryLineage(int $categoryId): array
-    {
-        if (isset(self::$sharedCategoryIds[$categoryId])) {
-            return self::$sharedCategoryIds[$categoryId];
+        foreach (array_keys($selected) as $categoryId) {
+            $name = mb_strtolower(trim((string) ($categories[$categoryId]['name'] ?? '')));
+
+            if ($name !== '') {
+                $names[$name] = true;
+            }
         }
 
-        $lineage = [];
+        foreach ($categories as $id => $category) {
+            $name = mb_strtolower(trim((string) $category['name']));
+
+            if ($name !== '' && isset($names[$name])) {
+                $selected[(int) $id] = true;
+            }
+        }
+
+        $covered = $selected;
+        $changed = true;
         $guard = 0;
-        $current = $categoryId;
-        $parents = $this->categoryParentMap();
 
-        while ($current > 0 && $guard < 25) {
-            $lineage[] = $current;
-            $parent = $parents[$current] ?? null;
-            $current = $parent ? (int) $parent : 0;
+        while ($changed && $guard < 30) {
+            $changed = false;
             $guard++;
+
+            foreach ($categories as $id => $category) {
+                $parentId = $category['parent_id'];
+
+                if ($parentId && isset($covered[$parentId]) && ! isset($covered[$id])) {
+                    $covered[$id] = true;
+                    $changed = true;
+                }
+            }
         }
 
-        return self::$sharedCategoryIds[$categoryId] = $lineage;
+        return self::$sharedCategoryIds[$cacheKey] = $covered;
     }
 
     /**
-     * @return array<int, int|null>
+     * @return array<int, array{name: string, parent_id: int|null}>
      */
-    private function categoryParentMap(): array
+    private function categoriesById(): array
     {
         if (self::$categoryParentMap !== null) {
             return self::$categoryParentMap;
         }
 
         self::$categoryParentMap = Category::query()
-            ->pluck('parent_id', 'id')
-            ->map(fn ($parentId) => $parentId ? (int) $parentId : null)
+            ->get(['id', 'name', 'parent_id'])
+            ->mapWithKeys(fn (Category $category) => [
+                (int) $category->id => [
+                    'name' => (string) $category->name,
+                    'parent_id' => $category->parent_id ? (int) $category->parent_id : null,
+                ],
+            ])
             ->all();
 
         return self::$categoryParentMap;
@@ -258,6 +290,10 @@ class PromotionService
 
         $startTime = $this->normalizeTime($promotion->start_time);
         $endTime = $this->normalizeTime($promotion->end_time);
+
+        if ($startTime === '00:00:00' && $endTime === '00:00:00') {
+            return true;
+        }
 
         if ($startTime === null && $endTime === null) {
             return true;
