@@ -23,19 +23,18 @@ class PromotionService
 
     public function sellingPriceFor(Product $product): float
     {
-        $base = (float) $product->price;
-
-        if ($product->discount_price !== null) {
-            $base = min($base, (float) $product->discount_price);
-        }
-
+        $price = (float) $product->price;
         $promotion = $this->bestPromotionFor($product);
 
-        if (! $promotion || $promotion->type === PromotionType::Bogo) {
-            return round(max(0, $base), 2);
+        if ($promotion && $promotion->type !== PromotionType::Bogo) {
+            return $this->applyPromotion($price, $promotion);
         }
 
-        return $this->applyPromotion($base, $promotion);
+        if ($product->discount_price !== null) {
+            $price = min($price, (float) $product->discount_price);
+        }
+
+        return round(max(0, $price), 2);
     }
 
     public function compareAtPriceFor(Product $product): ?float
